@@ -1,0 +1,20 @@
+# Native Apple Silicon Python 3.10. Install before building PyTorch3D.
+torch==2.4.1
+torchvision==0.19.1
+numpy==1.26.4
+matplotlib==3.9.4
+tqdm==4.66.6
+Pillow==10.4.0
+opencv-python==4.10.0.84
+trimesh==4.4.9
+scikit-image==0.24.0
+scipy==1.14.1
+mlx==0.32.4
+iopath==0.1.10
+ninja==1.13.2
+setuptools==84.2.1
+wheel==0.48.0
+rembg[cpu]==2.0.61
+onnxruntime==1.20.1
+opencv-python-headless==4.10.0.84
+numba==0.68.0
