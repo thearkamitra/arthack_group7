@@ -99,6 +99,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.store = store
     app.state.settings = cfg
     app.state.media = media
+    from .demo_bridge import DemoBridge
+    demo = DemoBridge()
+    app.state.demo = demo
     active_voice: set[str] = set()
     pair_attempts: dict[str, list[float]] = {}
 
@@ -267,7 +270,94 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def read_session(sid: str, request: Request):
         access = role(request, sid)
         value = session(sid)
-        return value if access == "therapist" else participant_view(value)
+        result = value if access == "therapist" else participant_view(value)
+        result["demo"] = demo.snapshot(sid)
+        return result
+
+    @app.post("/api/sessions/{sid}/demo/start")
+    def demo_start(sid: str, request: Request):
+        therapist(request)
+        if session(sid)["status"] != "active":
+            raise ValueError("Resume the session before starting the demo")
+        state = demo.state(sid)
+        if demo.snapshot(sid)["headset"]:
+            return demo.snapshot(sid)
+        state["enabled"] = True
+        store.mutate(sid, lambda s: s.update(driver="unity"))
+        # Explicit browser opt-in grants one local Editor a short-lived pairing offer.
+        demo.offer = dict(sid=sid, code=store.pair(sid), expires=time.monotonic()+120)
+        marker=cfg.root/"work"/"browser_demo"/"editor-start.json"
+        if (cfg.root/"Assets/Scenes/InnerLandscape.unity").exists():
+            marker.parent.mkdir(parents=True,exist_ok=True)
+            marker.write_text('{"start":true}')
+        return demo.snapshot(sid)
+
+    @app.post("/api/demo/editor-offer")
+    def editor_offer(request: Request):
+        if request.client.host not in ("127.0.0.1", "::1", "testclient") or request.headers.get("origin"):
+            raise HTTPException(403, "Local Editor only")
+        offer = demo.offer
+        if not offer or offer["expires"] < time.monotonic():
+            raise HTTPException(404, "No browser-approved Editor offer")
+        if session(offer["sid"])["status"] != "active" or demo.snapshot(offer["sid"])["headset"]:
+            raise HTTPException(409, "Editor offer is no longer available")
+        demo.offer = None
+        return {"code": offer["code"]}
+
+    @app.post("/api/sessions/{sid}/demo/input")
+    def demo_input(sid: str, body: dict, request: Request):
+        therapist(request)
+        if session(sid)["status"] != "active" or session(sid).get("pendingCycle"):
+            raise ValueError("Resume or begin the next cycle before camera control")
+        return demo.input(sid, body.get("action"))
+
+    @app.post("/api/sessions/{sid}/demo/speech")
+    def demo_speech(sid: str, body: dict, request: Request):
+        therapist(request)
+        state = demo.state(sid)
+        window = body.get("window_id", "")
+        if type(body.get("speaking")) is not bool or not isinstance(window,str) or len(window)>100:
+            raise ValueError("Invalid speech heartbeat")
+        sequence=body.get("sequence",0)
+        if type(sequence) is not int or not 0 <= sequence <= 9_007_199_254_740_991:
+            raise ValueError("Invalid speech sequence")
+        if sequence > state['speech_seq']:
+            state.update(speaking=body["speaking"] and session(sid)["status"]=="active", speech_at=time.monotonic(), window_id=window, speech_seq=sequence)
+        return {"ok": True}
+
+    @app.post("/api/sessions/{sid}/demo/presence")
+    def demo_presence(sid: str, body: dict, request: Request):
+        if role(request,sid) != "participant":
+            raise HTTPException(403, "Unity participant only")
+        mode = body.get("input_mode")
+        if mode not in ("xr","editor") or type(body.get("busy")) is not bool:
+            raise ValueError("Invalid Unity presence")
+        state = demo.state(sid)
+        # A tracked headset cannot be displaced by an Editor heartbeat.
+        if mode != "xr" and demo.snapshot(sid)["headset"]:
+            raise HTTPException(409,"Headset has priority")
+        state.update(presence_at=time.monotonic(),input_mode=mode,busy=body["busy"])
+        encoded = body.get("frame", "")
+        if encoded and state['enabled'] and mode != 'xr':
+            import base64,io
+            from PIL import Image
+            if not isinstance(encoded,str) or len(encoded)>700_000:
+                raise ValueError("Preview frame too large")
+            raw=base64.b64decode(encoded,validate=True)
+            with Image.open(io.BytesIO(raw)) as im:
+                if im.format!='JPEG' or im.width>1280 or im.height>720:
+                    raise ValueError("Invalid preview frame")
+                im.verify()
+            state.update(frame=raw,frame_at=time.monotonic())
+        return demo.snapshot(sid)
+
+    @app.get("/api/sessions/{sid}/demo/frame")
+    def demo_frame(sid: str, request: Request):
+        from fastapi.responses import Response
+        therapist(request)
+        if not demo.snapshot(sid)["frame_ready"]:
+            raise HTTPException(404,"Unity preview unavailable")
+        return Response(demo.state(sid)['frame'],media_type="image/jpeg")
 
     @app.post("/api/sessions/{sid}/commands")
     async def send_command(sid: str, body: CommandBody, request: Request):

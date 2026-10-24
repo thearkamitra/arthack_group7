@@ -206,3 +206,13 @@ sequence that the user approved.
 - [x] Add a bounded, sequential AI enhancement of the final frame to at least a 2560-pixel long edge; count the extra call within the four-call budget.
 - [x] Preview actual final dimensions and enhanced image before approval; blend into the enhanced still in Unity.
 - [x] Verify a fresh generated bundle visually and record actual resolution and regression evidence: `work/region_zoom_tests/1792879510944327000-upper-left/`, final PNG 2560×1408, 41 backend and 19 frontend tests passed.
+
+## Frontend-driven fallback demo (2026-10-25)
+
+- [x] Keep ElevenLabs microphone capture and guide playback in the frontend; publish audible playback timing to the coordinator.
+- [x] Add explicit browser opt-in, short-lived loopback Editor pairing and an Editor launcher that preserves unsaved scene changes.
+- [x] Send frontend arrow controls to the actual Unity camera and return authenticated, memory-only bounded JPEG previews to the main view.
+- [x] Freeze Unity's measured attention from the frontend and reuse the existing conversation-based media review/approval flow.
+- [x] Give a tracked headset priority; reject browser controls when disconnected, paused or transitioning.
+- [x] Verify the bounded Unity/control integration and offline authority/audio-timing tests.
+- [ ] Visually inspect the frontend and test the microphone conversation interactively after the saved browser-origin permission allows access.

@@ -104,3 +104,13 @@ Generated evidence stays under ignored `work/region_zoom_tests/`, not Git.
 - [x] Preserve edited still dimensions and add conservative AI enhancement of the exact final frame; validate its dimensions and include its hash as the next source.
 - [x] Count the enhancement call in the existing four-call budget; show the enhanced preview and dimensions before approval.
 - [x] Fresh run `work/region_zoom_tests/1792879510944327000-upper-left/` passed: final image 2560×1408, related companion shapes visually inspected, Unity transition and next-cycle promotion verified. 41 backend tests and 19 frontend tests passed. This epic remains In Progress for broader/hardware acceptance.
+
+### Browser-controlled no-headset flow (2026-10-25)
+
+- [x] Frontend voice playback timing gates Unity attention; arrows steer its actual camera and a live JPEG preview replaces the procedural demo view.
+- [x] Explicit frontend opt-in auto-pairs the local Editor; tracked headset input has priority. Existing scene images are preserved.
+- [x] Frontend confirmation and conversation-prefilled Media studio complete the existing transition flow.
+- [x] Bounded integrations passed at `work/browser_demo/1792880492957860000/` and `work/browser_demo/1792880937225415000/`, without paid calls or microphone recording; rendered view changes, clean previews and measured attention verified. Final suites: 47 backend tests and 23 frontend tests.
+- [ ] Interactive browser/microphone check remains unverified because the browser tool still reports a saved permission/managed-policy denial for the local origin. Broader epic/hardware acceptance remains open.
+
+See [browser demo handoff](../../docs/BROWSER_UNITY_DEMO.md).

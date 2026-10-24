@@ -174,3 +174,7 @@ remain unverified. Generated check artifacts stay ignored under `work/`.
 Unity now has an Editor mock-head region-entry path using the supplied textured
 abstract artwork. Setup, controls, staged zoom and the two bounded live-provider
 scenarios are documented in [Unity handoff](docs/UNITY_HANDOFF.md#region-entry-in-editor-2026-10-24).
+
+For a demo without a connected headset, use the frontend's **Use browser + Unity
+demo** button. The conversation and arrow controls run in the browser, driving
+and previewing the actual Unity camera. See [Browser demo setup](docs/BROWSER_UNITY_DEMO.md).

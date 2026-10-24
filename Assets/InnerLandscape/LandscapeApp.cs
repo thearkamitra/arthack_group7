@@ -52,6 +52,12 @@ namespace InnerLandscape
             session.attentionInput=attention;
             var transition=gameObject.AddComponent<RegionZoomTransition>();transition.head=head;transition.surface=renderer;transition.video=video;
             session.transition=transition;attention.transition=transition;
+            var browser=gameObject.AddComponent<BrowserDemoBridge>();browser.session=session;session.browserDemo=browser;
+            session.serverUrl="http://127.0.0.1:4173";
+#if UNITY_EDITOR
+            string demoUrl=System.Environment.GetEnvironmentVariable("INNER_LANDSCAPE_DEMO_URL");
+            if(!string.IsNullOrEmpty(demoUrl))session.serverUrl=demoUrl;
+#endif
             video.isLooping = false; video.playOnAwake = false; video.audioOutputMode = VideoAudioOutputMode.None;
             voice = gameObject.AddComponent<VoiceClient>(); voice.session = session; session.voice=voice;
             events = new GameObject("UI events", typeof(EventSystem)).GetComponent<EventSystem>();
@@ -101,6 +107,8 @@ namespace InnerLandscape
         void Update()
         {
             if(!head)return;
+            bool browserControlled=session.browserDemo&&session.browserDemo.Remote;
+            if(canvas.gameObject.activeSelf==browserControlled)canvas.gameObject.SetActive(!browserControlled);
             var device=InputDevices.GetDeviceAtXRNode(XRNode.Head);
             bool down=false;
             foreach(var node in new[]{XRNode.LeftHand,XRNode.RightHand})

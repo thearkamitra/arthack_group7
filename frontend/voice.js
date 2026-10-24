@@ -9,6 +9,13 @@
     playing = [];
   let ended = true,
     receive = () => {};
+  let voiceSid=null, speechTimer=null, windowId="", lastScheduledEnd=0;
+  function publishSpeech() {
+    if(!voiceSid)return;
+    const time=context?.currentTime || 0;
+    const speaking=!ended && context?.state==='running' && playing.some(n=>n.playbackStart<=time&&n.playbackEnd>time);
+    window.LandscapeDemo?.speech(voiceSid,speaking,windowId).catch(()=>{});
+  }
   const api = {
     get active() {
       return !ended;
@@ -25,7 +32,8 @@
       });
       context = new AudioContext({ sampleRate: 16000 });
       await context.resume();
-      nextTime = 0;
+      nextTime = 0;voiceSid=sessionId;windowId="";lastScheduledEnd=0;
+      speechTimer=setInterval(publishSpeech,150);
       const protocol = location.protocol === "https:" ? "wss:" : "ws:";
       socket = new WebSocket(
         `${protocol}//${location.host}/api/sessions/${sessionId}/voice`,
@@ -90,11 +98,13 @@
           node.buffer = buffer;
           node.connect(context.destination);
           nextTime = Math.max(nextTime, context.currentTime + 0.03);
+          if(!windowId || nextTime-lastScheduledEnd>1)windowId=crypto.randomUUID();
+          node.playbackStart=nextTime;node.playbackEnd=nextTime+buffer.duration;
           node.start(nextTime);
-          nextTime += buffer.duration;
+          nextTime += buffer.duration;lastScheduledEnd=nextTime;
           playing.push(node);
           node.onended = () => {
-            playing = playing.filter((n) => n !== node);
+            playing = playing.filter((n) => n !== node);publishSpeech();
           };
         }
         if (item.type === "conversation_initiation_metadata") api.update();
@@ -105,7 +115,8 @@
         socket.send(JSON.stringify({ type: "context_request" }));
     },
     async stop() {
-      ended = true;
+      ended = true;publishSpeech();voiceSid=null;
+      if(speechTimer)clearInterval(speechTimer);speechTimer=null;
       if (socket) {
         const old = socket;
         socket = null;

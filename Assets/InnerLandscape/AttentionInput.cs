@@ -22,7 +22,8 @@ namespace InnerLandscape
         void OnGUI()
         {
             if(mode==Mode.XR)return;
-            GUI.Label(new Rect(12,12,550,28),"MOCK HEAD INPUT · right-drag to look · head direction, not eye tracking");
+            var bridge=GetComponent<BrowserDemoBridge>();
+            GUI.Label(new Rect(12,12,650,28),bridge&&bridge.Remote?"BROWSER CONTROL · use frontend arrows · head direction, not eye tracking":"MOCK HEAD INPUT · right-drag to look · head direction, not eye tracking");
             var session=GetComponent<SessionClient>();
             if(session&&session.spatial.ValidSeconds>0)GUI.Label(new Rect(12,40,600,28),"Longest dwell: cell "+(session.spatial.Winner+1)+" · "+session.spatial.Percentage(session.spatial.Winner).ToString("F1")+"% · valid "+session.spatial.ValidSeconds.ToString("F1")+"s");
             GUI.Label(new Rect(Screen.width/2-6,Screen.height/2-12,20,24),"+");
@@ -39,7 +40,12 @@ namespace InnerLandscape
             }
             Valid=true;
             if(transition&&transition.Busy){LookRay=new Ray(head.transform.position,head.transform.forward);return;}
-            if(mode==Mode.Scripted)
+            var browser=GetComponent<BrowserDemoBridge>();
+            if(browser&&browser.Remote)
+            {
+                if(browser.Fresh)head.transform.rotation=Quaternion.Euler(browser.state.pitch,browser.state.yaw,0);
+            }
+            else if(mode==Mode.Scripted)
             {
                 Vector3 target=surface.Point(new Vector2(scriptedPoint.x,1-scriptedPoint.y));
                 head.transform.rotation=Quaternion.LookRotation(target-head.transform.position,Vector3.up);

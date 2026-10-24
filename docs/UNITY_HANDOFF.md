@@ -210,3 +210,11 @@ the clip and the high-resolution final image in Media studio. The dimensions
 shown there come from decoding the actual output, not an assumed resize. Failed
 or ambiguous enhancement leaves the bundle unapplied and is never resubmitted
 automatically. Manifests include the separate enhancement request ID and settings.
+
+### Frontend conversation and arrow control
+
+See [Browser-controlled Unity demo](BROWSER_UNITY_DEMO.md) for the complete
+no-headset flow. **Use browser + Unity demo** starts the open Editor and pairs
+locally. The frontend shows the live Unity camera and sends arrow controls, while
+frontend ElevenLabs playback gates Unity attention. The browser does not start
+Unity's microphone. A tracked headset takes priority over browser arrows.

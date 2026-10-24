@@ -1804,3 +1804,11 @@ input[type="checkbox"] {
   height: min(75vh, 900px);
   border: 0;
 }
+
+.unity-live {position:relative;aspect-ratio:16/9;background:#14231e;border-radius:16px;overflow:hidden}
+.unity-live img {width:100%;height:100%;object-fit:contain}
+.unity-reticle {position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:white;text-shadow:0 0 3px black;font-size:24px;pointer-events:none}
+.unity-arrows {display:flex;flex-direction:column;align-items:center;gap:8px;margin:12px}
+.unity-arrows div {display:flex;gap:12px}
+.unity-arrows button {min-width:60px;min-height:42px;border-radius:8px;border:1px solid #9eafa6;background:#e5eee8;color:#1b382b;cursor:pointer}
+.unity-arrows button:disabled {opacity:.45;cursor:default}

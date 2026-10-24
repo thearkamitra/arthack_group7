@@ -20,6 +20,9 @@ namespace InnerLandscape
         public AttentionInput attentionInput;
         public RegionZoomTransition transition;
         public VoiceClient voice;
+        public BrowserDemoBridge browserDemo;
+        bool GuideSpeaking => browserDemo&&browserDemo.Fresh&&browserDemo.state.voice_frontend ? browserDemo.GuideSpeaking : voice&&voice.GuideSpeaking;
+        string SpeechWindow => browserDemo&&browserDemo.Fresh&&browserDemo.state.voice_frontend ? browserDemo.SpeechWindow : voice?voice.SpeechWindow:"";
         [NonSerialized] public RegionAttention spatial = new RegionAttention();
         public string SourceHash => snapshot?.source_hash ?? "";
         public int Cycle => cycle;
@@ -169,14 +172,14 @@ namespace InnerLandscape
             RaycastHit hit;
             if (landscapeCollider.Raycast(attentionInput.LookRay, out hit, 10))
             {
-                spatial.Sample(Time.deltaTime,voice&&voice.GuideSpeaking,true,hit.textureCoord,voice?voice.SpeechWindow:"");
+                spatial.Sample(Time.deltaTime,GuideSpeaking,true,hit.textureCoord,SpeechWindow);
                 int index = Mathf.Min(2, Mathf.FloorToInt(Mathf.Clamp01(hit.textureCoord.x) * 3));
                 string region = new[] { "sky", "ridge", "water" }[index];
                 if (candidate != region) { candidate = region; candidateSeconds = 0; }
                 candidateSeconds += Time.deltaTime;
                 if (candidateSeconds >= dwellThreshold) { qualifiedCandidate = candidate; dwell[index] += Time.deltaTime; }
             }
-            else { spatial.Sample(Time.deltaTime,voice&&voice.GuideSpeaking,false,Vector2.zero,voice?voice.SpeechWindow:""); candidate = ""; candidateSeconds = 0; }
+            else { spatial.Sample(Time.deltaTime,GuideSpeaking,false,Vector2.zero,SpeechWindow); candidate = ""; candidateSeconds = 0; }
             if (string.IsNullOrEmpty(SourceHash) && Time.unscaledTime >= reportAt && !busyAttention) { reportAt = Time.unscaledTime + 1; StartCoroutine(ReportAttention()); }
         }
         IEnumerator ReportAttention()
