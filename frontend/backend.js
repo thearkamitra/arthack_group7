@@ -8,19 +8,40 @@
     onSnapshot = () => {},
     onStatus = () => {};
   let lastLocal = null;
-  async function request(path, options = {}) {
+  let authenticationRefresh = null;
+  async function refreshAuthentication() {
+    if (!["127.0.0.1", "localhost", "[::1]"].includes(location.hostname)) return false;
+    if (!authenticationRefresh)
+      authenticationRefresh = fetch("/", {credentials: "same-origin", cache: "no-store"})
+        .then(response => response.ok).catch(() => false)
+        .finally(() => { authenticationRefresh = null; });
+    return authenticationRefresh;
+  }
+  function connectionMessage(error) {
+    if (error.status === 401)
+      return "Workspace authentication expired. Reload this page on the Mac to sign in again; keep any unsaved drafts.";
+    if (error.status)
+      return `Coordinator returned HTTP ${error.status}. Your drafts are retained; check the Mac server.`;
+    return "Coordinator connection failed. Check the Mac server or network; your drafts are retained.";
+  }
+  async function request(path, options = {}, allowAuthenticationRefresh = true) {
     const response = await fetch(path, {
       credentials: "same-origin",
       ...options,
       headers: { "Content-Type": "application/json", ...options.headers },
     });
+    if (response.status === 401 && allowAuthenticationRefresh &&
+        (options.method || "GET").toUpperCase() === "GET" &&
+        ["/api/status", "/api/workspace"].includes(path) && await refreshAuthentication())
+      return request(path, options, false);
     const body = await response.json().catch(() => ({}));
-    if (!response.ok)
-      throw new Error(
-        typeof body.detail === "string"
-          ? body.detail
-          : "The coordinator could not complete this request.",
-      );
+    if (!response.ok) {
+      const error = new Error(response.status === 401
+        ? "Workspace authentication expired. Reload this page on the Mac; this action was not retried."
+        : typeof body.detail === "string" ? body.detail : "The coordinator could not complete this request.");
+      error.status = response.status;
+      throw error;
+    }
     return body;
   }
   const api = {
@@ -58,15 +79,14 @@
               lastLocal = JSON.parse(JSON.stringify(next.workspace));
               onSnapshot(next.workspace);
             }
-          } catch {
-            onStatus(
-              "Coordinator unavailable. Reload before continuing on another device.",
-            );
+          } catch (error) {
+            onStatus(connectionMessage(error));
           }
         }, 1500);
-      } catch {
+      } catch (error) {
         status = null;
         connected = false;
+        onStatus(connectionMessage(error));
       }
     },
     save(workspace) {

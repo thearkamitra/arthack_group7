@@ -132,8 +132,9 @@ remain open.
 
 ### Open issues and next actions
 
-- [ ] **Reported frontend warning:** “Coordinator unavailable. Reload before continuing on another device.” Investigate the actual `/api/workspace` response status from the affected browser. The coordinator was confirmed listening on port 4173, and Unity was running. No root cause or fix has yet been verified.
-- [ ] **Authentication hypothesis:** server restarts generate a fresh in-memory practitioner token, invalidating the old browser cookie. Reloading the root page is the existing local authentication bootstrap. Check whether the failing request is 401 before treating this as the cause; distinguish authentication loss from transport/backend errors in the UI if confirmed. Preserve current session data and drafts.
+- [x] **Reported frontend warning diagnosed:** the user supplied a 401 for GET `/api/workspace`, confirming an authentication failure while the backend was reachable. Restart-induced stale-cookie rejection is reproduced by an automated test; the generic connection warning is corrected.
+- [x] **Authentication recovery implemented:** read-only status/workspace GETs renew through the existing loopback root bootstrap once, then retry once. Mutations and paid calls are never automatically retried. Tests verify preserved workspace data, bounded renewal, and distinct authentication/network messages.
+- [ ] Confirm the affected browser recovers after one page reload to load the updated JavaScript; agent-side browser inspection remains blocked.
 - [ ] **Interactive inspection:** the browser tool still denies observing `http://127.0.0.1:4173/`, citing a saved permission or managed policy, including after the user reported enabling access. This is a separate tool-access issue, not proof of a backend or Unity fault. Inspect Settings → Browser for the exact origin or a managed rule; do not work around the denial through another browser surface.
 - [ ] **Actual frontend microphone conversation:** verify only after explicit user start/consent; mocked audio timing and prior real provider runs do not establish this live browser microphone check.
 - [ ] **Physical Quest acceptance:** retain the existing hardware gates; do not infer a headset pass from Editor rendering.
@@ -141,3 +142,21 @@ remain open.
 Untracked `Assets/_Recovery/` and `Assets/_Recovery.meta` are preserved and excluded
 from commits. They are not part of the implementation or acceptance evidence.
 See [browser demo setup and evidence](../../docs/BROWSER_UNITY_DEMO.md).
+
+
+### Active follow-up: workspace 401 (2026-10-25)
+
+User supplied a 401 response from `/api/workspace`; the backend is reachable but
+the presented cookie is not accepted. Owner: Codex. Implement one bounded
+read-only authentication renewal using the existing loopback root bootstrap,
+keep writes/paid calls non-retrying, and test restart/cookie behavior without
+copying or logging the user's credential.
+
+
+Authentication follow-up evidence: the new backend restart test reproduces old-
+cookie 401 → local root renewal → authorized workspace read, retaining notes and
+pausing unfinished sessions. Four JavaScript tests cover bounded recovery and
+no automatic POST/PUT retry. The pasted user credential is not used or recorded
+in code, tests or logs. No backend restart is needed to serve this frontend fix.
+
+Final authentication regression run: **48 backend tests and 27 frontend tests passed**. Evidence logs: `work/browser_demo/auth-backend-tests.log` and `work/browser_demo/auth-frontend-tests.log` (ignored).

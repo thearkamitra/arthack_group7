@@ -84,14 +84,24 @@ the browser tool's saved origin permission remained denied after authorized
 retries. Earlier live ElevenLabs/provider checks remain documented separately.
 
 
-## Reported coordinator refresh warning
+## Coordinator authentication after a restart
 
-The frontend warning “Coordinator unavailable. Reload before continuing on another
-device” currently covers any failed `/api/workspace` refresh, including an HTTP
-error. A live coordinator process alone does not prove that the affected browser
-request is authorized. Server restarts replace the in-memory practitioner token,
-so a previously open tab may retain a stale cookie; loading the root page is the
-existing local authentication bootstrap. This is a hypothesis for the reported
-warning, not a verified diagnosis. Next check the affected request's HTTP status
-and preserve drafts/session data while investigating. The agent browser tool's
-saved-origin denial is separate from this application-level warning.
+A user-confirmed GET `/api/workspace` returned **401 Unauthorized** while the
+server was reachable. The coordinator deliberately creates a fresh practitioner
+token when it starts, so an already-open page can retain an obsolete cookie.
+An automated test reproduces this restart failure and verifies that the existing
+loopback root-page bootstrap renews authentication while preserving stored notes
+and pausing unfinished sessions.
+
+The frontend now tries that existing local authentication bootstrap once for a
+401 on read-only `/api/status` or `/api/workspace`, then retries the read once.
+It does not change server authorization rules or replay writes/paid operations.
+Authentication errors, other HTTP failures and transport failures have distinct
+messages. This preserves draft fields and server state; a failed mutation still
+requires deliberate user action after authentication is restored.
+
+If an older tab still shows the old “Coordinator unavailable” text, reload that
+page once to load the updated JavaScript and renew its cookie. Do not clear local
+storage or session data. An unfinished session may require an explicit Resume
+after a coordinator restart. Browser-tool origin permission remains a separate
+issue; this fix does not grant the agent browser access.
