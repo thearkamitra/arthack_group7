@@ -13,6 +13,19 @@
 - The former Auto-MIA pipeline and its environment are retired. Do not restore
   the submodule, mesh dependencies or historical training artifacts by default.
 
+## Task board workflow
+- Read `kanba/README.md` and the matching task card before picking up work.
+  Use the `arthack-kanban-flow` skill when available (installed locally at
+  `/Users/arkamitra/.codex/skills/arthack-kanban-flow/SKILL.md`).
+- When taking a task, move its existing card to `kanba/progress/` before
+  implementation and set Status to `In Progress`; do not leave a copy behind.
+- When all acceptance criteria are verified, move the card to `kanba/done/`,
+  set Status to `Done`, and record completion evidence. Partial work stays active.
+- Move blocked work with no independent next step to `kanba/needme/`, with the
+  blocker and required user/hardware action; resume by moving it back to progress.
+- After each move, remove the old board-column entry, add the new one in
+  `kanba/README.md`, fix inbound links, and verify one card file per stable ID.
+
 ## Implementation
 - Plan integrations before implementation. Clearly label mock or simulated
   behavior, disconnected services and limits of attention tracking.

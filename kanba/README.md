@@ -8,6 +8,17 @@ This board tracks the implementation milestones defined in [PLAN.md](file:///Use
 
 ---
 
+## Card lifecycle
+
+When picking up work, move the existing card to `kanba/progress/` and set its
+status to **In Progress**. On verified completion, move that same card to
+`kanba/done/` and set it to **Done**. Remove the old column entry, add the new one,
+and repair links after each move; never leave duplicate card files behind.
+Blocked work belongs in `kanba/needme/` until it can resume. A partially completed
+epic stays in progress or blocked until its full acceptance criteria are met.
+
+See `AGENTS.md` and the installed `arthack-kanban-flow` skill for the workflow.
+
 ## Board Overview
 
 | Done | In Progress | Need Me (Blocked on User/Hardware) | Backlog |
