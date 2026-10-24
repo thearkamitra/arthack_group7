@@ -80,6 +80,14 @@ Use ignored `runs/garmin/<unique-run-id>/` under the repository (the existing `.
 
 The receiver should save `heart-rate.csv` (receipt time in UTC, elapsed time, BPM), `events.csv` (connect/disconnect and session markers), and `manifest.json` (model/firmware, receiver version, input/source, parameters, commands or UI actions, start/end, status, errors and output paths). Preserve original files and put derived results in separate files. Record RR intervals only if actually present; never manufacture them from BPM.
 
+#### Verified Live Test (24 October 2026)
+- **Device Tested**: Garmin Venu 4 (device identifier omitted)
+- **Run Directory**: `runs/garmin/run_20261024_124230/` (ignored by Git)
+- **Duration**: 3,777 seconds (~63 minutes)
+- **Samples**: 7,540 live heart rate measurements received at ~2 Hz (~500ms intervals)
+- **Sensor Contact**: Continuously confirmed (`contact_detected: 1`)
+- **Outcome**: Successfully verified live BLE broadcast, GATT 0x180D / 0x2A37 subscription, clean disconnection handling, and structured manifest export.
+
 ### If it does not connect
 
 - **No BPM on watch:** check skin contact and wrist-heart-rate settings first.
