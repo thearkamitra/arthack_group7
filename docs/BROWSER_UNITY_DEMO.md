@@ -82,3 +82,16 @@ controls do not issue movement requests. Interactive browser visual inspection
 and an actual microphone conversation have not been verified in this task:
 the browser tool's saved origin permission remained denied after authorized
 retries. Earlier live ElevenLabs/provider checks remain documented separately.
+
+
+## Reported coordinator refresh warning
+
+The frontend warning “Coordinator unavailable. Reload before continuing on another
+device” currently covers any failed `/api/workspace` refresh, including an HTTP
+error. A live coordinator process alone does not prove that the affected browser
+request is authorized. Server restarts replace the in-memory practitioner token,
+so a previously open tab may retain a stale cookie; loading the root page is the
+existing local authentication bootstrap. This is a hypothesis for the reported
+warning, not a verified diagnosis. Next check the affected request's HTTP status
+and preserve drafts/session data while investigating. The agent browser tool's
+saved-origin denial is separate from this application-level warning.

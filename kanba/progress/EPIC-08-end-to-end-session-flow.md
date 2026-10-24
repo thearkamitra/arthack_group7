@@ -114,3 +114,30 @@ Generated evidence stays under ignored `work/region_zoom_tests/`, not Git.
 - [ ] Interactive browser/microphone check remains unverified because the browser tool still reports a saved permission/managed-policy denial for the local origin. Broader epic/hardware acceptance remains open.
 
 See [browser demo handoff](../../docs/BROWSER_UNITY_DEMO.md).
+
+
+## Current handoff — 2026-10-25
+
+**Column: In Progress.** Implementation is pushed on `master`; the full epic is
+not complete because interactive browser/microphone and physical Quest acceptance
+remain open.
+
+### Delivered and verified
+
+- [x] `e608e54`: close object approach, 0.75 m initial viewing distance and corrected inward generation prompts.
+- [x] `b0655e7`: new related nearby forms and AI-enhanced final image; fresh generated output verified at 2560×1408.
+- [x] `910e1a4`: frontend ElevenLabs playback timing, browser arrows driving the actual Unity camera, live Unity preview, local opt-in pairing and headset priority.
+- [x] Latest regression suites: 47 backend tests and 23 frontend tests passed. Final Unity compilation passed.
+- [x] Local browser-control/Unity integration passed at `work/browser_demo/1792880937225415000/`: automatic pairing, changed camera frames, clean preview and non-manual speech-gated attention decision.
+
+### Open issues and next actions
+
+- [ ] **Reported frontend warning:** “Coordinator unavailable. Reload before continuing on another device.” Investigate the actual `/api/workspace` response status from the affected browser. The coordinator was confirmed listening on port 4173, and Unity was running. No root cause or fix has yet been verified.
+- [ ] **Authentication hypothesis:** server restarts generate a fresh in-memory practitioner token, invalidating the old browser cookie. Reloading the root page is the existing local authentication bootstrap. Check whether the failing request is 401 before treating this as the cause; distinguish authentication loss from transport/backend errors in the UI if confirmed. Preserve current session data and drafts.
+- [ ] **Interactive inspection:** the browser tool still denies observing `http://127.0.0.1:4173/`, citing a saved permission or managed policy, including after the user reported enabling access. This is a separate tool-access issue, not proof of a backend or Unity fault. Inspect Settings → Browser for the exact origin or a managed rule; do not work around the denial through another browser surface.
+- [ ] **Actual frontend microphone conversation:** verify only after explicit user start/consent; mocked audio timing and prior real provider runs do not establish this live browser microphone check.
+- [ ] **Physical Quest acceptance:** retain the existing hardware gates; do not infer a headset pass from Editor rendering.
+
+Untracked `Assets/_Recovery/` and `Assets/_Recovery.meta` are preserved and excluded
+from commits. They are not part of the implementation or acceptance evidence.
+See [browser demo setup and evidence](../../docs/BROWSER_UNITY_DEMO.md).
