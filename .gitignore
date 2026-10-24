@@ -32,3 +32,9 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+# Unity generated files
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
