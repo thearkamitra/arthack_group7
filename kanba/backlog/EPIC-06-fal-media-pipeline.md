@@ -2,7 +2,7 @@
 
 - **ID**: `EPIC-06`
 - **Milestone Reference**: Milestone 6 (Still generation) & Milestone 7 (Video cycle)
-- **Status**: Blocked on Paid API Approval Gate ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/needme/NEEDME-01-paid-api-approval.md))
+- **Status**: Blocked on Paid API Approval Gate ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/done/NEEDME-01-paid-api-approval.md))
 - **Primary Owner**: Backend / Media Engineer
 - **Relevant Files**:
   - [backend/inner_landscape/media.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/media.py)
@@ -40,7 +40,7 @@ Integrate the asynchronous fal.ai generative media pipeline into the reflection 
 - [ ] **Task 6.1 — Prerequisites & Cost Approval**:
   - Verify `ffmpeg` / `ffprobe` installed on Mac host (`which ffprobe`).
   - Verify `FAL_KEY` in `.env` or process environment.
-  - Obtain user sign-off for paid media generation ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/needme/NEEDME-01-paid-api-approval.md)).
+  - Obtain user sign-off for paid media generation ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/done/NEEDME-01-paid-api-approval.md)).
   - Launch coordinator with `bash backend/scripts/run.sh --enable-paid`.
 - [ ] **Task 6.2 — Still Inpainting Validation (`flux-kontext`)**:
   - Trigger image refinement from therapist console with a test brief (e.g., *"Sunlight filtering through morning mist"*).

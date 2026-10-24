@@ -91,3 +91,28 @@ The real-device acceptance test is steps 3–8 plus stopping broadcast briefly t
 verify stale display and baseline reset. User reports the standalone receiver
 works; the integrated implementation has been checked using fake BLE in API and
 browser tests, not with an actual watch. No paid service test was run.
+
+## Small broadcast smoke test
+
+With the watch worn and Broadcast Heart Rate enabled, close any other receiver
+and disconnect monitoring in the frontend. From the repository root:
+
+```sh
+PYTHONPATH=backend backend/.venv/bin/python -m inner_landscape.garmin_check --name venu --seconds 15
+```
+
+The test scans for eight seconds, connects to one uniquely matching name, and
+waits up to 15 seconds for a valid Heart Rate Measurement notification. Use
+`--name garmin` if that matches your advertisement instead. It prints JSON and
+returns 0 only after a valid notification; discovering an advertisement alone
+never passes. It always disconnects and clears readings. Nothing is recorded.
+The scan/connect/cleanup steps have separate bounded timeouts.
+
+In the therapist console, scan, select, consent and connect. The status distinguishes
+**Connected · waiting for broadcast** from **Broadcast verified** after a fresh
+notification. A stale or disconnected stream clears BPM instead of showing zero.
+
+Offline tests exercise valid notifications, malformed/no-contact packets, missing
+notifications, API consent/authorization, stale readings, pause/finish cleanup and
+frontend lifecycle. A live scan on 2026-10-24 completed with **zero matching Venu
+advertisements**. Physical broadcasting is not yet verified.

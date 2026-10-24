@@ -10,6 +10,7 @@ from inner_landscape.api import create_app
 from inner_landscape.config import Settings
 from inner_landscape.garmin import HeartRateMonitor
 from inner_landscape.garmin_ble import GarminBLE
+from inner_landscape.garmin_check import check_broadcast
 from inner_landscape.garmin_protocol import parse_hr_payload
 from test_service import fixture
 
@@ -184,3 +185,24 @@ class GarminAPITests(unittest.TestCase):
         self.assertEqual(self.client.put("/api/workspace",json=snap).status_code,200)
         self.assertTrue(FakeClient.instances[-1].disconnected)
         self.assertIsNone(self.app.state.heart_rate.baseline)
+
+
+class BroadcastCheckTests(unittest.IsolatedAsyncioTestCase):
+    async def test_pass_requires_notification_and_releases_connection(self):
+        bridge = GarminBLE(HeartRateMonitor(), FakeScanner, FakeClient)
+        result = await check_broadcast("Venu", 1, bridge)
+        self.assertTrue(result["passed"])
+        self.assertEqual(result["bpm"], 80)
+        self.assertTrue(FakeClient.instances[-1].disconnected)
+        self.assertIsNone(bridge.monitor.token)
+
+    async def test_advertisement_without_valid_notification_is_not_pass(self):
+        class SilentClient(FakeClient):
+            async def start_notify(self, uuid, callback):
+                callback(None, bytearray([1]))  # truncated packet
+                callback(None, bytearray([4, 80]))  # explicitly no skin contact
+        bridge = GarminBLE(HeartRateMonitor(), FakeScanner, SilentClient)
+        result = await check_broadcast("Venu", .1, bridge)
+        self.assertFalse(result["passed"])
+        self.assertTrue(FakeClient.instances[-1].disconnected)
+        self.assertIsNone(bridge.monitor.token)

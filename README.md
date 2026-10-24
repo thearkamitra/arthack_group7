@@ -117,7 +117,8 @@ provider-specific precedence. Do not run a paid speech test without approval.
 
 - `frontend/`: therapist/client UI and optional coordinator/voice/Garmin connection.
 - `backend/`: Python service, pinned dependencies, tests and setup scripts.
-- `unity/`: source integration kit for the Unity teammate; hardware validation pending.
+- `Assets/`, `Packages/`, `ProjectSettings/`: Unity 6000.6.7f1 project; runtime code in `Assets/InnerLandscape/`.
+- `unity/`: Unity entry guide; hardware validation pending.
 - `docs/`: API setup, backend instructions and Unity handoff.
 - `work/`: ignored local runtime state, agent metadata and generated artifacts.
 - `.env.example`: placeholder configuration only; never add real credentials.
@@ -126,3 +127,16 @@ provider-specific precedence. Do not run a paid speech test without approval.
 The retired mesh application remains in Git history at `8bfaa19`. Legacy local
 assets, outputs, caches and the unused Python environment have been moved out of
 this workspace. No dependencies are currently required by the local HTML sketch.
+
+## Latest integration verification
+
+Unity runtime code is now inside the root project and the InnerLandscape scene is
+selected for builds. See [Unity handoff](docs/UNITY_HANDOFF.md). Unity licensing
+blocked local compilation; Android Build Support and physical Quest checks remain.
+
+Garmin is integrated in the therapist panel and Python coordinator. Run the small
+[Garmin broadcast check](docs/GARMIN.md) after enabling broadcast on the watch.
+A local hardware scan found no matching Venu; offline tests passed (27 backend,
+14 frontend). One authorized ElevenLabs speech check produced a valid 2.8-second
+MP3 and the agent signed-URL check passed. Headset conversation and fal generation
+remain unverified. Generated check artifacts stay ignored under `work/`.

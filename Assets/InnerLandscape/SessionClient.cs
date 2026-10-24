@@ -23,11 +23,13 @@ namespace InnerLandscape
         public float dwellThreshold = 1.5f;
         public string SessionId => sessionId;
         public string ParticipantToken => token;
-        public bool Active => snapshot != null && snapshot.status == "active" && !snapshot.pendingCycle;
+        public bool Active => !localHold && snapshot != null && snapshot.status == "active" && !snapshot.pendingCycle;
+        public string LookedRegion => qualifiedCandidate;
+        bool localHold;
         string token, sessionId, currentMedia;
         Snapshot snapshot;
         readonly float[] dwell = new float[3];
-        string candidate = "";
+        string candidate = "", qualifiedCandidate = "";
         float candidateSeconds, reportAt, cycleSeconds;
         int cycle;
         bool hadTracking = true, sentEnd, busyAttention;
@@ -81,12 +83,13 @@ namespace InnerLandscape
                     else
                     {
                         snapshot = JsonUtility.FromJson<Snapshot>(request.downloadHandler.text); status = snapshot.status;
-                        if (snapshot.cycle != cycle) { cycle = snapshot.cycle; cycleSeconds = 0; sentEnd = false; Array.Clear(dwell, 0, dwell.Length); }
+                        if (snapshot.status != "active") localHold = false;
+                        if (snapshot.cycle != cycle) { cycle = snapshot.cycle; cycleSeconds = 0; sentEnd = false; candidate = qualifiedCandidate = ""; candidateSeconds = 0; Array.Clear(dwell, 0, dwell.Length); }
                         if (snapshot.status != "active" || snapshot.pendingCycle) { if (videoPlayer) videoPlayer.Pause(); }
                         if (snapshot.proposal != null) { suggestedRegion = snapshot.proposal.region; suggestionReason = snapshot.proposal.reason; }
                         if (snapshot.media != null && snapshot.media.region_map_verified && snapshot.media.url != currentMedia)
                         { currentMedia = snapshot.media.url; yield return LoadMedia(snapshot.media); }
-                        if (snapshot.status == "active" && !snapshot.pendingCycle && videoPlayer && videoPlayer.isPrepared && !videoPlayer.isPlaying && videoPlayer.time < videoPlayer.length - .1) videoPlayer.Play();
+                        if (snapshot.status == "active" && !snapshot.pendingCycle && !localHold && videoPlayer && videoPlayer.isPrepared && !videoPlayer.isPlaying && videoPlayer.time < videoPlayer.length - .1) videoPlayer.Play();
                         if (snapshot.status == "completed") { token = null; yield break; }
                     }
                 }
@@ -105,27 +108,27 @@ namespace InnerLandscape
                 if (media.kind == "image")
                 {
                     var texture = new Texture2D(2, 2);
-                    if (texture.LoadImage(request.downloadHandler.data)) { if (currentTexture) Destroy(currentTexture); currentTexture = texture; landscapeRenderer.material.mainTexture = texture; }
+                    if (texture.LoadImage(request.downloadHandler.data)) { if (videoPlayer) videoPlayer.Stop(); if (currentTexture) Destroy(currentTexture); currentTexture = texture; landscapeRenderer.material.mainTexture = texture; }
                     else { Destroy(texture); status = "Image could not be decoded"; }
                 }
                 else if (videoPlayer)
                 {
                     videoPlayer.source = VideoSource.Url; videoPlayer.url = file; videoPlayer.renderMode = VideoRenderMode.MaterialOverride;
-                    videoPlayer.targetMaterialRenderer = landscapeRenderer; videoPlayer.Prepare();
+                    videoPlayer.targetMaterialRenderer = landscapeRenderer; videoPlayer.targetMaterialProperty = "_MainTex"; videoPlayer.Prepare();
                     float deadline = Time.realtimeSinceStartup + 15;
                     while (!videoPlayer.isPrepared && Time.realtimeSinceStartup < deadline) yield return null;
-                    if (videoPlayer.isPrepared && snapshot != null && snapshot.status == "active") videoPlayer.Play();
+                    if (videoPlayer.isPrepared && Active) videoPlayer.Play();
                     else status = "Video not ready; playback held";
                 }
             }
         }
         void Update()
         {
-            if (snapshot == null || snapshot.status != "active" || snapshot.pendingCycle || !trackedHead || !landscapeCollider) return;
+            if (localHold || snapshot == null || snapshot.status != "active" || snapshot.pendingCycle || !trackedHead || !landscapeCollider) return;
             bool tracked = false;
             var device = InputDevices.GetDeviceAtXRNode(XRNode.Head);
             device.TryGetFeatureValue(CommonUsages.isTracked, out tracked);
-            if (!tracked) { if (hadTracking) { if (videoPlayer) videoPlayer.Pause(); Send("tracking_lost"); } hadTracking = false; return; }
+            if (!tracked) { if (hadTracking) { localHold = true; if (videoPlayer) videoPlayer.Pause(); Send("tracking_lost"); } hadTracking = false; return; }
             hadTracking = true;
             cycleSeconds += Time.deltaTime;
             if (cycleSeconds >= 30 && !sentEnd) { sentEnd = true; Send("window_finished"); if (videoPlayer) videoPlayer.Pause(); }
@@ -136,7 +139,7 @@ namespace InnerLandscape
                 string region = new[] { "sky", "ridge", "water" }[index];
                 if (candidate != region) { candidate = region; candidateSeconds = 0; }
                 candidateSeconds += Time.deltaTime;
-                if (candidateSeconds >= dwellThreshold) dwell[index] += Time.deltaTime;
+                if (candidateSeconds >= dwellThreshold) { qualifiedCandidate = candidate; dwell[index] += Time.deltaTime; }
             }
             else { candidate = ""; candidateSeconds = 0; }
             if (Time.unscaledTime >= reportAt && !busyAttention) { reportAt = Time.unscaledTime + 1; StartCoroutine(ReportAttention()); }
@@ -149,9 +152,9 @@ namespace InnerLandscape
             yield return SendRoutine(command); busyAttention = false;
         }
         Command NewCommand(string name) { return new Command { command_id = Guid.NewGuid().ToString(), command = name, payload = new Payload { cycle = cycle } }; }
-        public void ConfirmLookedRegion() { if (!string.IsNullOrEmpty(candidate)) { var cmd = NewCommand("select"); cmd.payload.region = candidate; StartCoroutine(SendRoutine(cmd)); } }
-        public void Pause() { if (videoPlayer) videoPlayer.Pause(); Send("pause"); }
-        public void StopSession() { if (videoPlayer) videoPlayer.Stop(); Send("stop"); }
+        public void ConfirmLookedRegion() { if (Active && !string.IsNullOrEmpty(qualifiedCandidate)) { var cmd = NewCommand("select"); cmd.payload.region = qualifiedCandidate; StartCoroutine(SendRoutine(cmd)); } }
+        public void Pause() { localHold = true; if (videoPlayer) videoPlayer.Pause(); Send("pause"); }
+        public void StopSession() { localHold = true; if (videoPlayer) videoPlayer.Stop(); Send("stop"); }
         public void NextCycle() { Send("next"); }
         void Send(string name) { if (!string.IsNullOrEmpty(token)) StartCoroutine(SendRoutine(NewCommand(name))); }
         IEnumerator SendRoutine(Command cmd)

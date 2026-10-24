@@ -23,7 +23,7 @@ namespace InnerLandscape
         AudioSource speaker;
         string microphoneDevice;
         int cursor;
-        bool running;
+        bool running, starting;
         readonly Queue<AudioClip> audioQueue = new Queue<AudioClip>();
         readonly ConcurrentQueue<string> incoming = new ConcurrentQueue<string>();
         [Serializable] class Hello { public string token; public bool consent = true; }
@@ -33,10 +33,11 @@ namespace InnerLandscape
 
         public async void StartVoice()
         {
-            if (running || session == null || !session.Active || string.IsNullOrEmpty(session.ParticipantToken)) return;
+            if (running || starting || session == null || !session.Active || string.IsNullOrEmpty(session.ParticipantToken)) return;
             if (!Application.HasUserAuthorization(UserAuthorization.Microphone))
             { StartCoroutine(RequestMicrophone()); status = "Approve microphone, then press Start voice again."; return; }
             if (Microphone.devices.Length == 0) { status = "No microphone available"; return; }
+            starting = true;
             cancellation = new CancellationTokenSource(); socket = new ClientWebSocket();
             try
             {
@@ -49,6 +50,7 @@ namespace InnerLandscape
                 _ = ReceiveLoop(); StartCoroutine(Capture());
             }
             catch { status = "Voice unavailable. Check coordinator status."; StopVoice(); }
+            finally { starting = false; }
         }
         IEnumerator RequestMicrophone() { yield return Application.RequestUserAuthorization(UserAuthorization.Microphone); }
         async Task Send(string json)

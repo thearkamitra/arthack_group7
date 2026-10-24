@@ -2,12 +2,12 @@
 
 - **ID**: `EPIC-02`
 - **Milestone Reference**: Milestone 2 (Quest foundation) & Milestone 7 (Video playback in VR)
-- **Status**: Ready for Physical Deployment / Blocked on Hardware Test ([NEEDME-02](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/needme/NEEDME-02-quest2-hardware-deployment.md))
+- **Status**: Blocked
 - **Primary Owner**: Unity / VR Developer
 - **Relevant Files**:
-  - [unity/Assets/InnerLandscape/CurvedLandscape.cs](file:///Users/arkamitra/Documents/ChatGPT/arthack/unity/Assets/InnerLandscape/CurvedLandscape.cs)
-  - [unity/Assets/InnerLandscape/SessionClient.cs](file:///Users/arkamitra/Documents/ChatGPT/arthack/unity/Assets/InnerLandscape/SessionClient.cs)
-  - [unity/Assets/InnerLandscape/VoiceClient.cs](file:///Users/arkamitra/Documents/ChatGPT/arthack/unity/Assets/InnerLandscape/VoiceClient.cs)
+  - [Assets/InnerLandscape/CurvedLandscape.cs](file:///Users/arkamitra/Documents/ChatGPT/arthack/Assets/InnerLandscape/CurvedLandscape.cs)
+  - [Assets/InnerLandscape/SessionClient.cs](file:///Users/arkamitra/Documents/ChatGPT/arthack/Assets/InnerLandscape/SessionClient.cs)
+  - [Assets/InnerLandscape/VoiceClient.cs](file:///Users/arkamitra/Documents/ChatGPT/arthack/Assets/InnerLandscape/VoiceClient.cs)
   - [docs/UNITY_HANDOFF.md](file:///Users/arkamitra/Documents/ChatGPT/arthack/docs/UNITY_HANDOFF.md)
 
 ---
@@ -26,7 +26,7 @@ Deploy the standalone Android Unity app to physical Meta Quest 2 hardware. Rende
 
 ## 2. Current Implementation State
 
-The C# source integration kit is written under [unity/Assets/InnerLandscape/](file:///Users/arkamitra/Documents/ChatGPT/arthack/unity/Assets/InnerLandscape):
+The runtime source now lives under [Assets/InnerLandscape/](file:///Users/arkamitra/Documents/ChatGPT/arthack/Assets/InnerLandscape):
 - `CurvedLandscape.cs`: Procedural curved mesh, mesh collider, and UV coordinates mapping left-to-right (`sky`, `ridge`, `water`).
 - `SessionClient.cs`: Pairing via LAN REST API, 1.5s dwell thresholding, 1Hz aggregate attention reporting, media download, and Unity `VideoPlayer` control.
 - `VoiceClient.cs`: PCM16 microphone recording and playback bridge skeleton.
@@ -38,7 +38,7 @@ What remains is compiling in Unity, deploying to a physical Quest 2, and verifyi
 ## 3. Tasks & Stories
 
 - [ ] **Task 2.1 — Unity Project Configuration**:
-  - Import `unity/Assets/InnerLandscape` into a clean Unity 2022.3 LTS (or team-pinned LTS) project with OpenXR and Android Build Support.
+  - Open the root Unity 6000.6.7f1 project with Android Build Support and run the configuration menu.
   - Set Android manifest permissions: `android.permission.INTERNET` and `android.permission.RECORD_AUDIO`.
   - Configure Android Network Security config for trusted cleartext LAN IP development (HTTP/WS for demo only).
 - [ ] **Task 2.2 — Visual & Spatial Validation**:
@@ -56,7 +56,7 @@ What remains is compiling in Unity, deploying to a physical Quest 2, and verifyi
 - [ ] **Task 2.5 — Video Playback & Continuity**:
   - Test download of 5-second video clip to local Android cache (`Application.temporaryCachePath`).
   - Verify `VideoPlayer` playback on the curved mesh surface.
-  - Verify video playback completes, stops on the last frame, and reports `MediaCompleted` back to the coordinator.
+  - Verify video playback completes, stops on the last frame, and reports `window_finished` back to the coordinator.
 - [ ] **Task 2.6 — Safety & Tracking Loss Handling**:
   - Test removing headset or tracking loss: verify attention aggregation freezes and playback pauses immediately.
   - Test controller pause/stop button: verify immediate local halt.
@@ -71,3 +71,20 @@ What remains is compiling in Unity, deploying to a physical Quest 2, and verifyi
 4. Controller trigger confirms the highlighted region and notifies the Mac coordinator.
 5. Headset pairs to Mac coordinator over LAN within 5 seconds using an 8-character code.
 6. 30-second media cycle plays smoothly and ends on a stable still frame.
+
+## Current pickup
+Owner: Codex. Scope: wire the merged Unity project and verify integrated Garmin broadcast reception; physical acceptance stays pending.
+
+## 2026-10-24 integration evidence and remaining gate
+
+- Moved the scripts into the actual root Unity project; committed a bootstrap scene
+  selected in Build Settings, world-space pairing/session controls, head-ray +
+  trigger confirmation, stereo unlit material, and Android/OpenXR settings.
+- Added an editor setup/build entry point; one Python coordinator owns providers.
+- Immediate local pause now holds playback while the network command is pending;
+  still-image transitions stop old video, and video uses the material's texture slot.
+- Batch Unity runs stalled in license initialization before compilation. Android
+  Build Support is absent on this Mac. **No compile pass or APK is claimed.**
+- Required action: activate Unity license and install Android module, or use the
+  teammate's configured 6000.6.7f1 editor. Compile, deploy and complete the physical
+  checks in docs/UNITY_HANDOFF.md. Full acceptance remains unverified.

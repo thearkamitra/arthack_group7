@@ -2,12 +2,12 @@
 
 - **ID**: `EPIC-04`
 - **Milestone Reference**: Milestone 4 (Garmin - deferred / research workstream)
-- **Status**: Research Script Ready / Blocked on Watch Broadcast Test ([NEEDME-03](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/needme/NEEDME-03-garmin-watch-broadcast-test.md))
+- **Status**: Blocked
 - **Primary Owner**: Systems / Hardware Engineer
 - **Relevant Files**:
   - [research/garmin_ble_receiver.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/research/garmin_ble_receiver.py)
   - [research/README.md](file:///Users/arkamitra/Documents/ChatGPT/arthack/research/README.md)
-  - [backend/inner_landscape/models.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/models.py#L45-L60)
+  - [backend/inner_landscape/garmin.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/garmin.py)
 
 ---
 
@@ -62,3 +62,29 @@ Establish a Bluetooth Low Energy (BLE) connection from the Mac to a worn Garmin 
 3. Generated `heart-rate.csv` and `manifest.json` have valid timestamps and sample counts.
 4. Signal interruption marks freshness as stale after 10 seconds; reconnection resumes automatically.
 5. Zero emotional or clinical labels attached to heart-rate telemetry.
+
+## Current pickup
+Owner: Codex. Scope: wire the merged Unity project and verify integrated Garmin broadcast reception; physical acceptance stays pending.
+
+## 2026-10-24 integration evidence and remaining gate
+
+The former optional ingestion story is now implemented directly by
+`backend/inner_landscape/garmin_ble.py`, `garmin.py` and `/api/garmin/scan` plus
+`/api/sessions/{id}/heart-rate` start/read/stop routes. No `/api/v1` ingestion
+endpoint is required. `frontend/garmin.js` and the therapist session panel provide
+scan, consent, connect, live BPM/freshness, baseline/check-in cue, and cleanup.
+Live values remain in memory; source CSV recording belongs to the separate research CLI.
+
+Added `python -m inner_landscape.garmin_check`: bounded hardware discovery and
+notification check, unconditional disconnect, exit 0 only after a valid measurement.
+Frontend now distinguishes waiting-for-broadcast from verified fresh reception.
+
+Verification: 27 backend tests and 14 frontend tests passed, including valid
+notifications, malformed/no-contact packets, no-notification failure, and cleanup.
+A real CoreBluetooth scan outside the sandbox completed with zero matching Venu
+advertisements. **This is not a live broadcast pass.**
+
+Required action: wear the Venu, enable Broadcast Heart Rate, allow macOS Bluetooth
+access, and run the small check or connect from the therapist panel. Remaining
+physical baseline, interruption/reconnect and timing acceptance is unverified.
+The integrated receiver currently uses explicit reconnect after disconnection.

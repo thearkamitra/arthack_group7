@@ -273,10 +273,10 @@
     if (!g || !$("#garmin-status")) return;
     const o = g.observation;
     const labels = {disconnected:"Disconnected", baseline:"Collecting baseline", tracking:"Receiving live heart rate", elevated:"Sustained rise", stale:"Signal stale — baseline reset"};
-    $("#garmin-status").textContent = o.transport === "connecting" ? "Connecting…" : labels[o.status] || "Disconnected";
+    $("#garmin-status").textContent = o.transport === "connecting" ? "Connecting…" : o.transport === "connected" && !o.broadcast_received ? "Connected · waiting for broadcast" : labels[o.status] || "Disconnected";
     $("#garmin-bpm").textContent = o.bpm == null ? "— BPM" : `${o.bpm} BPM`;
     $("#garmin-baseline").textContent = o.baseline == null ? (g.sid ? `Baseline: ${Math.min(30, Math.floor(o.baseline_seconds || 0))}/30 sec · ${o.baseline_samples || 0} samples` : "No baseline") : `Baseline ${o.baseline} BPM · rise threshold ${Math.ceil(o.threshold_bpm)} BPM`;
-    $("#garmin-age").textContent = o.age_seconds == null ? "No readings received" : `Last reading ${o.age_seconds}s ago`;
+    $("#garmin-age").textContent = o.age_seconds == null ? "No readings received" : `${o.broadcast_received ? "Broadcast verified · " : ""}Last reading ${o.age_seconds}s ago`;
     $("#garmin-cue").textContent = o.cue || (o.status === "stale" ? "No fresh readings. Pacing cues are suspended; reconnect if the signal does not return." : "");
     $("#garmin-cue").className = o.spike ? "callout garmin-rise" : "subtext";
     $("#garmin-message").textContent = g.message || o.error || "";

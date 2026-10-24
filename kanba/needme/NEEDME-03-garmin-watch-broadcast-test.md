@@ -1,7 +1,7 @@
 # NEEDME-03: Garmin Watch Broadcast Hardware Trial
 
 - **ID**: `NEEDME-03`
-- **Blocks**: [EPIC-04: Garmin BLE Receiver](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/backlog/EPIC-04-garmin-ble-integration.md)
+- **Blocks**: [EPIC-04: Garmin BLE Receiver](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/needme/EPIC-04-garmin-ble-integration.md)
 - **Status**: Waiting on User / Watch Hardware
 - **Action Required From**: User with physical Garmin Venu 4
 
@@ -32,3 +32,15 @@ A complete BLE receiver script has been built at [research/garmin_ble_receiver.p
 4. **Report Results**:
    - Confirm connection speed and signal reliability.
    - Once verified, move this card to `kanba/done/`.
+
+## Integrated check (2026-10-24)
+
+Frontend/backend integration is present. A real scan found no matching Venu.
+Enable Broadcast Heart Rate nearby, stop other BLE receivers, and run:
+
+```sh
+PYTHONPATH=backend backend/.venv/bin/python -m inner_landscape.garmin_check --name venu --seconds 15
+```
+
+A passing result requires a valid measurement, not just discovery. Alternatively
+scan/connect from the therapist session panel and check “Broadcast verified”.

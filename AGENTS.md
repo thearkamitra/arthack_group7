@@ -8,8 +8,9 @@
 - Keep frontend code under `frontend/` and documentation under `docs/`.
 - The shared Python coordinator, dependencies, setup and tests live under
   `backend/`; use its minimal hidden `.venv` with Python 3.10. Pin direct
-  dependencies and retain the installed environment snapshot. Unity teammate
-  source stays under `unity/`. Garmin is deferred as an independent workstream.
+  dependencies and retain the installed environment snapshot. The merged Unity project uses root `Assets/`, `Packages/` and `ProjectSettings/`;
+  runtime scripts live in `Assets/InnerLandscape/`. `unity/` holds the entry guide.
+  Garmin BLE monitoring is integrated in the Mac backend and therapist frontend.
 - The former Auto-MIA pipeline and its environment are retired. Do not restore
   the submodule, mesh dependencies or historical training artifacts by default.
 

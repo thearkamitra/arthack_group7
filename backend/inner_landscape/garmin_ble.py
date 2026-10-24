@@ -107,6 +107,7 @@ class GarminBLE:
         result = self.monitor.view(sid)
         result["transport"] = self.state if self.monitor.sid == sid else "disconnected"
         result["error"] = self.error
+        result["broadcast_received"] = result.get("bpm") is not None and result.get("status") != "stale"
         return result
 
     async def stop(self):

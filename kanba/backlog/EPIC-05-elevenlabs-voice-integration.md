@@ -2,7 +2,7 @@
 
 - **ID**: `EPIC-05`
 - **Milestone Reference**: Milestone 5 (AI guide)
-- **Status**: Blocked on Paid API Approval Gate ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/needme/NEEDME-01-paid-api-approval.md))
+- **Status**: Blocked on Paid API Approval Gate ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/done/NEEDME-01-paid-api-approval.md))
 - **Primary Owner**: Backend / AI Engineer
 - **Relevant Files**:
   - [backend/inner_landscape/agent.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/agent.py)
@@ -36,7 +36,7 @@ Establish live, low-latency conversational audio between the client (via browser
 ## 3. Tasks & Stories
 
 - [ ] **Task 5.1 — Paid Service Gate Activation**:
-  - Obtain user sign-off for paid speech testing budget ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/needme/NEEDME-01-paid-api-approval.md)).
+  - Obtain user sign-off for paid speech testing budget ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/done/NEEDME-01-paid-api-approval.md)).
   - Launch coordinator with `bash backend/scripts/run.sh --enable-paid`.
 - [ ] **Task 5.2 — WebSocket Audio Bridge Verification**:
   - Connect browser client to `/api/v1/sessions/{session_id}/voice/ws`.
