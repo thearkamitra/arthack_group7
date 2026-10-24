@@ -38,3 +38,7 @@ Thumbs.db
 [Oo]bj/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
+# Unity-generated IDE project files
+*.csproj
+*.sln
+*.slnx

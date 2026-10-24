@@ -28,7 +28,6 @@ namespace InnerLandscape.Editor
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android,ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.forceInternetPermission=true;
             PlayerSettings.insecureHttpOption=InsecureHttpOption.DevelopmentOnly;
-            PlayerSettings.microphoneUsageDescription="Optional voice conversation with your reflection guide.";
             var settings=XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Android);
             if(settings==null)
             {

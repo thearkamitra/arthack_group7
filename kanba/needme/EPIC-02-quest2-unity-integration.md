@@ -100,3 +100,21 @@ AndroidPlayer support is now installed on this Mac. Unity batch verification sti
 stalls at licensing initialization; its helper reports another licensing instance
 holding the global mutex. C# compilation, APK output and Quest behavior remain
 unverified. Stopped only this task's stalled batch editor.
+
+Current pickup: Codex — resolve the editor compile error exposed after clearing the licensing lock.
+
+## Licensing recovery and actual Unity verification
+
+Stopped an orphaned editor licensing helper while leaving Hub's module download
+running. Refreshed the existing Personal license successfully. Unity 6000.6.7f1
+then initialized licensing and reached compilation. Removed an unsupported
+`PlayerSettings.microphoneUsageDescription` call from the Android setup script.
+
+Reran `InnerLandscape.Editor.LandscapeSetup.Configure`: C# compiled, the generated
+scene and Android OpenXR settings were saved by Unity, the success marker appeared,
+and batch mode exited successfully. Added generated IDE solution/project patterns
+to .gitignore. The project is registered in Hub and its editor was launched.
+
+Remaining gate: Hub still shows module installation underway (6/12), despite the
+AndroidPlayer folder existing. Wait for all SDK/NDK/module installation to finish,
+then build the APK and perform the physical acceptance tests. No APK is claimed.

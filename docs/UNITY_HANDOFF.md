@@ -10,10 +10,13 @@ creates the tracked camera, curved image/video surface, world-space pairing and
 session controls, optional microphone bridge, and head-ray / trigger interaction.
 Android settings select ARM64/IL2CPP and OpenXR with Meta Quest support and Oculus
 Touch input. The referenced double-sided unlit shader includes stereo instancing.
-These source/settings changes are **not yet compile- or headset-verified**.
+Source compilation and the editor configuration entry point now pass in Unity
+6000.6.7f1. The scene and XR settings have been saved by Unity itself.
 
-Local batch compilation stalled before C# compilation because Unity licensing did
-not initialize. Android Build Support is now installed, but licensing still blocks batch verification (the helper reports a global mutex held by another licensing instance). No APK was produced.
+The licensing lock was cleared by stopping an orphaned editor licensing helper;
+Hub's existing Personal license refreshed successfully. Android module installation
+is still underway in Hub (6 of 12 components at last inspection), even though an
+AndroidPlayer directory already exists. No APK or physical headset pass is claimed.
 
 ## Build
 

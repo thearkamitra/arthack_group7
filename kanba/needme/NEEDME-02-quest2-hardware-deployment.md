@@ -31,3 +31,5 @@ The Unity integration scripts and curved display assets are prepared under [Asse
 Local build prerequisite: Unity license initialization timed out and Android Build Support is missing. Activate/install these or use the teammate's configured editor. No APK exists yet.
 
 Sync retest: Android Build Support is now installed. Licensing initialization remains blocked; batch compilation did not run. The new Android profile has Development Build enabled for the LAN demo.
+
+Latest recovery: licensing is fixed; Unity C# compilation and the scene/OpenXR setup method pass. Hub still reports modules installing (6/12), so folder presence did not prove installation complete. Wait for completion before APK build. Physical Quest acceptance remains pending.
