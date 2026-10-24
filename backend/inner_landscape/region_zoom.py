@@ -49,7 +49,7 @@ def visual_brief(text: str) -> str:
     if not isinstance(text,str) or not 1 <= len(text.strip()) <= 600:
         raise ValueError('Approve a short conversation excerpt (1–600 characters)')
     text=re.sub(r'\s+',' ',text).strip()
-    return ('Make a much closer view of the selected existing object. Preserve its identity, '
+    return ('Reveal new nearby forms while moving closer to the selected existing shape. Preserve its identity, '
             'soft grain, luminous shapes and source palette. Visual direction from the '
             'approved fictional or consented conversation: '+text)
 
@@ -75,20 +75,33 @@ def entry_image_prompt(brief: str, selected: dict) -> str:
     left, top, right, bottom = selected['crop']
     x = (selected['x'] - left) / (right - left)
     y = (selected['y'] - top) / (bottom - top)
-    return (f'The selected object is at {x:.0%} from the left and {y:.0%} from the top '
-            'of this input crop. Reframe tightly around that existing object and place it '
-            'at the center. Magnify it into a close-up so its luminous surface occupies '
-            'most of the frame and surrounding shapes leave the edges. Preserve its '
-            'original silhouette, soft painted grain and colors. '+brief+
-            ' Do not add a room, corridor, tunnel, frames, glyphs or new surrounding scenery. '
-            'Do not widen the composition or move away from the object.')
+    return (f'The selected shape is at {x:.0%} from the left and {y:.0%} from the top '
+            'of this input crop. Bring that existing shape closer and keep it recognizable. '
+            'Reveal a few new nearby objects derived from its silhouette: smaller companion '
+            'shapes, curved ribbons, luminous facets and layered forms. They share its '
+            'palette, soft grain and shape language, rather than unrelated scenery. '
+            'Keep a detailed composition with distinct forms and room to explore between '
+            'them. '+brief+' No text, embossed glyphs, room or nested tunnel frames.')
 
 
 def entry_video_prompt(brief: str) -> str:
-    return ('One continuous forward camera push directly INTO the selected object at '
-            'the CENTER of the first frame. Begin with the supplied close-up. Move '
-            'steadily closer: the same object grows larger every second, its outer '
-            'edges pass beyond the image boundaries, and finish with its luminous '
-            'surface texture filling the entire frame. This is a macro approach to '
-            'the object, with no newly revealed surrounding space. Preserve its colors '
-            'and soft grain. No cuts, orbit, receding object, tunnel or pullback. '+brief)
+    return ('One continuous slow forward push TOWARD the selected shape in the input. '
+            'The anchor shape grows larger while new nearby companion objects and layered '
+            'forms gradually emerge beside and within its luminous contours. These new '
+            'forms echo the same silhouette, colors and soft painted material. Reveal '
+            'local detail by moving closer, never by pulling back or widening the view. '
+            'End on a crisp, richly detailed closer composition with several distinct '
+            'related shapes visible and a recognizable part of the original anchor. '
+            'Hold the final composition steady. No featureless surface filling the frame, '
+            'blurred macro texture, cuts, orbit or nested tunnel frames. '+brief)
+
+
+def billable_units(jobs: list[dict]) -> int:
+    return sum(j.get('billable_units', 1) for j in jobs)
+
+
+def enhancement_factor(size: tuple[int, int]) -> float:
+    factor = max(1.0, 2560 / max(size))
+    if factor > 4:
+        raise ValueError('Final frame is too small for bounded high-resolution enhancement')
+    return factor

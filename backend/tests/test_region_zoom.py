@@ -99,7 +99,53 @@ class ObjectApproachPromptTests(unittest.TestCase):
         selected=decision(attention(),1,'a'*64)
         still=entry_image_prompt(visual_brief('blue star'),selected)
         self.assertIn('40% from the left and 16% from the top',still)
-        self.assertIn('place it at the center',still)
+        self.assertIn('new nearby objects derived from its silhouette',still)
         video=entry_video_prompt(visual_brief('blue star'))
-        self.assertIn('grows larger every second',video)
-        self.assertIn('texture filling the entire frame',video)
+        self.assertIn('anchor shape grows larger',video)
+        self.assertIn('several distinct',video)
+
+
+class ResolutionBudgetTests(unittest.TestCase):
+    def test_video_reserves_enhancement_and_legacy_jobs_still_count(self):
+        from inner_landscape.region_zoom import billable_units, enhancement_factor
+        self.assertEqual(billable_units([{}, {'billable_units':2}]),3)
+        self.assertEqual(enhancement_factor((1280,720)),2)
+        with self.assertRaises(ValueError):enhancement_factor((320,180))
+
+class EnhancementTests(unittest.IsolatedAsyncioTestCase):
+    async def test_enhancement_preserves_raw_frame_and_validates_real_output_size(self):
+        import tempfile
+        from pathlib import Path
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock, Mock, patch
+        from PIL import Image
+        from inner_landscape.providers import Media
+        with tempfile.TemporaryDirectory() as folder:
+            work=Path(folder);directory=work/'media'/'test';directory.mkdir(parents=True)
+            Image.new('RGB',(1280,720),'pink').save(directory/'final.png')
+            handle=SimpleNamespace(request_id='enhancement-test',get=AsyncMock(return_value={'image':{'url':'https://fal.media/test.png'}}))
+            client=SimpleNamespace(upload_file=AsyncMock(return_value='https://fal.media/input.png'),submit=AsyncMock(return_value=handle))
+            async def download(url,path,limit):Image.new('RGB',(2560,1440),'pink').save(path)
+            service=Media(SimpleNamespace(work=work),Mock())
+            job={'id':'test'}
+            with patch('inner_landscape.providers.download',download):await service.enhance_final(client,job,directory)
+            self.assertEqual(job['final_resolution'],[2560,1440])
+            self.assertEqual(job['upscale_request_id'],'enhancement-test')
+            with Image.open(directory/'final-original.png') as image:self.assertEqual(image.size,(1280,720))
+            self.assertEqual(client.submit.call_args.args[0],'fal-ai/clarity-upscaler')
+
+    async def test_budget_rejects_video_enhancement_before_submission(self):
+        import base64,io,tempfile
+        from pathlib import Path
+        from unittest.mock import Mock,patch
+        from PIL import Image
+        from inner_landscape.providers import Media
+        from inner_landscape.config import Settings
+        with tempfile.TemporaryDirectory() as folder:
+            store=Mock();store.jobs.return_value=[{'kind':'image','entry':None,'billable_units':3}]
+            service=Media(Settings(root=Path(folder),paid_enabled=True,fal_key='unit-test-only'),store)
+            buffer=io.BytesIO();Image.new('RGB',(640,360)).save(buffer,format='PNG')
+            with patch('inner_landscape.providers.shutil.which',return_value='/fake/ffprobe'):
+                with self.assertRaisesRegex(ValueError,'limit'):
+                    await service.submit({'id':'test','cycle':1,'region':'ridge'},'data:image/png;base64,'+base64.b64encode(buffer.getvalue()).decode(),'approved brief','video',entry={'cell':0})
+            self.assertFalse(service.tasks)

@@ -45,8 +45,8 @@ class Voice:
 
 
 def decode_image(data: str) -> tuple[Image.Image, bytes]:
-    if not data.startswith("data:image/png;base64,") or len(data) > 12_000_000:
-        raise ValueError("Use a PNG image under 8 MB")
+    if not data.startswith("data:image/png;base64,") or len(data) > 44_000_000:
+        raise ValueError("Use a PNG image under 32 MB")
     try:
         raw = base64.b64decode(data.split(",", 1)[1], validate=True)
         with Image.open(io.BytesIO(raw)) as im:
@@ -153,6 +153,8 @@ class Media:
             raise ProviderUnavailable(
                 "Install ffprobe before video generation; no paid job was submitted"
             )
+        if entry and kind == "video" and not shutil.which("ffmpeg"):
+            raise ProviderUnavailable("Install ffmpeg before video/final-frame generation")
         image, raw = decode_image(image_data)
         if kind == "video" and (
             min(image.size) < 300 or not 0.4 <= image.width / image.height <= 2.5
@@ -168,7 +170,9 @@ class Media:
             previous = self.store.jobs(session["id"])
             if entry and any(j.get("entry") == entry and j["kind"] == kind for j in previous):
                 raise ValueError("Region entry already submitted; reconcile existing job")
-            if len(previous) >= self.settings.max_jobs:
+            from .region_zoom import billable_units
+            units = 2 if entry and kind == "video" else 1
+            if billable_units(previous) + units > self.settings.max_jobs:
                 raise ValueError("Per-session generation limit reached")
             if any(j["status"] in ("queued", "running", "validating", "unknown") for j in previous):
                 raise ValueError(
@@ -180,6 +184,7 @@ class Media:
                 "cycle": session["cycle"],
                 "region": session["region"],
                 "entry": entry,
+                "billable_units": units,
                 "status": "queued",
                 "kind": kind,
                 "created_at": now(),
@@ -188,7 +193,7 @@ class Media:
                 "model": self.settings.video_model
                 if kind == "video"
                 else self.settings.image_model,
-                "prompt_version": 2 if entry else 1,
+                "prompt_version": 3 if entry else 1,
                 "brief": brief.strip(),
                 "request_id": None,
                 "output_path": None,
@@ -210,6 +215,37 @@ class Media:
         temp = directory / "manifest.tmp"
         temp.write_text(json.dumps(job, indent=2))
         temp.replace(directory / "manifest.json")
+
+    async def enhance_final(self, client, job: dict, directory: Path) -> None:
+        from .region_zoom import enhancement_factor
+        raw = directory / "final-original.png"
+        shutil.copy2(directory / "final.png", raw)
+        with Image.open(raw) as image:
+            source_size = image.size
+        inputs = {"image_url": await client.upload_file(str(raw)),
+                  "upscale_factor": enhancement_factor(source_size),
+                  "creativity": 0.1, "resemblance": 1.0,
+                  "prompt": "Detailed abstract artwork. Preserve the exact shapes, placement, palette and soft painted grain of this frame. Crisp edges and fine material detail.",
+                  "negative_prompt": "new objects, changed composition, text, glyphs, blur, oversharpening",
+                  "enable_safety_checker": True}
+        job["upscale_input_sha256"] = hashlib.sha256(raw.read_bytes()).hexdigest()
+        job["stage"] = "enhancing_final"
+        job["upscale_model"] = "fal-ai/clarity-upscaler"
+        job["upscale_parameters"] = {k: v for k, v in inputs.items() if k != "image_url"}
+        self.persist(job)
+        handle = await client.submit(job["upscale_model"], arguments=inputs)
+        job["upscale_request_id"] = handle.request_id
+        self.persist(job)
+        result = await asyncio.wait_for(handle.get(), timeout=300)
+        enhanced = directory / "enhanced.png"
+        await download(result["image"]["url"], enhanced, 40_000_000)
+        with Image.open(enhanced) as image:
+            image.load()
+            if max(image.size) < 2560 or image.width * image.height > 8_000_000 or abs(image.width/image.height-source_size[0]/source_size[1]) > .02:
+                raise ValueError("Enhanced frame failed resolution/aspect validation")
+            image.convert("RGB").save(directory / "final.png")
+            job["final_resolution"] = list(image.size)
+        job["stage"] = "validated"
 
     async def run(self, job: dict, original: Image.Image, directory: Path) -> None:
         submitted = False
@@ -233,7 +269,12 @@ class Media:
                     "enable_safety_checker": True,
                 }
             else:
-                url = await client.upload_file(str(directory / "input.png"))
+                video_input = directory / "video-input.jpg"
+                original.save(video_input, quality=95)
+                if video_input.stat().st_size > 10_000_000:
+                    raise ValueError("Video input exceeds the provider size limit")
+                job["video_input_sha256"] = hashlib.sha256(video_input.read_bytes()).hexdigest()
+                url = await client.upload_file(str(video_input))
                 from .region_zoom import entry_video_prompt
                 inputs = {
                     "prompt": entry_video_prompt(prompt) if job.get("entry") else prompt + " Locked camera. Very gentle environmental motion. Preserve composition and landmarks.",
@@ -242,7 +283,7 @@ class Media:
                     "enable_safety_checker": True,
                 }
             if job.get("entry") and job["kind"] == "video":
-                inputs["negative_prompt"] = "zoom out, pull back, dolly backward, shrinking subject, widening view, tunnel, corridor, nested frames, new scenery, cuts, embossed glyphs"
+                inputs["negative_prompt"] = "zoom out, pull back, dolly backward, shrinking subject, widening view, tunnel, corridor, nested frames, unrelated scenery, featureless surface, blurred macro texture, cuts, embossed glyphs"
             job["generation_prompt"] = inputs["prompt"]
             job["status"] = "running"
             self.persist(job)
@@ -265,15 +306,16 @@ class Media:
                 await download(remote, edited, 30_000_000)
                 with Image.open(edited) as im:
                     im.load()
-                    patch = im.convert("RGB").resize((box[2] - box[0], box[3] - box[1]))
-                composite = patch.resize(original.size) if job.get("entry") else original.copy()
+                    native = im.convert("RGB").copy()
+                    patch = native.resize((box[2] - box[0], box[3] - box[1]))
+                composite = native if job.get("entry") else original.copy()
                 if not job.get("entry"):
                     composite.paste(patch, box)
                 composite.save(output)
                 job["validation"] = {
                     "decoded": True,
-                    "width": original.width,
-                    "height": original.height,
+                    "width": composite.width,
+                    "height": composite.height,
                     "unchanged_outside_crop": not bool(job.get("entry")),
                 }
             else:
@@ -286,6 +328,7 @@ class Media:
                         await asyncio.to_thread(subprocess.run, ["ffmpeg", "-v", "error", "-y", *args, *tail, str(directory/name)], check=True, capture_output=True, timeout=30)
                         with Image.open(directory/name) as frame:
                             frame.verify()
+                    await self.enhance_final(client, job, directory)
                     job["frame_hashes"] = {n: hashlib.sha256((directory/n).read_bytes()).hexdigest() for n in ("first.png","final.png")}
             job["output_sha256"] = hashlib.sha256(output.read_bytes()).hexdigest()
             job["output_path"] = output.name
@@ -302,7 +345,7 @@ class Media:
             job["error"] = "Provider result timed out; do not resubmit automatically"
         except Exception as exc:
             job["status"] = (
-                "unknown" if submitted and not job.get("request_id") else "failed"
+                "unknown" if submitted and (not job.get("request_id") or (job.get("stage") == "enhancing_final" and not job.get("upscale_request_id"))) else "failed"
             )
             job["error"] = (
                 "Generation did not produce a validated artifact ("

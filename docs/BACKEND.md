@@ -143,3 +143,15 @@ the four allowed jobs; one billable job can be pending at a time.
 `spatial_select` explicitly confirms `{cycle,source_hash,input_mode,x,y}` when no
 audible guide attention exists. It is recorded as `manual:true`, with zero dwell
 and zero coverage. It shares the same once-per-cycle and stale-source checks.
+
+Region-entry v3 adds a sequential `fal-ai/clarity-upscaler` call to each video
+bundle. `billable_units` is 1 for image and 2 for an entry video (video plus final
+image enhancement). Legacy jobs default to one unit. Budget checks sum units;
+three units must remain before starting a new transition. The final PNG must
+have a long edge of at least 2560 pixels, preserve aspect ratio, and stay within
+the existing eight-million-pixel bound. PNG upload limits allow up to 32 MB of
+encoded image data for high-resolution next-cycle sources; video inputs use a
+quality-95 JPEG derivative with a separate hash, retaining the source PNG.
+The provider's native edited still is preserved instead of shrinking it to a crop
+and enlarging it again. The clip's original final PNG remains alongside the
+AI-enhanced final PNG; the latter is the approved next source.

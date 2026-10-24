@@ -197,3 +197,12 @@ The canonical Unity surface starts 0.75 m ahead of the initial camera instead
 of 3 m; the approach phase returns to that same close presentation. Its controls
 move in front of the closer surface. Keep the full-image pullback and transition
 sequence that the user approved.
+
+## 2026-10-25 refinement: discovery and resolution
+
+- [x] Prompt nearby new objects that inherit the selected shape's silhouette, palette and soft material while maintaining forward motion.
+- [x] Preserve recognizable shapes in the final composition; replace the earlier requirement that surface texture fill the entire frame.
+- [x] Preserve native edited-still dimensions, and retain video originals plus source hashes.
+- [x] Add a bounded, sequential AI enhancement of the final frame to at least a 2560-pixel long edge; count the extra call within the four-call budget.
+- [x] Preview actual final dimensions and enhanced image before approval; blend into the enhanced still in Unity.
+- [x] Verify a fresh generated bundle visually and record actual resolution and regression evidence: `work/region_zoom_tests/1792879510944327000-upper-left/`, final PNG 2560×1408, 41 backend and 19 frontend tests passed.

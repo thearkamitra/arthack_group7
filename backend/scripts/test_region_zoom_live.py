@@ -134,7 +134,7 @@ def main():
             if args.scenario=='upper-left':
                 assert abs(d['x']-.2)<.01 and abs(d['y']-.08)<.01 and d['crop']==[0,0,.5,.5]
             def ready(job):
-                limit=time.monotonic()+330
+                limit=time.monotonic()+660
                 while time.monotonic()<limit:
                     jobs=client.get('/api/sessions/'+sid+'/media').json();j=next(j for j in jobs if j['id']==job['id'])
                     if j['status']=='ready':return j
@@ -156,6 +156,7 @@ def main():
                 # Synthetic test therapist approves the fictional start image and video.
                 video=ready(post('/region-entry',{'excerpt':text,'parent_job':image['id']}));manifest['video_job']=video;save()
             assert abs(video['validation']['duration_seconds']-5)<.2
+            if not args.reuse_media:assert max(video['final_resolution'])>=2560
             from PIL import ImageChops, ImageStat
             media_dir=cfg.work/'media'
             with Image.open(media_dir/image['id']/image['output_path']) as still, Image.open(media_dir/video['id']/'first.png') as first:

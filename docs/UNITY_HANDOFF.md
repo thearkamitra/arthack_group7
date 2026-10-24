@@ -189,3 +189,24 @@ asks for a forward macro approach: the object grows until its luminous surface
 fills the frame. It excludes tunnel/room expansion and camera pullback. Previous
 saved clips do not change when prompts change; generate a new preview to see the
 corrected motion. Continue to review provider motion before applying.
+
+### Related new forms and high-resolution final image (2026-10-25)
+
+Prompt version 3 keeps moving toward the selected shape while revealing new
+nearby companion forms that share its contours, colors and material. It ends on
+a detailed composition of distinct shapes instead of a featureless macro surface.
+
+After the video, the backend enhances its exact last frame with Clarity Upscaler
+(low creativity, high resemblance), targeting a **2560-pixel long edge** while
+preserving aspect ratio. The unenhanced frame remains `final-original.png`.
+Unity gently blends from the video end into the enhanced PNG, holds that image,
+and promotes its actual hash as the next source. Video playback retains the
+video model's native resolution; the held still is higher resolution.
+
+Region entry now reserves **three provider calls**: starting still, video and
+final-frame enhancement. The existing four-call session ceiling is unchanged;
+a fresh full transition needs three remaining calls. Preview and approve both
+the clip and the high-resolution final image in Media studio. The dimensions
+shown there come from decoding the actual output, not an assumed resize. Failed
+or ambiguous enhancement leaves the bundle unapplied and is never resubmitted
+automatically. Manifests include the separate enhancement request ID and settings.

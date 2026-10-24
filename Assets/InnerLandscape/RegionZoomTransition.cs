@@ -54,7 +54,10 @@ namespace InnerLandscape
             }
             if(generation!=epoch)yield break;
             if(videoFailed||!videoEnded){Cancel();Set("Failed; previous image retained");yield break;}
-            video.Stop();surface.material.mainTexture=final;stable=final;
+            video.Pause();surface.material.SetTexture("_NextTex",final);
+            float reveal=0;while(reveal<.35f&&generation==epoch){if(!Hold)reveal+=Time.unscaledDeltaTime;surface.material.SetFloat("_Blend",Mathf.Clamp01(reveal/.35f));yield return null;}
+            if(generation!=epoch)yield break;
+            video.Stop();surface.material.mainTexture=final;surface.material.SetFloat("_Blend",0);stable=final;
             Set("Approach");yield return Move(home+retreat,home,approachSeconds,generation);
             if(generation!=epoch)yield break;
             Busy=false;Set("Exploring");Completed?.Invoke();

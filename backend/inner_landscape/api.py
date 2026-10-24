@@ -45,7 +45,7 @@ class PairBody(BaseModel):
 
 
 class MediaBody(BaseModel):
-    image: str = Field(max_length=12_000_000)
+    image: str = Field(max_length=44_000_000)
     brief: str = Field(min_length=1, max_length=1000)
     kind: str = "image"
 
@@ -130,7 +130,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.middleware("http")
     async def guard(request: Request, call_next):
-        if int(request.headers.get("content-length", "0") or "0") > 13_000_000:
+        if int(request.headers.get("content-length", "0") or "0") > 45_000_000:
             return JSONResponse({"detail": "Request too large"}, 413)
         origin = request.headers.get("origin")
         if (
@@ -424,8 +424,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         else:
             if any(j.get("entry") == selected and j["kind"] == "image" for j in jobs):
                 raise ValueError("Start image already submitted; reconcile existing job")
-            if len(jobs) + 2 > cfg.max_jobs:
-                raise ValueError("Region entry requires two available jobs")
+            from .region_zoom import billable_units
+            if billable_units(jobs) + 3 > cfg.max_jobs:
+                raise ValueError("Region entry requires three available provider calls")
             path = cfg.work / "scenes" / value.get("scene_file", "")
             kind = "image"
         if not path.is_file():
@@ -489,6 +490,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "entry": bool(job.get("entry")),
                 "first_url": f"/api/sessions/{sid}/media/{job['id']}/frame/first" if job.get("entry") else "",
                 "final_url": f"/api/sessions/{sid}/media/{job['id']}/frame/final" if job.get("entry") else "",
+                "final_resolution": job.get("final_resolution"),
                 "final_hash": job.get("frame_hashes", {}).get("final.png", ""),
                 "job_id": job["id"],
                 "kind": job["kind"],

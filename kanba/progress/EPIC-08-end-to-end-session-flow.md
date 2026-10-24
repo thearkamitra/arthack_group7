@@ -96,3 +96,11 @@ Generated evidence stays under ignored `work/region_zoom_tests/`, not Git.
 - [x] Start the surface 0.75 m from the head (formerly 3 m), returning to that distance after playback; move controls in front.
 - [x] Generate and inspect a fresh bounded fal pair: the selected pink oval grows to fill the final frame. Unity transition, pause, cancellation and next cycle passed at the close distance.
 - [x] Regression evidence: `work/region_zoom_tests/1792878858107020000-upper-left/`; 38 backend tests and 19 frontend tests passed. EPIC-08 remains In Progress for broader acceptance.
+
+
+### Related-form discovery and final resolution (2026-10-25)
+
+- [x] Reveal new nearby forms related to the selected silhouette/palette while continuing inward; keep multiple distinct shapes in the ending.
+- [x] Preserve edited still dimensions and add conservative AI enhancement of the exact final frame; validate its dimensions and include its hash as the next source.
+- [x] Count the enhancement call in the existing four-call budget; show the enhanced preview and dimensions before approval.
+- [x] Fresh run `work/region_zoom_tests/1792879510944327000-upper-left/` passed: final image 2560×1408, related companion shapes visually inspected, Unity transition and next-cycle promotion verified. 41 backend tests and 19 frontend tests passed. This epic remains In Progress for broader/hardware acceptance.

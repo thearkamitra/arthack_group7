@@ -92,3 +92,31 @@ older tunnel-like clip as evidence for the intended generated zoom direction.
 Unity framing, cancellation, pause/resume and next-source acknowledgement passed
 at the closer viewing distance. Recording: `unity-transition.mp4` in that run.
 The backend suite now has 38 passing tests; the frontend suite retains 19 passes.
+
+
+## Related-shape discovery and high-resolution hold (2026-10-25)
+
+Prompt v3 replaces the surface-only endpoint with new nearby companion forms
+sharing the selected shape's silhouette, colors and soft grain. The camera keeps
+approaching while distinct shapes remain available for the next exploration.
+The agent inspected the new source crop, edited start frame and final image:
+the pink anchor becomes a luminous rounded form with additional star-like
+companions nearby. This supersedes the v2 featureless macro ending.
+
+Fresh live fal evidence: `work/region_zoom_tests/1792879510944327000-upper-left/`.
+This run reused the saved synthetic ElevenLabs exchange explicitly, and made
+three fresh fal calls: image edit, five-second video and Clarity enhancement of
+the exact video end frame. The decoded final image is **2560×1408**, approximately
+3.6 million pixels, retaining the clip's aspect ratio. The native video end is
+preserved as `final-original.png`; the enhanced image is `final.png`. Enhancement
+is AI reconstruction, not native high-resolution video, and can change fine detail.
+The agent visually reviewed the output; Unity's final-frame blend, remote pause,
+cancellation, viewport fit and next-source hash acknowledgement all passed.
+
+Budget checks reserve two units for the video bundle (video + enhancement), plus
+one for the starting still, within the four-call session cap. The edited still
+now retains its native provider dimensions instead of a downsample/upscale cycle.
+Actual enhancement dimensions and a final-image preview appear in Media studio.
+Regression suites: **41 backend tests**, **19 frontend tests**. The separate
+upscale request ID, parameters and actual final dimensions are in the per-job
+manifest. No physical Quest check is claimed.
