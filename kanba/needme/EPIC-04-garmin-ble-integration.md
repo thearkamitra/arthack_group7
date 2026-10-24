@@ -88,3 +88,5 @@ Required action: wear the Venu, enable Broadcast Heart Rate, allow macOS Bluetoo
 access, and run the small check or connect from the therapist panel. Remaining
 physical baseline, interruption/reconnect and timing acceptance is unverified.
 The integrated receiver currently uses explicit reconnect after disconnection.
+
+Latest retest: integrated real-watch broadcast smoke check PASSED on 2026-10-24. Longer baseline, recording and physical interruption criteria remain unverified.

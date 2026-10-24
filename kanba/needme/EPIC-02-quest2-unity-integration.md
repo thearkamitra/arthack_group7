@@ -88,3 +88,15 @@ Owner: Codex. Scope: wire the merged Unity project and verify integrated Garmin 
 - Required action: activate Unity license and install Android module, or use the
   teammate's configured 6000.6.7f1 editor. Compile, deploy and complete the physical
   checks in docs/UNITY_HANDOFF.md. Full acceptance remains unverified.
+
+Current pickup: Codex — verify newly pulled changes and live hardware availability.
+
+## Master synchronization review
+
+Pulled teammate commit 3712817 by fast-forward. Its Android profile correctly
+inherits the global InnerLandscape scene list, but had Development Build disabled.
+Enabled Development Build to match the development-only LAN HTTP/WS setting.
+AndroidPlayer support is now installed on this Mac. Unity batch verification still
+stalls at licensing initialization; its helper reports another licensing instance
+holding the global mutex. C# compilation, APK output and Quest behavior remain
+unverified. Stopped only this task's stalled batch editor.

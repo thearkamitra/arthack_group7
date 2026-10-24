@@ -116,3 +116,5 @@ Offline tests exercise valid notifications, malformed/no-contact packets, missin
 notifications, API consent/authorization, stale readings, pause/finish cleanup and
 frontend lifecycle. A live scan on 2026-10-24 completed with **zero matching Venu
 advertisements**. Physical broadcasting is not yet verified.
+
+Latest hardware retest (2026-10-24): after broadcasting was enabled, the integrated smoke test received a valid live heart-rate notification and returned `passed: true`. Basic broadcast reception is verified. The longer recording and physical interruption trials remain pending.

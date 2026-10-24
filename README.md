@@ -132,11 +132,11 @@ this workspace. No dependencies are currently required by the local HTML sketch.
 
 Unity runtime code is now inside the root project and the InnerLandscape scene is
 selected for builds. See [Unity handoff](docs/UNITY_HANDOFF.md). Unity licensing
-blocked local compilation; Android Build Support and physical Quest checks remain.
+blocked local compilation; Android Build Support is now installed and physical Quest checks remain.
 
 Garmin is integrated in the therapist panel and Python coordinator. Run the small
 [Garmin broadcast check](docs/GARMIN.md) after enabling broadcast on the watch.
-A local hardware scan found no matching Venu; offline tests passed (27 backend,
+The live Garmin broadcast smoke test now passes; offline tests passed (27 backend,
 14 frontend). One authorized ElevenLabs speech check produced a valid 2.8-second
 MP3 and the agent signed-URL check passed. Headset conversation and fal generation
 remain unverified. Generated check artifacts stay ignored under `work/`.

@@ -29,3 +29,5 @@ The Unity integration scripts and curved display assets are prepared under [Asse
    - Once verified, move this card to `kanba/done/`.
 
 Local build prerequisite: Unity license initialization timed out and Android Build Support is missing. Activate/install these or use the teammate's configured editor. No APK exists yet.
+
+Sync retest: Android Build Support is now installed. Licensing initialization remains blocked; batch compilation did not run. The new Android profile has Development Build enabled for the LAN demo.

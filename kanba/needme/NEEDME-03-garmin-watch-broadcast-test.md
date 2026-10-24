@@ -2,7 +2,7 @@
 
 - **ID**: `NEEDME-03`
 - **Blocks**: [EPIC-04: Garmin BLE Receiver](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/needme/EPIC-04-garmin-ble-integration.md)
-- **Status**: Waiting on User / Watch Hardware
+- **Status**: Blocked
 - **Action Required From**: User with physical Garmin Venu 4
 
 ---
@@ -44,3 +44,16 @@ PYTHONPATH=backend backend/.venv/bin/python -m inner_landscape.garmin_check --na
 
 A passing result requires a valid measurement, not just discovery. Alternatively
 scan/connect from the therapist session panel and check “Broadcast verified”.
+
+Current pickup: Codex — verify newly pulled changes and live hardware availability.
+
+## Live retest after user enabled broadcasting
+
+2026-10-24: the integrated bounded check discovered the watch, connected, and
+received a valid GATT Heart Rate Measurement notification. The check returned
+`passed: true`. BPM was displayed during the test and is deliberately not saved
+in Git. The receiver's finally block released its connection and in-memory lease.
+
+The small broadcast smoke test now passes. This card's longer two-minute recorded
+trial and physical signal-interruption checks remain unverified; the epic is not
+claimed complete. No further action is needed to establish basic broadcasting.

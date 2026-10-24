@@ -13,7 +13,7 @@ Touch input. The referenced double-sided unlit shader includes stereo instancing
 These source/settings changes are **not yet compile- or headset-verified**.
 
 Local batch compilation stalled before C# compilation because Unity licensing did
-not initialize. This Mac also lacks Android Build Support. No APK was produced.
+not initialize. Android Build Support is now installed, but licensing still blocks batch verification (the helper reports a global mutex held by another licensing instance). No APK was produced.
 
 ## Build
 
