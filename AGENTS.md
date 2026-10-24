@@ -1,41 +1,34 @@
 # Project conventions
 
-Read this file before changing the project and follow it for all future work.
-
-## Boundaries and layout
-- Keep application Python, dependency specifications, setup scripts and tests
-  under `backend/`. Keep user inputs in `assets/`, deliverables in `outputs/`,
-  generated runs in `runs/`, and caches and scratch files in `work/`.
-- Keep Auto-MIA at `external/Auto-MIA` as a pinned Git submodule. Do not copy
-  or edit upstream code without an explicit reason and documented change.
-- Reuse the root `.venv` and Python 3.10. Do not silently replace the environment.
-- Keep Unity/frontend code separate when introduced. Do not introduce a web
-  framework or service infrastructure until needed.
+## Current scope and layout
+- Inner Landscape is a guided reflection art experience, initially a large 2D
+  image on a Mac. Future integrations are ElevenLabs, fal.ai, Garmin Venu 4 and
+  Meta Quest 2/3. Do not assume clinical efficacy or infer emotions from pulse.
+- Work on `master`; `main` is intentionally empty. Push authorized completed work.
+- Keep frontend code under `frontend/` and documentation under `docs/`.
+- No backend or Python environment is currently needed. Introduce Python code,
+  dependencies, setup and meaningful tests under `backend/` only when required
+  by the agreed implementation plan. Pin direct dependencies.
+- The former Auto-MIA pipeline and its environment are retired. Do not restore
+  the submodule, mesh dependencies or historical training artifacts by default.
 
 ## Implementation
-- Separate image preprocessing, upstream process orchestration, and mesh
-  validation. Use typed functions, pathlib, explicit configuration and small
-  modules. CLI commands should call reusable functions.
-- Never overwrite source images or existing runs. Produce real RGBA PNG files;
-  JPEG cannot hold alpha. Preserve RGB pixels when computing segmentation masks.
-- Validate inputs before starting expensive work. Use argument lists rather
-  than shell command strings. Propagate process failures and retain logs.
-- Write a manifest with input hashes, parameters, submodule commit, commands,
-  status and output locations for each pipeline run. Mark failures explicitly.
-- Pin direct dependencies and record an environment snapshot after installation.
-  Keep model downloads/cache locations explicit; do not commit model weights.
-- Do not present MLX installation as an MLX port. Distinguish CPU, native MPS,
-  MPS with CPU fallback, and MLX. Preserve MPS memory safeguards.
-- Document export limitations, including averaged directional colors and
-  conversion density logic. File validation is not visual/VR validation.
+- Plan integrations before implementation. Clearly label mock or simulated
+  behavior, disconnected services and limits of attention tracking.
+- Keep credentials in ignored `.env` or `.env.local`, never in frontend code,
+  logs, chat, Git or VITE_-prefixed variables. `.env.example` is placeholders only.
+- Preserve user source inputs and existing runs. If generated files are needed,
+  use explicit ignored assets/output/run/cache locations and per-run manifests
+  with inputs, parameters, commands, status and output locations.
+- Validate inputs before expensive work; propagate failures and retain useful
+  logs without secrets. Prefer reusable typed functions and small modules.
+- No unnecessary web frameworks or service infrastructure. Use server-side
+  credentials and usage controls when integrating paid APIs.
 
 ## Verification and communication
-- Test meaningful behavior: preservation of sources/RGB, input rejection,
-  failure handling, metadata, and reloading exported geometry.
-- Run unit tests without network or model downloads; integration checks must
-  be explicit and bounded. Use small renders, not an unrequested full run.
-- Keep docs and runnable commands consistent. Report checks actually run and
-  material limits. Never claim a training/export job succeeded from exit status
-  alone: check its expected artifacts.
-- Keep credentials, caches, environments, logs, and generated training data out
-  of Git. Avoid unrelated changes and destructive Git operations.
+- Verify actual behavior and expected artifacts; do not infer success from an
+  exit status alone. Report checks actually run and material unverified limits.
+- Unit tests must not require network or model downloads. Integration checks
+  must be explicit and bounded; paid speech tests require user approval.
+- Keep README commands and current code consistent. Avoid unrelated changes,
+  destructive Git operations, and committing environments, caches or user data.

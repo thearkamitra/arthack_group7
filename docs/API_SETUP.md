@@ -6,7 +6,7 @@ on the backend; never embed them in browser code or prefix secrets with VITE_.
 
 ## Local Mac
 
-A blank `.env` has been prepared at the repository root and is ignored by Git.
+A local `.env` has been prepared at the repository root and is ignored by Git.
 Open it locally in an editor and fill:
 
 ```dotenv
@@ -33,8 +33,10 @@ No SDKs or environment replacements are required just to store the keys.
 3. Enable permissions needed for Agents/conversations. Enable text-to-speech
    separately only if using that endpoint; set a credit limit where available.
 4. Put the key in local `.env` as ELEVENLABS_API_KEY.
-5. In Agents, create the reflection guide, configure its voice, opening question
-   and instructions, and copy its agent ID into ELEVENLABS_AGENT_ID.
+5. Agent creation is pending. During implementation, create the reflection guide
+   in Agents, configure its voice, opening question and instructions, and copy
+   its ID into ELEVENLABS_AGENT_ID. This ID is not another API key. Leave it
+   unset until the agent exists.
 6. Integration should obtain short-lived conversation credentials server-side
    rather than putting the permanent API key in the browser.
 
