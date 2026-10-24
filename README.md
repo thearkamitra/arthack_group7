@@ -4,6 +4,9 @@ An immersive reflection experience: an AI guide will start a conversation while
 an abstract landscape becomes defined through words and selected regions.
 Development takes place on `master`; `main` is intentionally empty.
 
+Implementation plan: [PLAN.md](PLAN.md). It specifies up-to-30-second media
+cycles, Unity/Quest 2, Garmin and the therapist/client platform.
+
 ## Current frontend
 
 Open `frontend/index.html` in a browser. No installation or server is required.
