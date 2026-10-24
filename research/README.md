@@ -110,6 +110,64 @@ FIT is a structured binary recording, not a spreadsheet. The activities-list CSV
 
 **Result:** retrospective data; it will not drive the artwork live. Record-on-watch and live broadcast may be useful together, but verify their simultaneous behavior on your watch before relying on both.
 
+### End-of-session summary from FIT files
+
+[garmin_session_summary.py](garmin_session_summary.py) turns the synced FIT files
+into one summary per session for metrics the live broadcast does not carry:
+stress, Body Battery, respiration, activity (calories, heart rate, time in zones)
+and fitness (VO2 max, resting heart rate, training effect), plus the **previous
+night's** sleep stages/score, skin temperature and HRV status. It runs offline;
+no Garmin login or network is used.
+
+1. When the session starts, start an activity on the watch (B, step 2). The Mac
+   cannot start it remotely. Stop and save it when the session ends.
+2. Sync the watch, then collect the activity FIT file (Connect **Export Original**
+   or `GARMIN/Activity` over USB). For stress, sleep and skin temperature, also
+   copy the watch's monitoring/sleep/metrics FIT files from that day (for example
+   `GARMIN/Monitor`, `GARMIN/Sleep`, `GARMIN/Metrics`; names vary by model).
+3. Run it on the files or a folder containing them:
+
+```bash
+# Session window taken from the single recorded activity:
+uv run --with garmin-fit-sdk==21.218.0 python research/garmin_session_summary.py path/to/fit-files/
+
+# Or give the window explicitly (needed if the files hold several activities):
+uv run --with garmin-fit-sdk==21.218.0 python research/garmin_session_summary.py path/to/fit-files/ \
+  --start 2026-10-24T14:00:00+02:00 --end 2026-10-24T14:30:00+02:00 --session-id <session-id>
+```
+
+Output goes to ignored `runs/garmin/summary_<UTC time>/`: `summary.json` and
+`manifest.json` (input paths with SHA-256, parameters, command, status, outputs).
+Source files are read only, never modified. Times without an offset are taken as the
+Mac's local time. Files that fail FIT validation are listed as rejected; if none
+decode, only the manifest is written and the command fails.
+
+Every metric is either `available` with its samples/values or `not_available` with
+a reason. Nothing is interpolated. Expect gaps: Garmin stores Body Battery and often
+stress in undocumented parts of its monitoring files, so a real watch may only
+yield them via Garmin Connect. Stress is Garmin's HRV-based estimate and is labelled
+as such, not as an emotional state. Tests: `python -m unittest discover -s research/tests`
+(the FIT-file tests run only when `garmin-fit-sdk` is installed). Not yet run on
+files from a real Venu 4.
+
+### Simulated watch files for the guided demo
+
+For the 4-minute demo, [make_demo_garmin_fit.py](make_demo_garmin_fit.py) replaces
+the watch transfer with **synthetic** FIT files (activity, monitoring, sleep,
+metrics) covering a 4-minute recording and the night before. Every value is
+invented; files are named `SYNTHETIC_*.fit` and marked "Synthetic demo". It runs
+the summary script on them unchanged, then exports the result to
+`frontend/demo-garmin.js`, which the guided demo shows as "Simulated Garmin data"
+when the walkthrough ends.
+
+```bash
+uv run --with garmin-fit-sdk==21.218.0 python research/make_demo_garmin_fit.py
+```
+
+Output is deterministic: `runs/garmin/demo_fit/` and `runs/garmin/demo_summary/`
+(ignored), plus the regenerated `frontend/demo-garmin.js`. Edit values in the
+script, not in the generated frontend file.
+
 ## C. Collect previous wellness data
 
 1. Sync the watch to Garmin Connect first.

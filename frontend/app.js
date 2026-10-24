@@ -130,6 +130,7 @@
     ["overview", "home", "Overview"],
     ["clients", "people", "Clients"],
     ["sessions", "calendar", "Sessions"],
+    ["demo", "play", "Guided demo"],
     ["notes", "notes", "Notes"],
     ["settings", "settings", "Settings"],
   ];
@@ -158,7 +159,7 @@
     const completed = sessions().filter((s) => s.status === "completed");
     const activeLink = active ? `session/${active.id}` : "prepare/demo-jamie";
     return layout(
-      `${head("A SPACE FOR MEANINGFUL MOMENTS", "Make room for reflection.", "A quiet overview of your clients, conversations, and what comes next.", link(icon(active ? "play" : "plus") + (active ? "Return to session" : "Begin a session"), activeLink))}<section class="hero"><div class="hero-copy"><span class="eyebrow">A DIFFERENT WAY TO EXPLORE</span><h2>Let the conversation<br>shape the landscape.</h2><p>A gentle space where attention becomes a starting point, and each reflection opens something new.</p><a class="text-link" href="#${activeLink}">${active ? "Continue exploring" : "Prepare your first session"} ${icon("arrow")}</a></div><div class="hero-art">${artwork({}, true)}</div></section><div class="stats"><div class="stat"><span class="stat-icon">${icon("people")}</span><div><div class="stat-label">Clients in your workspace</div><strong>3</strong><small>fictional demo profiles</small></div></div><div class="stat"><span class="stat-icon">${icon("calendar")}</span><div><div class="stat-label">Completed sessions</div><strong>${completed.length}</strong><small>${completed.length ? "moments to look back on" : "a fresh beginning"}</small></div></div><div class="stat"><span class="stat-icon">${icon("notes")}</span><div><div class="stat-label">Session reflections</div><strong>${data.sessions.reduce((n, s) => n + s.events.filter((e) => e.type === "reflection").length, 0)}</strong><small>${window.LandscapeBackend?.connected ? "saved on this Mac" : "saved in this browser"}</small></div></div></div><div class="grid-two"><section><div class="section-head"><div><h2>Your clients</h2><p>Every journey starts with a conversation.</p></div><a href="#clients" class="text-link">View all ${icon("arrow")}</a></div><div class="panel">${clientRows()}</div></section><section><div class="section-head"><h2>A moment for you</h2></div><div class="panel journal">${icon("leaf", "leaf")}<span class="eyebrow">THE PRACTITIONER'S PAUSE</span><h3>Arrive before you begin.</h3><p>Take a breath. Notice what you bring into the room. There is no need to have every answer.</p><a href="#notes" class="text-link">Open your notes ${icon("arrow")}</a></div><div class="callout mt"><strong>Start with curiosity.</strong><br>This prototype uses a scripted guide. Your judgement and the client's choices lead the experience.</div></section></div>`,
+      `${head("A SPACE FOR MEANINGFUL MOMENTS", "Make room for reflection.", "A quiet overview of your clients, conversations, and what comes next.", link(icon(active ? "play" : "plus") + (active ? "Return to session" : "Begin a session"), activeLink))}<section class="hero"><div class="hero-copy"><span class="eyebrow">A DIFFERENT WAY TO EXPLORE</span><h2>Let the conversation<br>shape the landscape.</h2><p>A gentle space where attention becomes a starting point, and each reflection opens something new.</p><a class="text-link" href="#${activeLink}">${active ? "Continue exploring" : "Prepare your first session"} ${icon("arrow")}</a><br><a class="text-link" href="#demo">Watch the 4-minute guided demo ${icon("arrow")}</a></div><div class="hero-art">${artwork({}, true)}</div></section><div class="stats"><div class="stat"><span class="stat-icon">${icon("people")}</span><div><div class="stat-label">Clients in your workspace</div><strong>3</strong><small>fictional demo profiles</small></div></div><div class="stat"><span class="stat-icon">${icon("calendar")}</span><div><div class="stat-label">Completed sessions</div><strong>${completed.length}</strong><small>${completed.length ? "moments to look back on" : "a fresh beginning"}</small></div></div><div class="stat"><span class="stat-icon">${icon("notes")}</span><div><div class="stat-label">Session reflections</div><strong>${data.sessions.reduce((n, s) => n + s.events.filter((e) => e.type === "reflection").length, 0)}</strong><small>${window.LandscapeBackend?.connected ? "saved on this Mac" : "saved in this browser"}</small></div></div></div><div class="grid-two"><section><div class="section-head"><div><h2>Your clients</h2><p>Every journey starts with a conversation.</p></div><a href="#clients" class="text-link">View all ${icon("arrow")}</a></div><div class="panel">${clientRows()}</div></section><section><div class="section-head"><h2>A moment for you</h2></div><div class="panel journal">${icon("leaf", "leaf")}<span class="eyebrow">THE PRACTITIONER'S PAUSE</span><h3>Arrive before you begin.</h3><p>Take a breath. Notice what you bring into the room. There is no need to have every answer.</p><a href="#notes" class="text-link">Open your notes ${icon("arrow")}</a></div><div class="callout mt"><strong>Start with curiosity.</strong><br>This prototype uses a scripted guide. Your judgement and the client's choices lead the experience.</div></section></div>`,
       "overview",
     );
   }
@@ -259,7 +260,7 @@
       return "";
     }
     return layout(
-      `<div class="page-head"><div><span class="eyebrow">SESSION IN PROGRESS · ${esc(client(s.clientId).name)}</span><h1>${esc(s.goal)}</h1><p>A conversation, a landscape, and time to notice.</p></div><a class="button secondary" href="#client-session/${s.id}">Client view ${icon("arrow")}</a></div><div class="session-grid">${stage(s)}${guide(s)}</div>${connectionControls(s)}${garminControls(s)}<div class="device-summary">${[s.driver === "unity" ? "Unity · paired" : "Quest 2 · not connected", "Garmin · optional live monitoring", "ElevenLabs · not connected", "fal.ai · not connected"].map((t) => `<div class="device-mini">${t.split(" · ")[0]}<strong style="margin:6px 0 0">${t.split(" · ")[1]}</strong></div>`).join("")}</div><div class="grid-two mt"><section class="panel panel-pad"><div class="section-head"><h2>Conversation & interactions</h2><span class="badge">LIVE DEMO TIMELINE</span></div><ol class="timeline" id="timeline">${timeline(s)}</ol></section><section class="panel panel-pad"><h2>In-the-moment notes</h2><p class="subtext">Keep your observations separate from the client's words.</p><form id="session-note" data-id="${s.id}"><label for="moment-note">Practitioner observation</label><textarea id="moment-note" name="note" maxlength="5000" placeholder="What feels useful to remember?" required></textarea><div class="form-actions"><button class="button secondary">Add to timeline</button></div></form><div class="callout mt">Optional live heart rate can flag a sustained rise for a check-in. Ask the participant what they need; pulse does not identify emotion.</div></section></div>`,
+      `<div class="page-head"><div><span class="eyebrow">SESSION IN PROGRESS · ${esc(client(s.clientId).name)}</span><h1>${esc(s.goal)}</h1><p>A conversation, a landscape, and time to notice.</p></div><a class="button secondary" href="#client-session/${s.id}">Client view ${icon("arrow")}</a></div><div class="session-grid">${stage(s)}${guide(s)}</div>${connectionControls(s)}${garminControls(s)}<div class="device-summary">${[s.driver === "unity" ? "Unity · paired" : "Quest 2 · not connected", "Garmin · optional live monitoring", "ElevenLabs · not connected", "fal.ai · not connected"].map((t) => `<div class="device-mini">${t.split(" · ")[0]}<strong style="margin:6px 0 0">${t.split(" · ")[1]}</strong></div>`).join("")}</div><div class="grid-two mt"><section class="panel panel-pad"><div class="section-head"><h2>Conversation & interactions</h2><span class="badge">LIVE DEMO TIMELINE</span></div><ol class="timeline" id="timeline">${timeline(s)}</ol></section><section class="panel panel-pad"><h2>In-the-moment notes</h2><p class="subtext">Keep your observations separate from the client's words.</p><form id="session-note" data-id="${s.id}"><label for="moment-note">Practitioner observation</label><textarea id="moment-note" name="note" maxlength="5000" placeholder="What feels useful to remember?" required></textarea><div class="form-actions"><button class="button secondary">Add to timeline</button></div></form><div class="callout mt">Optional live heart rate can flag a sustained rise for a check-in. Ask the participant what they need; pulse does not identify emotion.</div></section></div>${referencesPanel(s.id)}`,
       "sessions",
     );
   }
@@ -418,6 +419,232 @@
       s,
     );
   }
+  // Therapist reference files served from frontend/reference/. Notes stay in this browser, per session or demo.
+  const REFERENCES = [
+    { id: "questionnaire", title: "Initial questionnaire", file: "reference/initial-questionnaire.pdf", pdf: true },
+    { id: "colours", title: "Colour map · colours", file: "reference/colour-map-colours.png" },
+    { id: "shapes-1", title: "Colour map · shapes and lines (Admiration–Pity)", file: "reference/colour-map-shapes-1.png" },
+    { id: "shapes-2", title: "Colour map · shapes and lines (Pride–Surprise)", file: "reference/colour-map-shapes-2.png" },
+  ];
+  const NOTES_KEY = "inner-landscape-reference-notes-v1";
+  let referenceNotes = {};
+  try {
+    referenceNotes = JSON.parse(localStorage.getItem(NOTES_KEY) || "{}") || {};
+  } catch {
+    referenceNotes = {};
+  }
+  const openReference = {};
+  function referencesPanel(scope) {
+    const open = REFERENCES.find((r) => r.id === openReference[scope]);
+    const list = REFERENCES.map(
+      (r) =>
+        `<button class="button secondary small" data-action="reference-open" data-scope="${esc(scope)}" data-ref="${r.id}" aria-pressed="${open === r}">${icon("notes")}${esc(r.title)}</button>`,
+    ).join("");
+    const note = open && `reference-note-${scope}-${open.id}`;
+    const viewer = open
+      ? `<div class="reference-viewer">${open.pdf ? `<iframe src="${open.file}" title="${esc(open.title)}"></iframe>` : `<img src="${open.file}" alt="${esc(open.title)} reference table">`}</div><div class="spaced"><a class="text-link" href="${open.file}" target="_blank" rel="noopener">Open in new tab ${icon("arrow")}</a></div><label for="${esc(note)}">Notes on ${esc(open.title)}</label><textarea id="${esc(note)}" data-reference-note="${esc(scope + ":" + open.id)}" maxlength="5000" placeholder="Scores, observations or what the client says these mean to them">${esc(referenceNotes[scope + ":" + open.id] || "")}</textarea><p class="subtext">${storageAvailable ? "Saved in this browser as you type." : "Browser storage is unavailable; notes are kept in memory only."}</p>`
+      : '<p class="subtext">Choose a file to open it here and take notes alongside it.</p>';
+    return `<section class="panel panel-pad mt" id="references-${esc(scope)}"><div class="section-head"><h2>Reference materials</h2><span class="badge">PRACTITIONER ONLY</span></div><p class="subtext">The colour maps are a starting point, not a key: ask what colours and shapes mean to the client, and do not infer emotions from colour alone.</p><div class="reference-list">${list}</div>${viewer}</section>`;
+  }
+  document.addEventListener("click", (e) => {
+    const target = e.target.closest("[data-action='reference-open']");
+    if (!target) return;
+    const scope = target.dataset.scope;
+    openReference[scope] = openReference[scope] === target.dataset.ref ? null : target.dataset.ref;
+    const panel = document.getElementById("references-" + scope);
+    if (panel) panel.outerHTML = referencesPanel(scope);
+  });
+  document.addEventListener("input", (e) => {
+    const key = e.target.dataset?.referenceNote;
+    if (!key) return;
+    referenceNotes[key] = e.target.value;
+    try {
+      localStorage.setItem(NOTES_KEY, JSON.stringify(referenceNotes));
+    } catch {
+      // Notes remain in memory; the panel already states when storage is unavailable.
+    }
+  });
+  // Scripted walkthrough state stays in memory: nothing is saved or sent.
+  const D = window.LandscapeDemo;
+  const demo = {
+    index: -1,
+    declined: false,
+    paused: false,
+    neutral: false,
+    done: false,
+    elapsed: 0,
+    comfort: [],
+  };
+  const clock = (seconds) =>
+    String(Math.floor(seconds / 60)).padStart(2, "0") +
+    ":" +
+    String(seconds % 60).padStart(2, "0");
+  const demoRunning = () => demo.index >= 0 && !demo.done;
+  function demoScene() {
+    return demoRunning() && !demo.neutral
+      ? D.sceneAt(demo.index, demo.declined)
+      : demo.done
+        ? D.sceneAt(D.steps.length - 1, demo.declined)
+        : D.neutral;
+  }
+  function demoArtwork() {
+    return `<svg class="landscape-svg demo-svg" viewBox="0 0 900 560" preserveAspectRatio="xMidYMid slice" role="img" aria-label="An abstract landscape that changes with the scripted conversation"><defs><linearGradient id="demo-sky" x2="0" y2="1"><stop stop-color="#e2e6dc"/><stop offset=".65" stop-color="#efece0"/><stop offset="1" stop-color="#d9e0d0"/></linearGradient><linearGradient id="demo-lake" x2="0" y2="1"><stop stop-color="#8eb0c4"/><stop offset="1" stop-color="#bdd2d9"/></linearGradient><radialGradient id="demo-glow"><stop stop-color="#fff4d6" stop-opacity=".9"/><stop offset="1" stop-color="#fff4d6" stop-opacity="0"/></radialGradient><filter id="demo-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter><filter id="demo-shape" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter></defs><rect width="900" height="560" fill="url(#demo-sky)"/><g class="d-glow"><ellipse cx="640" cy="150" rx="330" ry="170" fill="url(#demo-glow)"/><circle cx="640" cy="140" r="44" fill="#f8f1d8"/></g><g class="d-horizon"><path d="M-40 300Q140 205 300 270T600 250T950 235V560H-40Z" fill="#cdd5c3"/><path d="M-30 345Q150 270 330 330T650 310T950 320V560H-30Z" fill="#bac7af"/></g><path d="M-30 380Q200 350 450 360T940 375V560H-30Z" fill="#a9b99e"/><g class="d-shapes" filter="url(#demo-soft)" opacity=".55"><ellipse cx="150" cy="300" rx="110" ry="45" fill="#c9b89a"/><ellipse cx="770" cy="270" rx="120" ry="40" fill="#b7c3a7"/><ellipse cx="260" cy="470" rx="150" ry="40" fill="#93a889"/></g><g class="d-lake"><ellipse cx="450" cy="420" rx="300" ry="78" fill="url(#demo-lake)"/><g fill="none" stroke="#f3f6ef" stroke-linecap="round" opacity=".55"><path d="M330 410h120M420 432h170M300 448h90"/></g></g><g class="d-ripples" fill="none" stroke="#f6f8f2" stroke-width="2"><ellipse cx="450" cy="420" rx="60" ry="12"/><ellipse cx="450" cy="420" rx="60" ry="12"/><ellipse cx="450" cy="420" rx="60" ry="12"/></g><g class="d-mist" filter="url(#demo-soft)" fill="#f4f3ea"><ellipse cx="260" cy="380" rx="300" ry="60"/><ellipse cx="700" cy="420" rx="280" ry="55"/><ellipse cx="450" cy="300" rx="380" ry="50"/></g><path class="d-path" d="M430 560C300 548 110 525 100 450S150 360 260 330 380 282 400 262" pathLength="1" fill="none" stroke="#fbf5df" stroke-width="7" stroke-linecap="round"/><path class="d-gap" d="M590 560C582 505 592 465 620 425" fill="none" stroke="#fff6da" stroke-width="30" stroke-linecap="round" filter="url(#demo-shape)"/><g class="d-pressure" filter="url(#demo-shape)"><path d="M760 360c40-25 95-10 105 30s-25 80-75 75-70-25-75-55 10-38 45-50Z" fill="#5f5873"/><path d="M800 395c30-10 60 5 60 30s-30 40-58 32-35-50-2-62Z" fill="#4c4163" opacity=".85"/><ellipse cx="745" cy="420" rx="38" ry="24" fill="#7a7787" opacity=".8"/></g><path d="M300 560Q450 520 600 560Z" fill="#8fa287"/></svg>`;
+  }
+  function demoStageAttrs(scene) {
+    return Object.entries(scene)
+      .map(([key, value]) => `data-${key}="${value}"`)
+      .join(" ");
+  }
+  function demoCaption() {
+    if (demo.done)
+      return '<p class="demo-line">The scene has settled. The walkthrough is complete.</p>';
+    if (!demoRunning())
+      return '<p class="demo-line">When the participant is settled, press Start. Timing is a guide, and the walkthrough itself is not saved.</p>';
+    if (demo.neutral)
+      return '<span class="demo-speaker">Neutral reset</span><p class="demo-line">The landscape has returned to a quiet starting point. Return to the scene only when ready.</p>';
+    const step = D.steps[demo.index];
+    return `<span class="demo-speaker ${step.speaker}">${step.speaker === "therapist" ? "Therapist" : "Patient · example response"}</span><p class="demo-line">“${esc(D.lineAt(demo.index, demo.declined))}”</p>`;
+  }
+  function demoControls() {
+    if (!demoRunning())
+      return demo.done
+        ? `${button(icon("play") + "Restart walkthrough", "demo-restart")}`
+        : `${button(icon("play") + "Start", "demo-start")}`;
+    const step = D.steps[demo.index],
+      hold = demo.paused || demo.neutral,
+      last = D.nextIndex(demo.index, demo.declined) < 0;
+    const forward = step.choice
+      ? `${button("Explore the heaviness " + icon("arrow"), "demo-next", false, hold ? "disabled" : "")}${button("Stay with the lake", "demo-decline", true, hold ? "disabled" : "")}`
+      : button(
+          (last ? "Close the session " : "Next ") + icon("arrow"),
+          "demo-next",
+          false,
+          hold ? "disabled" : "",
+        );
+    return `<div class="spaced">${button(icon("back") + "Back", "demo-back", true, hold || demo.index === 0 ? "disabled" : "")}${forward}</div><div class="spaced">${button(icon(demo.paused ? "play" : "pause") + (demo.paused ? "Resume" : "Pause"), "demo-pause", true)}${button(demo.neutral ? "Return to scene" : "Neutral reset", "demo-neutral", true, demo.paused ? "disabled" : "")}${button("End early", "demo-end", true)}</div>`;
+  }
+  function demoStatus() {
+    const active = demoRunning() ? D.steps[demo.index].section : -1,
+      section = D.sections[Math.max(0, active)],
+      over = demoRunning() && demo.elapsed > section.end;
+    return `<div class="demo-clock"><div><strong id="demo-clock">${clock(demo.elapsed)}</strong> <span class="subtext">elapsed · about 04:00 planned</span></div>${demo.paused ? '<span class="pill amber">Paused</span>' : ""}</div><p class="subtext">${demoRunning() ? `Target for this part: ${clock(section.start)}–${clock(section.end)}.${over ? " Running over is fine; do not rush emotionally significant material." : ""}` : "The schedule is a guide, not a reason to interrupt."}</p><ol class="demo-sections">${D.sections.map((s, i) => `<li class="${i === active ? "current" : i < active || demo.done ? "past" : ""} ${demo.declined && i === 3 ? "skipped" : ""}" ${i === active ? 'aria-current="step"' : ""}><small>${clock(s.start)}–${clock(s.end)}</small><span>${s.title}${demo.declined && i === 3 ? " · declined" : ""}</span></li>`).join("")}</ol>${active >= 0 ? `<div class="callout"><strong>Visual cue · presenter only</strong><br>${esc(section.cue)}</div>` : ""}`;
+  }
+  function demoStage(cls = "") {
+    return `<div class="scene demo-stage ${cls} ${demo.paused ? "paused" : ""}" id="demo-stage" ${demoStageAttrs(demoScene())}>${demoArtwork()}<span class="scene-label">SCRIPTED DEMO · EXAMPLE DIALOGUE · NO AI</span></div><div class="demo-caption ${cls}" id="demo-caption" aria-live="polite">${demoCaption()}</div>`;
+  }
+  function demoPage() {
+    return layout(
+      `${head("SCRIPTED WALKTHROUGH · ABOUT 4 MINUTES", "The lake and the heavy shape.", "One example session: association, emotion, challenge, personal need and a small, self-directed step.", link("Presentation view " + icon("arrow"), "demo/present", true))}<div class="demo-grid"><section>${demoStage()}<div class="demo-controls" id="demo-controls">${demoControls()}</div><p class="demo-notice">Patient lines are fictional examples. Colors and shapes have no fixed meaning; each visual change settles within 8 seconds, well under the 30-second exploration limit, and the next waits for a deliberate click. Apart from reference notes kept in this browser, nothing is recorded or sent.</p></section><aside><div class="panel panel-pad" id="demo-status">${demoStatus()}</div><div class="panel panel-pad mt"><h2>Comfort check</h2><p class="subtext">Offer at any point. Pause, neutral reset and ending early are always available.</p>${comfort("demo-comfort")}${button("Record check-in", "demo-comfort", true)}<ul class="demo-checkins" id="demo-checkins">${demoCheckins()}</ul></div></aside></div><div id="demo-garmin">${demoGarmin()}</div>${referencesPanel("demo")}<section class="panel panel-pad mt"><h2>Facilitation notes</h2><ul class="privacy-list"><li><strong>Patient-led meaning.</strong> Ask what colors and shapes represent; do not infer emotions from color alone.</li><li><strong>No forced resolution.</strong> The heavy shape stays visible; naming a difficulty can be meaningful in itself.</li><li><strong>Clinical safety.</strong> Nothing here diagnoses or infers clinical states from speech or visual choices.</li></ul></section>`,
+      "demo",
+    );
+  }
+  function demoPresent() {
+    return `<main id="main" class="client-shell demo-present" tabindex="-1"><header class="client-header">${brand()}<div class="spaced"><span class="pill amber">Scripted demo · example dialogue</span><a class="button secondary small" href="#demo">Presenter view ${icon("arrow")}</a></div></header>${demoStage("demo-large")}<div class="demo-controls" id="demo-controls">${demoControls()}</div><div class="footer-note">${icon("shield")} Fictional example · No AI, microphone or headset · Nothing is saved</div></main>`;
+  }
+  function demoCheckins() {
+    return demo.comfort
+      .map((c) => `<li>${clock(c.at)} · ${c.value ? c.value + "/5" : "Preferred not to answer"}</li>`)
+      .join("");
+  }
+  // Simulated watch summary from synthetic FIT files (demo-garmin.js); shown once the walkthrough ends.
+  function garminTile(label, metric, main, sub) {
+    const ok = metric?.status === "available";
+    return `<div class="device-mini">${label}<strong style="margin:6px 0 0">${ok ? esc(main(metric)) : "Not available"}</strong>${ok ? esc(sub(metric)) : ""}</div>`;
+  }
+  function demoGarmin() {
+    const G = window.LandscapeDemoGarmin;
+    if (!demo.done || !G) return "";
+    const s = G.session,
+      n = G.previous_night,
+      rec = s.activity.recordings[0],
+      signed = (v) => (v > 0 ? "+" : "") + v;
+    const during = [
+      garminTile("Heart rate", s.activity.heart_rate, (m) => `${Math.round(m.mean)} bpm average`, (m) => `${m.min}–${m.max} bpm`),
+      garminTile("Stress · Garmin estimate", s.stress, (m) => `${m.first} → ${m.last}`, (m) => `average ${m.mean} of 100`),
+      garminTile("Body Battery", s.body_battery, (m) => `${m.first}% → ${m.last}%`, (m) => `${signed(m.change)} during session`),
+      garminTile("Respiration", s.respiration, (m) => `${m.mean} breaths/min`, (m) => `${m.min.toFixed(1)}–${m.max.toFixed(1)}`),
+      garminTile("Activity", rec && { status: "available", ...rec }, (m) => `${m.calories_kcal} kcal`, (m) => `${m.elapsed_seconds / 60} min · ${m.sport}`),
+      garminTile("Resting heart rate", s.fitness.resting_heart_rate, (m) => `${m.current_day} bpm`, () => "today"),
+      garminTile("VO2 max", s.fitness.vo2_max, (m) => `${m.value}`, () => "mL/kg/min"),
+      garminTile("Training effect", s.fitness.training_effect, (m) => `${m.aerobic_training_effect} aerobic`, () => "scale 0–5"),
+    ];
+    const night = [
+      garminTile("Sleep", n.sleep, (m) => `${Math.floor(m.total_sleep_minutes / 60)} h ${Math.round(m.total_sleep_minutes % 60)} min`, (m) => `score ${m.assessment?.overall_score ?? "–"} · ${m.minutes.deep} min deep`),
+      garminTile("Skin temperature", n.skin_temperature, (m) => `${signed(m.deviation_from_baseline)} °C`, () => "vs. personal baseline"),
+      garminTile("HRV status", n.hrv_status, (m) => `${m.last_night_average} ms`, (m) => `${m.garmin_status} · weekly ${m.weekly_average} ms`),
+    ];
+    return `<section class="panel panel-pad mt"><div class="section-head"><h2>End-of-session watch summary</h2><span class="badge">SIMULATED GARMIN DATA</span></div><p class="subtext">Read from synthetic FIT files that stand in for the transfer from the watch after a ${G.session_window.minutes}-minute recording. No watch or person was measured. These are device-style estimates, not emotional or clinical assessments.</p><span class="eyebrow">DURING THE SESSION</span><div class="device-summary">${during.join("")}</div><span class="eyebrow" style="display:block;margin-top:18px">THE NIGHT BEFORE</span><div class="device-summary">${night.join("")}</div></section>`;
+  }
+  function updateDemo() {
+    const stage = $("#demo-stage");
+    if (!stage) return;
+    if ($("#demo-garmin")) $("#demo-garmin").innerHTML = demoGarmin();
+    Object.assign(stage.dataset, demoScene());
+    stage.classList.toggle("paused", demo.paused);
+    $("#demo-caption").innerHTML = demoCaption();
+    $("#demo-controls").innerHTML = demoControls();
+    if ($("#demo-status")) $("#demo-status").innerHTML = demoStatus();
+    if ($("#demo-checkins")) $("#demo-checkins").innerHTML = demoCheckins();
+  }
+  function demoAction(action) {
+    if (action === "demo-start" || action === "demo-restart") {
+      Object.assign(demo, {
+        index: 0,
+        declined: false,
+        paused: false,
+        neutral: false,
+        done: false,
+        elapsed: 0,
+        comfort: [],
+      });
+    }
+    if (action === "demo-comfort")
+      demo.comfort.push({ at: demo.elapsed, value: $("#demo-comfort")?.value || "" });
+    if (!demoRunning()) return updateDemo();
+    const hold = demo.paused || demo.neutral;
+    if ((action === "demo-next" || action === "demo-decline") && !hold) {
+      if (action === "demo-decline") demo.declined = true;
+      const next = D.nextIndex(demo.index, demo.declined);
+      if (next < 0) demo.done = true;
+      else demo.index = next;
+    }
+    if (action === "demo-back" && !hold && demo.index > 0) {
+      demo.index = Math.max(0, D.previousIndex(demo.index, demo.declined));
+      // Returning to the invitation offers the choice again.
+      if (D.steps[demo.index].choice) demo.declined = false;
+    }
+    if (action === "demo-pause") demo.paused = !demo.paused;
+    if (action === "demo-neutral" && !demo.paused) demo.neutral = !demo.neutral;
+    if (action === "demo-end") {
+      demo.done = true;
+      demo.paused = demo.neutral = false;
+    }
+    updateDemo();
+  }
+  document.addEventListener("click", (e) => {
+    const target = e.target.closest("[data-action^='demo-']");
+    if (target && !target.disabled) demoAction(target.dataset.action);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (!$("#demo-stage") || e.target.closest("input,textarea,select,button"))
+      return;
+    if (e.key === "ArrowRight")
+      demoAction(demoRunning() ? "demo-next" : "demo-start");
+    if (e.key === "ArrowLeft") demoAction("demo-back");
+  });
+  setInterval(() => {
+    if (!demoRunning() || demo.paused || document.hidden) return;
+    demo.elapsed++;
+    if ($("#demo-clock")) $("#demo-clock").textContent = clock(demo.elapsed);
+    if ($("#demo-status") && demo.elapsed === D.sections[D.steps[demo.index].section].end + 1)
+      $("#demo-status").innerHTML = demoStatus();
+  }, 1000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && demoRunning() && !demo.paused) {
+      demo.paused = true;
+      updateDemo();
+    }
+  });
   function notFound() {
     return layout(
       '<div class="panel empty"><h1>This page is not here.</h1><p>The session may have been cleared from this browser.</p><a class="button" href="#overview">Back to overview</a></div>',
@@ -453,6 +680,7 @@
       settings: settingsPage,
       client: () => clientWelcome(id),
       "client-session": () => clientSession(id),
+      demo: () => (id === "present" ? demoPresent() : demoPage()),
     };
     $("#app").innerHTML = (views[page] || notFound)();
     if (studio && document.querySelector("#media-studio"))
@@ -489,6 +717,7 @@
         settings: "Settings",
         client: "Client welcome",
         "client-session": "Client reflection",
+        demo: "Guided demo",
       }[page] || "Workspace");
   }
   function event(s, type, text) {
@@ -545,6 +774,12 @@
     ) {
       data = S.fresh();
       save();
+      referenceNotes = {};
+      try {
+        localStorage.removeItem(NOTES_KEY);
+      } catch {
+        // Nothing stored to remove.
+      }
       render();
       toast("Saved demo data cleared.");
     }

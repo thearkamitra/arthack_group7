@@ -55,6 +55,33 @@ credential files. Python's standard-library server is only for local preview.
 - Client presentation mode with welcome, reflection and completion/check-in views.
 - Client context notes, session history, notes index and connection status page.
 
+### Guided demo (about 4 minutes, free)
+
+Open **Guided demo** in the sidebar (`#demo`). It steps through a fixed
+example script, "The lake and the heavy shape", one line per click or Right
+arrow; the landscape changes at each scripted visual cue. Patient lines are
+fictional examples. There is no AI, microphone, headset or paid service, and
+nothing is saved. The presenter view shows the elapsed time against each part's
+target window, the visual-cue notes, a comfort check, pause, neutral reset and
+end early. "Stay with the lake" declines the heaviness and skips that part.
+**Presentation view** (`#demo/present`) shows only the landscape, captions and
+controls for an audience screen. The clock and animations pause when the tab
+is hidden. The script lives in `frontend/demo-script.js`.
+
+The presenter view and the live session page have a **Reference materials**
+panel: the initial questionnaire (PDF) and three colour/shape-emotion maps (PNG)
+from `frontend/reference/`. Open a file to view it in place, or in a new tab, and
+take notes beside it. Notes are saved in this browser per session (the demo has its
+own set) and are removed by Settings → clear. The maps are a facilitation reference;
+the client's own meaning comes first.
+
+When the walkthrough ends, the presenter view shows an end-of-session watch
+summary labelled **Simulated Garmin data**: stress, Body Battery, respiration,
+activity and fitness, plus the previous night's sleep, skin temperature and HRV.
+It comes from synthetic FIT files run through the real summary script, not from
+a watch; regenerate it with `research/make_demo_garmin_fit.py`
+(see [research/README.md](research/README.md)).
+
 In static mode, notes and sessions use browser-local storage. With the coordinator,
 they also persist in SQLite on this Mac. The UI identifies the active mode before
 starting. File and HTTP origins may have separate storage. Hidden tabs pause active
@@ -77,6 +104,7 @@ this implementation and its source is not synced to this repository.
 node --test frontend/tests/*.cjs
 node --check frontend/state.js
 node --check frontend/app.js
+node --check frontend/demo-script.js
 ```
 
 Tests cover setup rejection, region isolation/refinement limits, pause, the
