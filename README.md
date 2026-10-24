@@ -17,6 +17,32 @@ to this repository. The local sketch below is the earlier prototype.
 API setup: [backend/API_SETUP.md](backend/API_SETUP.md). Put local credentials in
 the ignored root `.env`; `.env.example` contains blank placeholders only.
 
+## ElevenLabs onboarding
+
+From the repository root, run:
+
+```sh
+npx -y @elevenlabs/cli@latest onboard init
+```
+
+Follow the instructions printed by the CLI. When directed, run:
+
+```sh
+npx -y @elevenlabs/cli@latest onboard connect --env-path .env.local
+```
+
+Approve the browser authorization. The CLI stores `ELEVENLABS_API_KEY` in the
+Git-ignored root `.env.local`; never print or commit that file. This is separate
+from the manual `.env` setup above. The future backend must explicitly load the
+chosen env file. After answering the CLI's question about what to build, continue
+with the command it prints (currently `onboard check --answered --env-path
+.env.local`). Use `onboard check` for verification instead of reading credentials.
+
+On this checkout, browser authorization and local key creation have completed.
+SDK installation and voice-guide integration are still pending. Onboarding uses
+`@latest` as requested; implementation dependencies will be pinned separately.
+Do not run a paid speech or conversation test without explicit approval.
+
 ## Run the interaction sketch
 
 Open `frontend/index.html` in a browser (double-click it in Finder). No server,
