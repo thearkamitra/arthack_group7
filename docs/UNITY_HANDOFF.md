@@ -174,3 +174,18 @@ For a provider-free replay after an initial live run, pass both
 manifest is explicitly REPLAY. Each successful Unity scenario also exports
 `unity-transition.mp4`, `fit.json` and pose samples proving remote pause holds both
 presentation position and video time.
+
+
+### Object close-up correction
+
+`LandscapeApp.viewingDistance` defaults to **0.75 m**, measured from the initial
+head position to the image center. It is editable in the scene Inspector and
+preserved as the close endpoint after each transition. The curved surface keeps
+its large dimensions, so the initial view is intentionally immersive and cropped;
+the pullback temporarily fits the whole image. Controls sit in front at 0.55 m.
+
+Region-entry prompt version 2 centers the selected object within the crop and
+asks for a forward macro approach: the object grows until its luminous surface
+fills the frame. It excludes tunnel/room expansion and camera pullback. Previous
+saved clips do not change when prompts change; generate a new preview to see the
+corrected motion. Continue to review provider motion before applying.

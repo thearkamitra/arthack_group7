@@ -89,3 +89,10 @@ still/video bundles, staged presentation transitions and final-frame promotion.
 See [verification report](../../docs/UNITY_REGION_ZOOM_VERIFICATION.md) and
 [setup](../../docs/UNITY_HANDOFF.md#region-entry-in-editor-2026-10-24).
 Generated evidence stays under ignored `work/region_zoom_tests/`, not Git.
+
+### Review correction: closer object and starting surface
+
+- [x] Replace ambiguous deeper-space prompts with object enlargement and explicit forward macro approach; exclude zoom-out/tunnel expansion.
+- [x] Start the surface 0.75 m from the head (formerly 3 m), returning to that distance after playback; move controls in front.
+- [x] Generate and inspect a fresh bounded fal pair: the selected pink oval grows to fill the final frame. Unity transition, pause, cancellation and next cycle passed at the close distance.
+- [x] Regression evidence: `work/region_zoom_tests/1792878858107020000-upper-left/`; 38 backend tests and 19 frontend tests passed. EPIC-08 remains In Progress for broader acceptance.

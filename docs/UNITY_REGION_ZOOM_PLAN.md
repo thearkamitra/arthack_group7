@@ -8,7 +8,7 @@ EPIC-06. Planning did not invoke providers. Implementation authorized on 2026-10
 
 While the simulated or real guide speaks, accumulate head-directed dwell on the
 image. At the end of the speaking window, freeze the highest-percentage region.
-Prepare a conversation-informed deeper view of that region using fal. Once ready
+Prepare a conversation-informed close-up of the existing selected object using fal. Once ready
 and approved, pull back to frame the entire current image, replace it with the
 prepared starting frame, play the generated inward-moving clip, then move closer
 to the resulting image. Hold its final frame as the next exploration surface.
@@ -73,8 +73,9 @@ Use an aspect-preserving crop centered on the selected point, initially 50% of
 image width/height, clamped to source boundaries. The next still is a full-frame
 expansion of this crop, rather than an edited patch in the old composition.
 Generate the still from a short, approved visual brief derived only from the
-consented conversation. Supply that still as the video start image. Prompt fal
-for a slow inward journey preserving the selected symbols and palette; replace
+consented conversation. Supply that still as the video start image. Recenter the exact attention centroid within the crop, then prompt fal for a
+forward macro approach: the same object grows every second until its surface
+fills the frame. Do not reveal a larger scene, tunnel or nested frames. Replace
 the existing locked-camera instruction only for this new transition mode.
 Generated motion is approximate: Unity provides deterministic framing and zoom;
 provider output must be visually reviewed for continuity before application.
@@ -183,3 +184,16 @@ in APIOnly mode so preparation cannot replace the stable image with black.
 Remote polling continues independently throughout transitions so pause can work.
 
 Verified outcomes and remaining checks are recorded in [the verification report](UNITY_REGION_ZOOM_VERIFICATION.md).
+
+
+## User correction: object approach and close viewing distance
+
+The original generated tunnel-like clip was perceived as zooming out. Prompt
+version 2 replaces ambiguous “deeper space” language with object enlargement:
+recenter the selected source point in the still, approach that same object,
+and finish with its texture filling the image. The provider negative prompt
+excludes pullback, widening, shrinking objects, corridors and nested frames.
+The canonical Unity surface starts 0.75 m ahead of the initial camera instead
+of 3 m; the approach phase returns to that same close presentation. Its controls
+move in front of the closer surface. Keep the full-image pullback and transition
+sequence that the user approved.

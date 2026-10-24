@@ -73,3 +73,22 @@ establish real-time Unity microphone streaming quality.
 See [setup and commands](UNITY_HANDOFF.md#region-entry-in-editor-2026-10-24) and
 [the implementation checklist](UNITY_REGION_ZOOM_PLAN.md). EPIC-08 remains
 In Progress because its broader workflow/hardware acceptance is not complete.
+
+## Object-approach correction (prompt version 2)
+
+User review identified that the original generated clip looked like a zoom out.
+The new prompt requests a close-up of the existing selected object, followed by
+continuous forward magnification until the object's surface fills the frame.
+It explicitly excludes tunnel expansion, pullback and shrinking subjects.
+Unity now starts and finishes with the image center **0.75 m** ahead of the head
+instead of 3 m. The temporary full-frame pullback is retained.
+
+A fresh bounded image/video pair was generated and played successfully in
+`work/region_zoom_tests/1792878858107020000-upper-left/`, reusing the previously
+verified synthetic voice exchange (clearly recorded in its manifest). The agent
+inspected the first and final video frames: the pink oval grows from an object
+within the composition into a frame-filling pink surface. This supersedes the
+older tunnel-like clip as evidence for the intended generated zoom direction.
+Unity framing, cancellation, pause/resume and next-source acknowledgement passed
+at the closer viewing distance. Recording: `unity-transition.mp4` in that run.
+The backend suite now has 38 passing tests; the frontend suite retains 19 passes.

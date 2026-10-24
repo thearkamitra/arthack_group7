@@ -92,3 +92,14 @@ class ManualSelectionTests(unittest.TestCase):
         self.assertEqual(d['speaking_seconds'],0);self.assertEqual(sum(d['percentages']),0)
         p['x']=float('nan')
         with self.assertRaises(ValueError):manual_decision(p,1,'a'*64)
+
+class ObjectApproachPromptTests(unittest.TestCase):
+    def test_target_is_recentered_and_motion_is_object_enlargement(self):
+        from inner_landscape.region_zoom import entry_image_prompt, entry_video_prompt
+        selected=decision(attention(),1,'a'*64)
+        still=entry_image_prompt(visual_brief('blue star'),selected)
+        self.assertIn('40% from the left and 16% from the top',still)
+        self.assertIn('place it at the center',still)
+        video=entry_video_prompt(visual_brief('blue star'))
+        self.assertIn('grows larger every second',video)
+        self.assertIn('texture filling the entire frame',video)

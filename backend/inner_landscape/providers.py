@@ -188,7 +188,7 @@ class Media:
                 "model": self.settings.video_model
                 if kind == "video"
                 else self.settings.image_model,
-                "prompt_version": 1,
+                "prompt_version": 2 if entry else 1,
                 "brief": brief.strip(),
                 "request_id": None,
                 "output_path": None,
@@ -220,13 +220,13 @@ class Media:
                 + job["brief"]
             )
             if job["kind"] == "image":
-                from .region_zoom import crop_box
+                from .region_zoom import crop_box, entry_image_prompt
                 box = crop_box(original.size, job["entry"]) if job.get("entry") else region_box(original.size, job["region"])
                 crop = directory / "crop.png"
                 original.crop(box).save(crop)
                 url = await client.upload_file(str(crop))
                 inputs = {
-                    "prompt": prompt,
+                    "prompt": entry_image_prompt(prompt, job["entry"]) if job.get("entry") else prompt,
                     "image_url": url,
                     "output_format": "png",
                     "num_images": 1,
@@ -234,13 +234,16 @@ class Media:
                 }
             else:
                 url = await client.upload_file(str(directory / "input.png"))
+                from .region_zoom import entry_video_prompt
                 inputs = {
-                    "prompt": prompt
-                    + (" Slow continuous inward camera journey through this abstract space. Preserve luminous forms and texture. End on a stable deeper composition, no cuts." if job.get("entry") else " Locked camera. Very gentle environmental motion. Preserve composition and landmarks."),
+                    "prompt": entry_video_prompt(prompt) if job.get("entry") else prompt + " Locked camera. Very gentle environmental motion. Preserve composition and landmarks.",
                     "image_url": url,
                     "duration": "5",
                     "enable_safety_checker": True,
                 }
+            if job.get("entry") and job["kind"] == "video":
+                inputs["negative_prompt"] = "zoom out, pull back, dolly backward, shrinking subject, widening view, tunnel, corridor, nested frames, new scenery, cuts, embossed glyphs"
+            job["generation_prompt"] = inputs["prompt"]
             job["status"] = "running"
             self.persist(job)
             submitted = True

@@ -14,6 +14,7 @@ namespace InnerLandscape
     {
         public Material landscapeMaterial;
         public bool mockHeadInput=true;
+        [Range(.3f,3f)] public float viewingDistance=.75f;
         SessionClient session;
         VoiceClient voice;
         Camera head;
@@ -34,7 +35,7 @@ namespace InnerLandscape
             SubsystemManager.GetSubsystems(trackingSystems);
             foreach(var system in trackingSystems)system.TrySetTrackingOriginMode(TrackingOriginModeFlags.Device);
             var landscape = new GameObject("World anchored landscape", typeof(CurvedLandscape));
-            landscape.transform.position = new Vector3(0,1.6f,0);
+            landscape.transform.position = new Vector3(0,1.6f,viewingDistance-landscape.GetComponent<CurvedLandscape>().radius);
             var renderer = landscape.GetComponent<MeshRenderer>();
             renderer.material = landscapeMaterial ? new Material(landscapeMaterial) : new Material(Shader.Find("Universal Render Pipeline/Unlit"));
             if(renderer.material.HasProperty("_Cull")) renderer.material.SetFloat("_Cull", 0);
@@ -56,7 +57,7 @@ namespace InnerLandscape
             events = new GameObject("UI events", typeof(EventSystem)).GetComponent<EventSystem>();
             canvas = new GameObject("Session controls", typeof(Canvas), typeof(GraphicRaycaster)).GetComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace; canvas.worldCamera = head;
-            canvas.transform.position = new Vector3(0,.55f,1.7f); canvas.transform.localScale = Vector3.one * .002f;
+            canvas.transform.position = new Vector3(0,1.42f,.55f); canvas.transform.localScale = Vector3.one * .0006f;
             canvas.GetComponent<RectTransform>().sizeDelta = new Vector2(760,480);
             raycaster = canvas.GetComponent<GraphicRaycaster>();
             Label("INNER LANDSCAPE · Head direction, not eye tracking",190);

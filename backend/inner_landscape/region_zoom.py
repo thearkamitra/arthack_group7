@@ -49,8 +49,8 @@ def visual_brief(text: str) -> str:
     if not isinstance(text,str) or not 1 <= len(text.strip()) <= 600:
         raise ValueError('Approve a short conversation excerpt (1–600 characters)')
     text=re.sub(r'\s+',' ',text).strip()
-    return ('Expand the selected abstract space into a deeper view. Preserve its textured '
-            'material, luminous shapes and source palette. Visual direction from the '
+    return ('Make a much closer view of the selected existing object. Preserve its identity, '
+            'soft grain, luminous shapes and source palette. Visual direction from the '
             'approved fictional or consented conversation: '+text)
 
 
@@ -68,3 +68,27 @@ def manual_decision(payload: dict, cycle: int, source_hash: str) -> dict:
                 input_mode=payload['input_mode'],x=x,y=y,cell=min(2,int(x*3))+3*min(2,int(y*3)),
                 crop=[left,top,left+.5,top+.5],cells=[],percentages=[0]*9,
                 coverage=0,speaking_seconds=0,window_ids=[])
+
+
+
+def entry_image_prompt(brief: str, selected: dict) -> str:
+    left, top, right, bottom = selected['crop']
+    x = (selected['x'] - left) / (right - left)
+    y = (selected['y'] - top) / (bottom - top)
+    return (f'The selected object is at {x:.0%} from the left and {y:.0%} from the top '
+            'of this input crop. Reframe tightly around that existing object and place it '
+            'at the center. Magnify it into a close-up so its luminous surface occupies '
+            'most of the frame and surrounding shapes leave the edges. Preserve its '
+            'original silhouette, soft painted grain and colors. '+brief+
+            ' Do not add a room, corridor, tunnel, frames, glyphs or new surrounding scenery. '
+            'Do not widen the composition or move away from the object.')
+
+
+def entry_video_prompt(brief: str) -> str:
+    return ('One continuous forward camera push directly INTO the selected object at '
+            'the CENTER of the first frame. Begin with the supplied close-up. Move '
+            'steadily closer: the same object grows larger every second, its outer '
+            'edges pass beyond the image boundaries, and finish with its luminous '
+            'surface texture filling the entire frame. This is a macro approach to '
+            'the object, with no newly revealed surrounding space. Preserve its colors '
+            'and soft grain. No cuts, orbit, receding object, tunnel or pullback. '+brief)

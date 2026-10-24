@@ -24,6 +24,7 @@ namespace InnerLandscape.Editor
             EditorUtility.SetDirty(material);
             app.landscapeMaterial=material;
             app.mockHeadInput=true;
+            app.viewingDistance=.75f;
             EditorSceneManager.SaveScene(scene,"Assets/Scenes/InnerLandscape.unity");
             EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/Scenes/InnerLandscape.unity",true)};
             var desktop=XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Standalone);
