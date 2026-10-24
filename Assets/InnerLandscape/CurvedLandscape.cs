@@ -10,6 +10,11 @@ namespace InnerLandscape
         public float height = 2.8f;
         [Range(16, 128)] public int segments = 64;
 
+        public Vector3 Point(Vector2 uv)
+        {
+            float angle=(uv.x-.5f)*arcDegrees*Mathf.Deg2Rad;
+            return transform.TransformPoint(new Vector3(Mathf.Sin(angle)*radius,(uv.y-.5f)*height,Mathf.Cos(angle)*radius));
+        }
         void Awake()
         {
             var vertices = new Vector3[(segments + 1) * 2];

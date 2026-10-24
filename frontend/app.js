@@ -144,7 +144,7 @@
   }
   function scene(session, cls = "", disabled = false) {
     const depth = session?.depth || {};
-    return `<div class="scene ${cls}" id="scene">${artwork(depth)}${session?.media && session.media.source !== "desktop_snapshot" ? `<${session.media.kind === "video" ? "video" : "img"} class="applied-media" src="${esc(session.media.url)}" ${session.media.kind === "video" ? (session.status === "active" ? 'autoplay muted playsinline preload="metadata"' : 'muted playsinline preload="metadata"') : 'alt="Approved session landscape"'}></${session.media.kind === "video" ? "video" : "img"}>` : ""}<span class="scene-label">${session ? "DESKTOP EXPLORATION · SIMULATED" : "A LITTLE ROOM TO EXPLORE"}</span>${session ? `<div class="scene-regions" aria-label="Choose a landscape region">${S.regions.map((r, i) => `<button class="region-button" data-action="select" data-region="${r}" aria-label="Explore ${r}" aria-pressed="${session.region === r}" ${disabled ? "disabled" : ""}><span>${["The sky", "The ridges", "The water"][i]} · ${(depth[r] || 0) + 1}/4</span></button>`).join("")}</div>` : ""}</div>`;
+    return `<div class="scene ${cls}" id="scene">${artwork(depth)}${session?.media ? `<${session.media.kind === "video" ? "video" : "img"} class="applied-media" src="${esc(session.media.url)}" ${session.media.kind === "video" ? (session.status === "active" ? 'autoplay muted playsinline preload="metadata"' : 'muted playsinline preload="metadata"') : 'alt="Approved session landscape"'}></${session.media.kind === "video" ? "video" : "img"}>` : ""}<span class="scene-label">${session ? "DESKTOP EXPLORATION · SIMULATED" : "A LITTLE ROOM TO EXPLORE"}</span>${session ? `<div class="scene-regions" aria-label="Choose a landscape region">${S.regions.map((r, i) => `<button class="region-button" data-action="select" data-region="${r}" aria-label="Explore ${r}" aria-pressed="${session.region === r}" ${disabled ? "disabled" : ""}><span>${["The sky", "The ridges", "The water"][i]} · ${(depth[r] || 0) + 1}/4</span></button>`).join("")}</div>` : ""}</div>`;
   }
   function clientRows() {
     return S.clients
@@ -246,7 +246,7 @@
   }
   function stage(s, clientMode = false) {
     const disabled = s.status !== "active" || s.pendingCycle;
-    return `<section><div id="scene-slot">${scene(s, clientMode ? "client-scene" : "", disabled)}</div><div id="scene-legend">${sessionLegend(s)}</div>${s.proposal ? `<div class="callout mb"><strong>Suggested next region: ${esc(s.proposal.region || "ask the practitioner")}</strong><br>${esc(s.proposal.reason)} ${s.proposal.region ? button("Confirm region", "select", true, `data-id="${s.id}" data-region="${s.proposal.region}" ${s.status !== "active" ? "disabled" : ""}`) : ""}</div>` : ""}<div class="progress" aria-hidden="true"><span id="cycle-progress" style="width:${((30 - s.remaining) / 30) * 100}%"></span></div><div class="stage-footer"><div class="timer"><strong id="remaining">${String(s.remaining).padStart(2, "0")}</strong> / 30 sec <span class="countdown-caption">· Cycle ${s.cycle} · simulated window</span></div><div class="controls">${button(icon(s.status === "paused" ? "play" : "pause") + (s.status === "paused" ? "Resume" : "Pause"), "pause", true, `data-id="${s.id}"`)}${button("Finish session", "finish", true, `data-id="${s.id}"`)}</div></div>${s.pendingCycle ? `<div class="callout"><strong>A moment to reflect.</strong><br>This 30-second window is complete. Stay here as long as you need. ${button("Begin next cycle " + icon("arrow"), "next", false, `data-id="${s.id}" ${s.status !== "active" ? "disabled" : ""}`)}</div>` : ""}${s.status === "paused" ? '<div class="callout">Session paused. The clock and exploration are held until you resume.</div>' : ""}<p class="demo-notice">${s.driver === "unity" ? "Unity participant paired; head-directed reports are used when received." : "Desktop selection uses clicks or keyboard."} ${s.media?.job_id ? "Approved provider media is shown." : "Artwork is procedural; no generated video is playing."}</p></section>`;
+    return `<section><div id="scene-slot">${scene(s, clientMode ? "client-scene" : "", disabled)}</div><div id="scene-legend">${sessionLegend(s)}</div>${s.proposal ? `<div class="callout mb"><strong>Suggested next region: ${esc(s.proposal.region || "ask the practitioner")}</strong><br>${esc(s.proposal.reason)} ${s.proposal.region ? button("Confirm region", "select", true, `data-id="${s.id}" data-region="${s.proposal.region}" ${s.status !== "active" ? "disabled" : ""}`) : ""}</div>` : ""}<div class="progress" aria-hidden="true"><span id="cycle-progress" style="width:${((30 - s.remaining) / 30) * 100}%"></span></div><div class="stage-footer"><div class="timer"><strong id="remaining">${String(s.remaining).padStart(2, "0")}</strong> / 30 sec <span class="countdown-caption">· Cycle ${s.cycle} · simulated window</span></div><div class="controls">${button(icon(s.status === "paused" ? "play" : "pause") + (s.status === "paused" ? "Resume" : "Pause"), "pause", true, `data-id="${s.id}"`)}${button("Finish session", "finish", true, `data-id="${s.id}"`)}</div></div>${s.pendingCycle ? `<div class="callout"><strong>A moment to reflect.</strong><br>This 30-second window is complete. Stay here as long as you need. ${button("Begin next cycle " + icon("arrow"), "next", false, `data-id="${s.id}" ${s.status !== "active" ? "disabled" : ""}`)}</div>` : ""}${s.status === "paused" ? '<div class="callout">Session paused. The clock and exploration are held until you resume.</div>' : ""}<p class="demo-notice">${s.driver === "unity" ? "Unity participant paired; head-directed reports are used when received." : "Desktop selection uses clicks or keyboard."} ${s.media?.url ? "Current session image or approved provider media is shown." : "Artwork is procedural; no generated video is playing."}</p></section>`;
   }
   function guide(s) {
     const disabled = s.status !== "active" || s.pendingCycle;
@@ -300,7 +300,7 @@
     const backend = window.LandscapeBackend;
     if (!backend?.connected)
       return '<div class="callout mt">Local-only workspace. Start the coordinator to pair Unity and configure voice/media. Start it to use local Garmin Bluetooth monitoring.</div>';
-    return `<section class="panel panel-pad mt"><div class="section-head"><h2>Connected session</h2><span class="pill sage">Mac coordinator</span></div><p class="subtext">Pair the Unity client to this session. Voice sends microphone audio to ElevenLabs only after explicit start. Media uses the current scene plus a visual brief; private notes are not sent. Garmin monitoring is available below with separate consent.</p><div class="spaced">${button("Pair Unity headset", "pair", true, `data-id="${s.id}"`)}${button(window.LandscapeVoice?.active ? "Stop voice" : "Start voice guide", "voice", true, `data-id="${s.id}" ${!backend.status?.paid_enabled || !backend.status?.voice.configured ? "disabled" : ""}`)}${button("Media studio", "media-studio", true, `data-id="${s.id}"`)}<span id="connection-message" class="subtext"></span></div><div id="media-studio"></div></section>`;
+    return `<section class="panel panel-pad mt"><div class="section-head"><h2>Connected session</h2><span class="pill sage">Mac coordinator</span></div><p class="subtext">Pair the Unity client to this session. Voice sends microphone audio to ElevenLabs only after explicit start. Media uses the current scene plus a visual brief; private notes are not sent. Garmin monitoring is available below with separate consent.</p><div class="spaced">${button("Pair Unity headset", "pair", true, `data-id="${s.id}"`)}${button(window.LandscapeVoice?.active ? "Stop voice" : "Start voice guide", "voice", true, `data-id="${s.id}" ${!backend.status?.paid_enabled || !backend.status?.voice.configured ? "disabled" : ""}`)}${button("Use Unity abstract image", "canonical-scene", true, `data-id="${s.id}"`)}${button("Media studio", "media-studio", true, `data-id="${s.id}"`)}<span id="connection-message" class="subtext"></span></div><div id="media-studio"></div></section>`;
   }
   async function captureScene() {
     const svg = document.querySelector("#scene svg");
@@ -336,7 +336,7 @@
     const jobs = await window.LandscapeBackend.jobs(s.id),
       enabled = window.LandscapeBackend.status?.paid_enabled;
     document.querySelector("#media-studio").innerHTML =
-      `<div class="divider"></div><p class="subtext">${enabled ? "Generation may incur provider charges. One job at a time; four jobs maximum per session. Video output is currently 5 seconds, within the 30-second limit." : "Paid generation is disabled. Restart the coordinator with --enable-paid only after agreeing a test budget."}</p><form id="media-form" data-id="${s.id}"><label for="visual-brief">Visual brief (no names, notes or identifying details)</label><input id="visual-brief" name="brief" required maxlength="1000" placeholder="Soft mist lifting over the selected region"><div class="spaced mt"><select name="kind" aria-label="Media type" style="width:auto"><option value="image">Refine selected image region</option><option value="video">Animate current scene · 5 seconds</option></select><button class="button" ${!enabled ? "disabled" : ""}>Generate preview</button>${button("Refresh jobs", "media-studio", true, `data-id="${s.id}"`)}</div></form><div class="mt">${jobs.map((j) => `<article class="callout mb"><strong>${esc(j.kind)} · ${esc(j.status)}</strong><p class="subtext">${esc(j.error || j.model)}</p>${j.status === "ready" ? `${j.kind === "image" ? `<img src="/api/sessions/${s.id}/media/${j.id}/artifact" alt="Generated preview" style="max-width:100%;border-radius:8px">` : `<video controls preload="metadata" src="/api/sessions/${s.id}/media/${j.id}/artifact" style="width:100%"></video>`}<p class="subtext">Check continuity and region placement before applying. A generated video can move landmarks.</p>${button("Confirm continuity & use", "apply-media", true, `data-id="${s.id}" data-job="${j.id}"`)}` : ""}</article>`).join("") || '<p class="subtext">No generation jobs yet.</p>'}</div>`;
+      `<div class="divider"></div>${s.spatialDecision ? `<p class="callout">${s.spatialDecision.manual ? "Explicitly confirmed" : "Frozen attention"} spatial cell ${s.spatialDecision.cell + 1} · ${Math.round(s.spatialDecision.percentages[s.spatialDecision.cell])}% of valid attention · ${Math.round(s.spatialDecision.coverage * 100)}% coverage. Crop: ${esc(JSON.stringify(s.spatialDecision.crop))}</p>` : ""}<p class="subtext">${enabled ? "Generation may incur provider charges. One job at a time; four jobs maximum per session. Video output is currently 5 seconds, within the 30-second limit." : "Paid generation is disabled. Restart the coordinator with --enable-paid only after agreeing a test budget."}</p><form id="media-form" data-id="${s.id}"><label for="visual-brief">Visual brief (no names, notes or identifying details)</label><input id="visual-brief" name="brief" required maxlength="1000" placeholder="Soft mist lifting over the selected region"><div class="spaced mt"><select name="kind" aria-label="Media type" style="width:auto"><option value="entry">Enter frozen spatial region · still then video</option><option value="image">Refine selected image region</option><option value="video">Animate current scene · 5 seconds</option></select><button class="button" ${!enabled ? "disabled" : ""}>Generate preview</button>${button("Refresh jobs", "media-studio", true, `data-id="${s.id}"`)}</div></form><div class="mt">${jobs.map((j) => `<article class="callout mb"><strong>${esc(j.kind)} · ${esc(j.status)}</strong><p class="subtext">${esc(j.error || j.model)}</p>${j.status === "ready" ? `${j.kind === "image" ? `<img src="/api/sessions/${s.id}/media/${j.id}/artifact" alt="Generated preview" style="max-width:100%;border-radius:8px">` : `<video controls preload="metadata" src="/api/sessions/${s.id}/media/${j.id}/artifact" style="width:100%"></video>`}<p class="subtext">Check continuity and region placement before applying. A generated video can move landmarks.</p>${j.entry && j.kind === "image" ? button("Approve start image & generate entry video", "entry-video", true, `data-id="${s.id}" data-job="${j.id}"`) : button("Confirm continuity & use", "apply-media", true, `data-id="${s.id}" data-job="${j.id}"`)}` : ""}</article>`).join("") || '<p class="subtext">No generation jobs yet.</p>'}</div>`;
   }
   function sessionsPage() {
     return layout(
@@ -921,7 +921,7 @@
       if (target.dataset.action === "garmin-connect") await window.LandscapeGarmin.start(s.id, $("#garmin-device").value, $("#garmin-consent").checked);
       if (target.dataset.action === "garmin-stop") await window.LandscapeGarmin.stop();
       if (target.dataset.action === "pair") {
-        await window.LandscapeBackend.scene(s.id, await captureScene());
+        await window.LandscapeBackend.canonical(s.id);
         const result = await window.LandscapeBackend.pair(s.id);
         toast("Unity pairing code: " + result.code + " (valid 2 minutes)");
         const msg = document.querySelector("#connection-message");
@@ -943,7 +943,14 @@
         }
         render();
       }
+      if (target.dataset.action === "canonical-scene") {
+        await window.LandscapeBackend.canonical(s.id); toast("Unity source image loaded");
+      }
       if (target.dataset.action === "media-studio") await openMedia(s);
+      if (target.dataset.action === "entry-video") {
+        await window.LandscapeBackend.entry(s.id, "Approved start image", target.dataset.job);
+        await openMedia(s);
+      }
       if (target.dataset.action === "apply-media")
         await window.LandscapeBackend.apply(s.id, target.dataset.job);
       if (["pause", "finish"].includes(target.dataset.action))
@@ -964,12 +971,16 @@
     );
     if (submit) submit.disabled = true;
     try {
+      if (values.kind === "entry") {
+        await window.LandscapeBackend.entry(s.id, values.brief);
+      } else {
       const image = await captureScene();
       await window.LandscapeBackend.generate(s.id, {
         image,
         brief: values.brief,
         kind: values.kind,
       });
+      }
       toast("Generation queued. The existing scene stays in place.");
       await openMedia(s);
     } catch (error) {

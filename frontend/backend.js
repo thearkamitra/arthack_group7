@@ -142,6 +142,15 @@
         body: JSON.stringify(body),
       });
     },
+    async canonical(id) {
+      await queue;
+      await request(`/api/sessions/${id}/canonical-scene`, {method: "POST"});
+      const snapshot = await request("/api/workspace"); revision = snapshot.revision; onSnapshot(snapshot.workspace);
+    },
+    async entry(id, excerpt, parent_job = null) {
+      await this.flush();
+      return request(`/api/sessions/${id}/region-entry`, {method: "POST", body: JSON.stringify({excerpt, parent_job})});
+    },
     async apply(id, jobId) {
       await queue;
       await request(`/api/sessions/${id}/media/apply`, {

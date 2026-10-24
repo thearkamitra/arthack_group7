@@ -13,6 +13,7 @@ namespace InnerLandscape
     public sealed class LandscapeApp : MonoBehaviour
     {
         public Material landscapeMaterial;
+        public bool mockHeadInput=true;
         SessionClient session;
         VoiceClient voice;
         Camera head;
@@ -41,8 +42,17 @@ namespace InnerLandscape
             session = gameObject.AddComponent<SessionClient>();
             session.trackedHead = head; session.landscapeCollider = landscape.GetComponent<MeshCollider>();
             session.landscapeRenderer = renderer; session.videoPlayer = video;
+            var attention=gameObject.AddComponent<AttentionInput>();attention.head=head;attention.surface=landscape.GetComponent<CurvedLandscape>();
+#if UNITY_EDITOR
+            attention.mode=mockHeadInput?AttentionInput.Mode.Mouse:AttentionInput.Mode.XR;
+#else
+            attention.mode=AttentionInput.Mode.XR;
+#endif
+            session.attentionInput=attention;
+            var transition=gameObject.AddComponent<RegionZoomTransition>();transition.head=head;transition.surface=renderer;transition.video=video;
+            session.transition=transition;attention.transition=transition;
             video.isLooping = false; video.playOnAwake = false; video.audioOutputMode = VideoAudioOutputMode.None;
-            voice = gameObject.AddComponent<VoiceClient>(); voice.session = session;
+            voice = gameObject.AddComponent<VoiceClient>(); voice.session = session; session.voice=voice;
             events = new GameObject("UI events", typeof(EventSystem)).GetComponent<EventSystem>();
             canvas = new GameObject("Session controls", typeof(Canvas), typeof(GraphicRaycaster)).GetComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace; canvas.worldCamera = head;
@@ -50,7 +60,7 @@ namespace InnerLandscape
             canvas.GetComponent<RectTransform>().sizeDelta = new Vector2(760,480);
             raycaster = canvas.GetComponent<GraphicRaycaster>();
             Label("INNER LANDSCAPE · Head direction, not eye tracking",190);
-            address = Field("Mac LAN URL", "http://192.168.1.10:4173",140);
+            address = Field("Mac LAN URL", "http://127.0.0.1:4173",140);
             code = Field("Pairing code", "",85); code.characterLimit = 8;
             Button("Pair", -240,25,()=> { session.serverUrl=address.text.Trim(); session.pairingCode=code.text.Trim(); session.Pair(); });
             Button("Confirm region",0,25,session.ConfirmLookedRegion);
@@ -91,10 +101,6 @@ namespace InnerLandscape
         {
             if(!head)return;
             var device=InputDevices.GetDeviceAtXRNode(XRNode.Head);
-            float heightOffset=1.6f;
-            foreach(var system in trackingSystems)if(system.GetTrackingOriginMode()==TrackingOriginModeFlags.Floor)heightOffset=0;
-            if(device.TryGetFeatureValue(CommonUsages.devicePosition,out Vector3 p)) head.transform.localPosition=p+Vector3.up*heightOffset;
-            if(device.TryGetFeatureValue(CommonUsages.deviceRotation,out Quaternion q))head.transform.localRotation=q;
             bool down=false;
             foreach(var node in new[]{XRNode.LeftHand,XRNode.RightHand})
             { var hand=InputDevices.GetDeviceAtXRNode(node);hand.TryGetFeatureValue(CommonUsages.triggerButton,out bool trigger);down|=trigger; }
@@ -125,7 +131,7 @@ namespace InnerLandscape
             if(editing&&Keyboard.current!=null)
             { if(Keyboard.current.backspaceKey.wasPressedThisFrame&&editing.text.Length>0)editing.text=editing.text.Substring(0,editing.text.Length-1); }
 #endif
-            feedback.text=session.status+" · Looking: "+session.LookedRegion+"\n"+voice.status;
+            feedback.text=(session.attentionInput.Source=="xr"?"XR HEAD":"MOCK HEAD INPUT · right drag to look")+"\n"+session.transition.State+" · "+session.status+" · Looking: "+session.LookedRegion+"\n"+voice.status;
         }
         InputField editing;
 #if UNITY_ANDROID && !UNITY_EDITOR

@@ -50,6 +50,11 @@ class MediaBody(BaseModel):
     kind: str = "image"
 
 
+class EntryBody(BaseModel):
+    excerpt: str = Field(min_length=1, max_length=600)
+    parent_job: str | None = None
+
+
 class ApplyBody(BaseModel):
     job_id: str
     continuity_confirmed: bool
@@ -323,18 +328,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def save_scene(sid: str, body: dict, request: Request):
         therapist(request)
         image, raw = decode_image(body.get("image", ""))
+        import io
+        normalized = io.BytesIO()
+        image.save(normalized, format="PNG")
+        raw = normalized.getvalue()
         directory = cfg.work / "scenes"
         directory.mkdir(exist_ok=True)
         digest = hashlib.sha256(raw).hexdigest()
         filename = hashlib.sha256(sid.encode()).hexdigest() + "-" + digest + ".png"
         path = directory / filename
         if not path.exists():
-            image.save(path)
+            path.write_bytes(raw)
 
         def apply(s):
             if s["status"] == "completed":
                 raise ValueError("Session completed")
             s["scene_file"] = filename
+            s["source_hash"] = digest
+            s.pop("spatialDecision", None)
             s["media"] = {
                 "kind": "image",
                 "source": "desktop_snapshot",
@@ -342,6 +353,29 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "region_map_verified": True,
             }
 
+        return store.mutate(sid, apply)
+
+    @app.post("/api/sessions/{sid}/transition-complete")
+    def transition_complete(sid: str, body: dict, request: Request):
+        role(request, sid)
+        def apply(s):
+            active = s.get("media", {})
+            if s["status"] != "active" or body.get("job_id") != active.get("job_id") or not active.get("entry"):
+                raise ValueError("Stale transition")
+            job = next(j for j in store.jobs(sid) if j["id"] == active["job_id"])
+            if s.get("source_hash") == active["final_hash"]:
+                return
+            directory = cfg.work / "scenes"
+            directory.mkdir(exist_ok=True)
+            filename = active["final_hash"] + ".png"
+            (directory / filename).write_bytes((cfg.work / "media" / job["id"] / "final.png").read_bytes())
+            s["scene_file"] = filename
+            s["source_hash"] = active["final_hash"]
+            s["cycle"] += 1
+            s["remaining"] = 30
+            s["pendingCycle"] = False
+            s.pop("spatialDecision", None)
+            event(s, "cycle", "Region entry completed; final frame is next source")
         return store.mutate(sid, apply)
 
     @app.get("/api/sessions/{sid}/scene")
@@ -352,6 +386,64 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if not path.is_file():
             raise HTTPException(404, "Scene not uploaded yet")
         return FileResponse(path, media_type="image/png")
+
+    @app.post("/api/sessions/{sid}/canonical-scene")
+    def canonical_scene(sid: str, request: Request):
+        import base64
+        import io
+        from PIL import Image
+        therapist(request)
+        path = cfg.root / "Assets" / "Images" / "ideal_abstract.jpeg"
+        if not path.is_file():
+            raise ValueError("Canonical image is unavailable")
+        buffer = io.BytesIO()
+        with Image.open(path) as image:
+            image.convert("RGB").save(buffer, format="PNG")
+        return save_scene(sid, {"image": "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode()}, request)
+
+    @app.post("/api/sessions/{sid}/region-entry")
+    async def region_entry(sid: str, body: EntryBody, request: Request):
+        import base64
+        from .region_zoom import visual_brief
+        therapist(request)
+        value = session(sid)
+        selected = value.get("spatialDecision")
+        if value["status"] != "active" or not selected or selected["cycle"] != value["cycle"] or selected["source_hash"] != value.get("source_hash"):
+            raise ValueError("Freeze a current spatial decision first")
+        brief = visual_brief(body.excerpt)
+        jobs = store.jobs(sid)
+        if body.parent_job:
+            parent = next((j for j in jobs if j["id"] == body.parent_job), None)
+            if not parent or parent["status"] != "ready" or parent["kind"] != "image" or parent.get("entry") != selected:
+                raise ValueError("A ready start image for this decision is required")
+            if any(j.get("parent_job") == parent["id"] for j in jobs):
+                raise ValueError("Video already submitted; reconcile existing job")
+            path = cfg.work / "media" / parent["id"] / parent["output_path"]
+            kind = "video"
+            brief = parent["brief"]
+        else:
+            if any(j.get("entry") == selected and j["kind"] == "image" for j in jobs):
+                raise ValueError("Start image already submitted; reconcile existing job")
+            if len(jobs) + 2 > cfg.max_jobs:
+                raise ValueError("Region entry requires two available jobs")
+            path = cfg.work / "scenes" / value.get("scene_file", "")
+            kind = "image"
+        if not path.is_file():
+            raise ValueError("Current source image is unavailable")
+        data = "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
+        job = await media.submit(value, data, brief, kind, entry=selected)
+        if body.parent_job:
+            job["parent_job"] = body.parent_job
+            media.persist(job)
+        return job
+
+    @app.get("/api/sessions/{sid}/media/{jid}/frame/{frame}")
+    def media_frame(sid: str, jid: str, frame: str, request: Request):
+        role(request, sid)
+        job = next((j for j in store.jobs(sid) if j["id"] == jid), None)
+        if not job or job["status"] != "ready" or frame not in ("first", "final") or not job.get("frame_hashes"):
+            raise HTTPException(404, "No validated frame")
+        return FileResponse(cfg.work / "media" / jid / (frame + ".png"), media_type="image/png")
 
     @app.post("/api/sessions/{sid}/media")
     async def make_media(sid: str, body: MediaBody, request: Request):
@@ -389,7 +481,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 raise ValueError(
                     "Paused, completed or stale cycle; media was not applied"
                 )
+            if job.get("entry") and (job["kind"] != "video" or job["entry"] != s.get("spatialDecision")):
+                raise ValueError("Approve a complete video bundle for the current decision")
+            if s.get("media", {}).get("job_id") == job["id"]:
+                return
             s["media"] = {
+                "entry": bool(job.get("entry")),
+                "first_url": f"/api/sessions/{sid}/media/{job['id']}/frame/first" if job.get("entry") else "",
+                "final_url": f"/api/sessions/{sid}/media/{job['id']}/frame/final" if job.get("entry") else "",
+                "final_hash": job.get("frame_hashes", {}).get("final.png", ""),
                 "job_id": job["id"],
                 "kind": job["kind"],
                 "url": f"/api/sessions/{sid}/media/{job['id']}/artifact",
@@ -493,29 +593,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                             continue
                         if session(sid)["status"] != "active":
                             return
-                        if item.get("type") in ("user_transcript", "agent_response"):
-                            kind = (
-                                "reflection"
-                                if item["type"] == "user_transcript"
-                                else "guide"
-                            )
-                            key = (
-                                "user_transcript"
-                                if kind == "reflection"
-                                else "agent_response"
-                            )
-                            text = item.get(key + "_event", {}).get(key, "")
-                            if isinstance(text, str) and text.strip():
-                                store.mutate(
-                                    sid,
-                                    lambda s: event(
-                                        s,
-                                        kind,
-                                        text[:2000],
-                                        "elevenlabs",
-                                        region=s["region"],
-                                    ),
-                                )
+                        from .voice_events import transcript
+                        turn = transcript(item)
+                        if turn:
+                            kind, text = turn
+                            store.mutate(sid, lambda s: event(s, kind, text, "elevenlabs", region=s["region"]))
                         if item.get("type") in (
                             "audio",
                             "interruption",
@@ -573,7 +655,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 active_voice.discard(sid)
             try:
                 await ws.close()
-            except RuntimeError:
+            except (WebSocketDisconnect, RuntimeError):
                 pass
 
     app.mount(

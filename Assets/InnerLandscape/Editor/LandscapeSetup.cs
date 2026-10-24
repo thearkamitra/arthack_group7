@@ -20,9 +20,14 @@ namespace InnerLandscape.Editor
             var app=new GameObject("Inner Landscape",typeof(LandscapeApp)).GetComponent<LandscapeApp>();
             var material=AssetDatabase.LoadAssetAtPath<Material>("Assets/InnerLandscape/Landscape.mat");
             if(!material){material=new Material(Shader.Find("Universal Render Pipeline/Unlit"));material.SetFloat("_Cull",0);AssetDatabase.CreateAsset(material,"Assets/InnerLandscape/Landscape.mat");}
+            material.mainTexture=AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Images/ideal_abstract.jpeg");
+            EditorUtility.SetDirty(material);
             app.landscapeMaterial=material;
+            app.mockHeadInput=true;
             EditorSceneManager.SaveScene(scene,"Assets/Scenes/InnerLandscape.unity");
             EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/Scenes/InnerLandscape.unity",true)};
+            var desktop=XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(BuildTargetGroup.Standalone);
+            if(desktop!=null){desktop.InitManagerOnStart=false;EditorUtility.SetDirty(desktop);}
             PlayerSettings.productName="Inner Landscape";
             PlayerSettings.companyName="Inner Landscape";
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android,"com.innerlandscape.demo");

@@ -115,6 +115,8 @@ def participant_view(s: dict) -> dict:
         "depth",
         "media",
         "proposal",
+        "spatialDecision",
+        "source_hash",
     )
     result = {k: copy.deepcopy(s[k]) for k in allowed if k in s}
     result["events"] = [
@@ -209,6 +211,14 @@ def command(s: dict, name: str, payload: dict, source: str) -> None:
         s["attention"] = dwell
         s["attentionAt"] = now()
         s["proposal"] = propose(s)
+    elif name in ("spatial_decision", "spatial_select"):
+        from .region_zoom import decision, manual_decision
+        if s["status"] != "active" or not s.get("source_hash"):
+            raise ValueError("Active session with a source image required")
+        if s.get("spatialDecision", {}).get("cycle") == s["cycle"]:
+            raise ValueError("Decision already frozen for this cycle")
+        s["spatialDecision"] = (manual_decision if name == "spatial_select" else decision)(payload, s["cycle"], s["source_hash"])
+        event(s, "decision", "Spatial attention frozen", source, cell=s["spatialDecision"]["cell"])
     elif name == "select":
         r = payload.get("region")
         if s["status"] != "active" or r not in REGIONS:
@@ -222,6 +232,7 @@ def command(s: dict, name: str, payload: dict, source: str) -> None:
         s["remaining"] = 30
         s["pendingCycle"] = False
         s["attention"] = {}
+        s.pop("spatialDecision", None)
         event(s, "cycle", "Next cycle explicitly confirmed", source)
     elif name == "window_finished":
         if payload.get("cycle") != s["cycle"]:

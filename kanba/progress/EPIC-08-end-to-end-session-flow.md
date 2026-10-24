@@ -2,7 +2,7 @@
 
 - **ID**: `EPIC-08`
 - **Milestone Reference**: Milestone 8 (End-to-end demo)
-- **Status**: Queued in Backlog (Depends on EPIC-02, EPIC-05, EPIC-06)
+- **Status**: In Progress
 - **Primary Owner**: Full-Stack / Product Engineer & Therapist Role
 - **Relevant Files**:
   - [frontend/index.html](file:///Users/arkamitra/Documents/ChatGPT/arthack/frontend/index.html)
@@ -64,3 +64,28 @@ Integrate all components into a seamless, therapist-supervised end-to-end experi
 3. Pausing from either therapist console or headset halts all media and voice immediately.
 4. Saved session, notes, and AI summary reload identically after restarting the Mac server.
 5. Zero leakage of private notes into AI prompts or participant API payloads.
+
+## Proposed Unity region-entry subtask (2026-10-24)
+
+Owner: Codex. Approved Unity region-entry implementation started 2026-10-24. See
+[Unity region zoom handover plan](../../docs/UNITY_REGION_ZOOM_PLAN.md) for the
+inspected image, file-level checklist, mock head input and two live-provider test
+scenarios. Scope: Editor mock head input, spatial attention, region-entry media, staged transitions and two bounded integration scenarios. Physical Quest acceptance remains separate.
+
+
+## Unity region-entry implementation evidence (2026-10-24)
+
+Owner: Codex. This subtask implements the supplied abstract JPEG, mock/XR input
+boundary, speech-gated 3×3 longest dwell, manual fallback, validated crop/start
+still/video bundles, staged presentation transitions and final-frame promotion.
+
+- [x] Two reproducible scenarios implemented; real ElevenLabs and fal artifacts verified.
+- [x] Center transition verified with saved live artifacts and explicit REPLAY provenance.
+- [x] Upper-left live test: 69.7% dwell, correct pink-oval/blue-star crop, complete Unity transition.
+- [x] Remote pause holds video and position; cancellation restores stable pose/image.
+- [x] Unity coordinate/framing checks, 37 backend tests and 19 frontend tests passed.
+- [ ] Broader epic acceptance and physical Quest checks remain open; this card stays In Progress.
+
+See [verification report](../../docs/UNITY_REGION_ZOOM_VERIFICATION.md) and
+[setup](../../docs/UNITY_HANDOFF.md#region-entry-in-editor-2026-10-24).
+Generated evidence stays under ignored `work/region_zoom_tests/`, not Git.

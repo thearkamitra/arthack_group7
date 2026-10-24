@@ -2,10 +2,10 @@
 
 - **ID**: `EPIC-06`
 - **Milestone Reference**: Milestone 6 (Still generation) & Milestone 7 (Video cycle)
-- **Status**: Blocked on Paid API Approval Gate ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/done/NEEDME-01-paid-api-approval.md))
+- **Status**: Queued; paid approval recorded; live acceptance in progress under EPIC-08 ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/done/NEEDME-01-paid-api-approval.md))
 - **Primary Owner**: Backend / Media Engineer
 - **Relevant Files**:
-  - [backend/inner_landscape/media.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/media.py)
+  - [backend/inner_landscape/providers.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/providers.py)
   - [backend/inner_landscape/api.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/api.py)
   - [frontend/app.js](file:///Users/arkamitra/Documents/ChatGPT/arthack/frontend/app.js)
   - [docs/BACKEND.md](file:///Users/arkamitra/Documents/ChatGPT/arthack/docs/BACKEND.md#L67-L97)
@@ -27,7 +27,7 @@ Integrate the asynchronous fal.ai generative media pipeline into the reflection 
 
 ## 2. Current Implementation State
 
-- **Provider Adapters**: [backend/inner_landscape/media.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/media.py) implements:
+- **Provider Adapters**: [backend/inner_landscape/providers.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/providers.py) implements:
   - `generate_image_edit()`: Sends vertical region crop to `fal-ai/flux-kontext/dev` and composites the edited crop back into the full composition, preserving surrounding pixels. Validated with Pillow.
   - `generate_video_clip()`: Submits 5s image-to-video job to `fal-ai/kling-video/v2.5-turbo/standard/image-to-video`. Validates resulting MP4 duration and dimensions with `ffprobe`.
 - **Manifest Logging**: Generates per-job manifests with input/output hashes, parameters, prompt versions, and artifact paths in `work/media_jobs/`.

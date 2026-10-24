@@ -139,7 +139,7 @@ class Media:
         self.tasks: set[asyncio.Task] = set()
 
     async def submit(
-        self, session: dict, image_data: str, brief: str, kind: str
+        self, session: dict, image_data: str, brief: str, kind: str, entry: dict | None = None
     ) -> dict:
         if not self.settings.paid_enabled:
             raise ProviderUnavailable(
@@ -166,9 +166,11 @@ class Media:
             raise ValueError("Provide a short visual brief of at most 1000 characters")
         async with self.lock:
             previous = self.store.jobs(session["id"])
+            if entry and any(j.get("entry") == entry and j["kind"] == kind for j in previous):
+                raise ValueError("Region entry already submitted; reconcile existing job")
             if len(previous) >= self.settings.max_jobs:
                 raise ValueError("Per-session generation limit reached")
-            if any(j["status"] in ("queued", "running", "unknown") for j in previous):
+            if any(j["status"] in ("queued", "running", "validating", "unknown") for j in previous):
                 raise ValueError(
                     "A job is already pending; reconcile it before submitting another"
                 )
@@ -177,6 +179,7 @@ class Media:
                 "session_id": session["id"],
                 "cycle": session["cycle"],
                 "region": session["region"],
+                "entry": entry,
                 "status": "queued",
                 "kind": kind,
                 "created_at": now(),
@@ -213,11 +216,12 @@ class Media:
         try:
             client = fal_client.AsyncClient(key=self.settings.fal_key)
             prompt = (
-                "Gentle abstract landscape, soft sage and ivory, no text, no people, no threatening imagery. "
+                "Abstract space, preserve the input palette and texture, no text, no people, no threatening imagery. "
                 + job["brief"]
             )
             if job["kind"] == "image":
-                box = region_box(original.size, job["region"])
+                from .region_zoom import crop_box
+                box = crop_box(original.size, job["entry"]) if job.get("entry") else region_box(original.size, job["region"])
                 crop = directory / "crop.png"
                 original.crop(box).save(crop)
                 url = await client.upload_file(str(crop))
@@ -232,7 +236,7 @@ class Media:
                 url = await client.upload_file(str(directory / "input.png"))
                 inputs = {
                     "prompt": prompt
-                    + " Locked camera. Very gentle environmental motion. Preserve composition and landmarks.",
+                    + (" Slow continuous inward camera journey through this abstract space. Preserve luminous forms and texture. End on a stable deeper composition, no cuts." if job.get("entry") else " Locked camera. Very gentle environmental motion. Preserve composition and landmarks."),
                     "image_url": url,
                     "duration": "5",
                     "enable_safety_checker": True,
@@ -259,19 +263,27 @@ class Media:
                 with Image.open(edited) as im:
                     im.load()
                     patch = im.convert("RGB").resize((box[2] - box[0], box[3] - box[1]))
-                composite = original.copy()
-                composite.paste(patch, box)
+                composite = patch.resize(original.size) if job.get("entry") else original.copy()
+                if not job.get("entry"):
+                    composite.paste(patch, box)
                 composite.save(output)
                 job["validation"] = {
                     "decoded": True,
                     "width": original.width,
                     "height": original.height,
-                    "unchanged_outside_crop": True,
+                    "unchanged_outside_crop": not bool(job.get("entry")),
                 }
             else:
                 remote = result["video"]["url"]
                 await download(remote, output, 150_000_000)
                 job["validation"] = await asyncio.to_thread(probe_video, output)
+                if job.get("entry"):
+                    import subprocess
+                    for name, args, tail in (("first.png", ["-i", str(output)], ["-frames:v", "1"]), ("final.png", ["-sseof", "-0.5", "-i", str(output)], ["-update", "1"])):
+                        await asyncio.to_thread(subprocess.run, ["ffmpeg", "-v", "error", "-y", *args, *tail, str(directory/name)], check=True, capture_output=True, timeout=30)
+                        with Image.open(directory/name) as frame:
+                            frame.verify()
+                    job["frame_hashes"] = {n: hashlib.sha256((directory/n).read_bytes()).hexdigest() for n in ("first.png","final.png")}
             job["output_sha256"] = hashlib.sha256(output.read_bytes()).hexdigest()
             job["output_path"] = output.name
             job["status"] = "ready"

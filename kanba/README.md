@@ -23,9 +23,9 @@ See `AGENTS.md` and the installed `arthack-kanban-flow` skill for the workflow.
 
 | Done | In Progress | Need Me | Backlog |
 | :--- | :--- | :--- | :--- |
-| [EPIC-00: Contracts](done/EPIC-00-contracts-and-scope.md) | — | [EPIC-02: APK verified; Quest connection pending](needme/EPIC-02-quest2-unity-integration.md) | [EPIC-05: ElevenLabs live conversation](backlog/EPIC-05-elevenlabs-voice-integration.md) |
+| [EPIC-00: Contracts](done/EPIC-00-contracts-and-scope.md) | [EPIC-08: Region-entry implementation](progress/EPIC-08-end-to-end-session-flow.md) | [EPIC-02: APK verified; Quest connection pending](needme/EPIC-02-quest2-unity-integration.md) | [EPIC-05: ElevenLabs live conversation](backlog/EPIC-05-elevenlabs-voice-integration.md) |
 | [EPIC-01: Desktop](done/EPIC-01-desktop-vertical-slice.md) | | [EPIC-04: Garmin physical broadcast](needme/EPIC-04-garmin-ble-integration.md) | [EPIC-06: fal media](backlog/EPIC-06-fal-media-pipeline.md) |
-| [EPIC-03: Coordinator](done/EPIC-03-shared-coordinator-service.md) | | [NEEDME-02: Quest deployment](needme/NEEDME-02-quest2-hardware-deployment.md) | [EPIC-08: End-to-end demo](backlog/EPIC-08-end-to-end-session-flow.md) |
+| [EPIC-03: Coordinator](done/EPIC-03-shared-coordinator-service.md) | | [NEEDME-02: Quest deployment](needme/NEEDME-02-quest2-hardware-deployment.md) | |
 | [NEEDME-01: API approval received](done/NEEDME-01-paid-api-approval.md) | | [NEEDME-03: Extended watch checks; broadcast passed](needme/NEEDME-03-garmin-watch-broadcast-test.md) | |
 
 ---
@@ -39,4 +39,4 @@ See `AGENTS.md` and the installed `arthack-kanban-flow` skill for the workflow.
 - **Milestone 4**: Garmin Venu 4 BLE heart rate (deferred/research) ➔ [EPIC-04](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/needme/EPIC-04-garmin-ble-integration.md) + [NEEDME-03](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/needme/NEEDME-03-garmin-watch-broadcast-test.md)
 - **Milestone 5**: ElevenLabs voice guide live testing ➔ [EPIC-05](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/backlog/EPIC-05-elevenlabs-voice-integration.md) + [NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/done/NEEDME-01-paid-api-approval.md)
 - **Milestone 6 & 7**: fal.ai still & video cycles (≤30s) ➔ [EPIC-06](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/backlog/EPIC-06-fal-media-pipeline.md) + [NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/done/NEEDME-01-paid-api-approval.md)
-- **Milestone 8**: End-to-end therapist-guided session ➔ [EPIC-08](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/backlog/EPIC-08-end-to-end-session-flow.md)
+- **Milestone 8**: End-to-end therapist-guided session ➔ [EPIC-08](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/progress/EPIC-08-end-to-end-session-flow.md)

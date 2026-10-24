@@ -2,11 +2,11 @@
 
 - **ID**: `EPIC-05`
 - **Milestone Reference**: Milestone 5 (AI guide)
-- **Status**: Blocked on Paid API Approval Gate ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/done/NEEDME-01-paid-api-approval.md))
+- **Status**: Queued; paid approval recorded; live acceptance in progress under EPIC-08 ([NEEDME-01](file:///Users/arkamitra/Documents/ChatGPT/arthack/kanba/done/NEEDME-01-paid-api-approval.md))
 - **Primary Owner**: Backend / AI Engineer
 - **Relevant Files**:
   - [backend/inner_landscape/agent.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/agent.py)
-  - [backend/inner_landscape/voice.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/voice.py)
+  - [backend/inner_landscape/api.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/api.py)
   - [frontend/voice.js](file:///Users/arkamitra/Documents/ChatGPT/arthack/frontend/voice.js)
   - [docs/BACKEND.md](file:///Users/arkamitra/Documents/ChatGPT/arthack/docs/BACKEND.md#L31-L66)
 
@@ -27,7 +27,7 @@ Establish live, low-latency conversational audio between the client (via browser
 ## 2. Current Implementation State
 
 - **Agent Provisioning**: The private reflection agent was created and verified with the official ElevenLabs SDK using the English Flash v2 model ([backend/inner_landscape/agent.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/agent.py)). Agent metadata is stored locally in `work/elevenlabs-agent.json`.
-- **Coordinator Audio Bridge**: [backend/inner_landscape/voice.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/voice.py) implements the PCM16 / 16kHz WebSocket bridge connecting the client to the ElevenLabs Conversational AI WebSocket endpoint.
+- **Coordinator Audio Bridge**: [backend/inner_landscape/api.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/backend/inner_landscape/api.py) implements the PCM16 / 16kHz WebSocket bridge connecting the client to the ElevenLabs Conversational AI WebSocket endpoint.
 - **Client Audio Capture**: [frontend/voice.js](file:///Users/arkamitra/Documents/ChatGPT/arthack/frontend/voice.js) implements browser AudioContext resampling and binary PCM streaming.
 - **Pending**: Actual end-to-end paid voice stream execution, measuring acoustic latency, echo cancellation, and verifying conversational turn-taking quality.
 

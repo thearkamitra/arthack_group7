@@ -116,3 +116,30 @@ and automatic disconnect/data clearing. See [GARMIN.md](GARMIN.md) for steps,
 thresholds, lifecycle and verification limits. The shared parser is also used by
 the working research CLI. Garmin Connect/cloud APIs are not used. Sessions still
 work without a watch.
+
+### Spatial region-entry API
+
+`POST /api/sessions/{id}/canonical-scene` (therapist) loads the checked-in Unity
+JPEG as lossless PNG and records its SHA256. Pairing in the browser uses this
+source. `spatial_decision` participant command accepts cycle/source_hash,
+input_mode (`xr`, `mouse`, `scripted`), speaking_seconds, distinct window_ids and
+nine row-major cells `{seconds,x,y}` in top-left normalized coordinates. The
+coordinator validates and freezes the longest-dwell cell, percentages, coverage
+and aspect-preserving clamped 50% crop once per cycle. This is head direction,
+not eye tracking. Raw head poses are neither stored nor sent to providers.
+
+`POST /api/sessions/{id}/region-entry` is therapist-only, with an explicitly
+approved `excerpt` of 1–600 characters. It creates a new scene from the selected
+crop using the existing fal image endpoint. Calling again with `parent_job` from
+the ready image creates a 5-second inward-motion video. It cannot resubmit an
+existing decision/job. Existing patch-edit generation remains available. Video
+validation extracts authenticated `/media/{job}/frame/first` and `/frame/final`
+PNG artifacts with hashes. The usual media apply endpoint approves the complete
+video bundle; Unity's `transition-complete` acknowledgement promotes the final
+PNG as the next source and advances the cycle idempotently. Pause/completion,
+stale source and stale cycle checks remain enforced. Each entry consumes two of
+the four allowed jobs; one billable job can be pending at a time.
+
+`spatial_select` explicitly confirms `{cycle,source_hash,input_mode,x,y}` when no
+audible guide attention exists. It is recorded as `manual:true`, with zero dwell
+and zero coverage. It shares the same once-per-cycle and stale-source checks.

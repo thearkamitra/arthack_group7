@@ -170,3 +170,7 @@ The live Garmin broadcast smoke test now passes; offline tests passed (27 backen
 14 frontend). One authorized ElevenLabs speech check produced a valid 2.8-second
 MP3 and the agent signed-URL check passed. Headset conversation and fal generation
 remain unverified. Generated check artifacts stay ignored under `work/`.
+
+Unity now has an Editor mock-head region-entry path using the supplied textured
+abstract artwork. Setup, controls, staged zoom and the two bounded live-provider
+scenarios are documented in [Unity handoff](docs/UNITY_HANDOFF.md#region-entry-in-editor-2026-10-24).

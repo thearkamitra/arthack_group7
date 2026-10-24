@@ -112,3 +112,65 @@ To deploy the existing APK after USB debugging approval:
 
 `AndroidDemoNetwork.cs` sets `usesCleartextTraffic` only for Development Build;
 release builds explicitly disable it. The local HTTP/WS demo is synthetic only.
+
+## Region entry in Editor (2026-10-24)
+
+The approved startup artwork is `Assets/Images/ideal_abstract.jpeg` (the supplied
+textured abstract space). Run **Inner Landscape → Configure demo project** to
+assign it to the runtime scene. Existing `Assets/mainscene.unity` is preserved.
+The build scene remains `Assets/Scenes/InnerLandscape.unity`.
+
+In Editor, `LandscapeApp.mockHeadInput` selects mouse look: hold right mouse and
+drag. A center reticle is the head-direction proxy. Quest builds use XR input;
+missing tracking pauses instead of silently substituting mouse input. The
+presentation surface moves for transitions; the tracked head is not animated.
+Editor head look and synthetic tests are explicitly labelled MOCK HEAD INPUT.
+
+Start the coordinator with `bash backend/scripts/run.sh --enable-paid`. Start a
+fictional session in its browser and click **Pair Unity headset**; this loads the
+same canonical artwork into the coordinator. Enter the code and loopback URL in
+Unity. Start voice explicitly for live microphone use. After the guide has spoken,
+**Confirm region** freezes the spatial grid decision for review. The spatial
+cycle has no automatic 30-second cutoff; it completes when region entry finishes.
+Legacy desktop timers are unchanged.
+
+Open Media studio, select **Enter frozen spatial region**, and supply an approved
+short conversational excerpt (600 characters maximum). Review the generated
+start image; **Approve start image & generate entry video** spends the second
+job. Review the video and click **Confirm continuity & use**. Unity preloads its
+frames/video, pulls back, dissolves to the starting frame, plays the 5-second
+inward journey, holds the extracted final frame, approaches, and acknowledges the
+next cycle. Generation latency leaves the current image visible. No paid request
+is retried automatically. A timeout needs provider reconciliation by request ID.
+
+Two bounded synthetic scenarios (open this project in Unity; exit prior Play Mode):
+
+```sh
+PYTHONPATH=backend backend/.venv/bin/python backend/scripts/test_region_zoom_live.py --scenario center
+PYTHONPATH=backend backend/.venv/bin/python backend/scripts/test_region_zoom_live.py --scenario upper-left
+```
+
+The runner uses an isolated loopback coordinator on port 4174 and a fresh ignored
+run directory. It uses real ElevenLabs TTS as fictional participant audio, real
+conversational guide audio, and two real fal jobs per scenario. Unity consumes a
+local test request and reports scripted spatial attention. Only this synthetic
+runner acts as a simulated approving therapist. Ordinary participant APIs cannot
+submit or approve media. `--reuse-dialogue RUN_DIRECTORY` reuses saved live audio
+for a Unity retry and explicitly records that provenance; it is not a fresh
+ElevenLabs check. Evidence includes manifests, dialogue audio, grid aggregates,
+job IDs, crop/still/video/final frames and rendered camera captures under
+`work/region_zoom_tests/`. Never commit these generated runs or pairing files.
+
+Editor contract checks are available through the batch entry point
+`InnerLandscape.Editor.RegionZoomChecks.Run`; this verifies top-left UV conversion,
+speech gating and all curved-mesh vertices at three viewport aspects. Hardware
+stereo, head pose, acoustic echo and motion comfort remain unverified without Quest.
+
+If no audible guide attention is available, **Confirm region** explicitly selects
+the reticle's image point. The decision is labelled manual and has zero dwell;
+it is never presented as measured attention. This permits controlled manual demos.
+For a provider-free replay after an initial live run, pass both
+`--reuse-dialogue LIVE_VOICE_RUN` and `--reuse-media LIVE_MEDIA_RUN`; the resulting
+manifest is explicitly REPLAY. Each successful Unity scenario also exports
+`unity-transition.mp4`, `fit.json` and pose samples proving remote pause holds both
+presentation position and video time.

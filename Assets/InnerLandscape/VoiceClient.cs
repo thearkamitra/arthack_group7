@@ -24,6 +24,13 @@ namespace InnerLandscape
         string microphoneDevice;
         int cursor;
         bool running, starting;
+        public bool GuideSpeaking => speaker && speaker.isPlaying;
+        public string SpeechWindow { get; private set; } = "";
+        bool turnOpen; float lastChunk;
+        public void PlaySyntheticGuide(AudioClip clip)
+        {
+            speaker=GetComponent<AudioSource>();speaker.clip=clip;SpeechWindow=Guid.NewGuid().ToString();speaker.Play();
+        }
         readonly Queue<AudioClip> audioQueue = new Queue<AudioClip>();
         readonly ConcurrentQueue<string> incoming = new ConcurrentQueue<string>();
         [Serializable] class Hello { public string token; public bool consent = true; }
@@ -106,9 +113,11 @@ namespace InnerLandscape
             {
                 var msg = JsonUtility.FromJson<Message>(raw);
                 if (msg.type == "error" || msg.type == "closed") { status = msg.message ?? "Voice disconnected"; StopVoice(); }
-                if (msg.type == "interruption" && speaker) { speaker.Stop(); while (audioQueue.Count > 0) Destroy(audioQueue.Dequeue()); }
+                if (msg.type == "interruption" && speaker) { turnOpen=false; speaker.Stop(); while (audioQueue.Count > 0) Destroy(audioQueue.Dequeue()); }
                 if (msg.type == "audio" && running && msg.audio_event != null)
                 {
+                    if(!turnOpen){SpeechWindow=Guid.NewGuid().ToString();turnOpen=true;}
+                    lastChunk=Time.unscaledTime;
                     byte[] bytes = Convert.FromBase64String(msg.audio_event.audio_base_64);
                     float[] samples = new float[bytes.Length / 2];
                     for (int i = 0; i < samples.Length; i++) samples[i] = (short)(bytes[i * 2] | bytes[i * 2 + 1] << 8) / 32768f;
@@ -117,11 +126,12 @@ namespace InnerLandscape
                 }
             }
             if (running && speaker && !speaker.isPlaying && audioQueue.Count > 0) { if (speaker.clip) Destroy(speaker.clip); speaker.clip = audioQueue.Dequeue(); speaker.Play(); }
+            if(turnOpen && speaker && !speaker.isPlaying && audioQueue.Count==0 && Time.unscaledTime-lastChunk>1)turnOpen=false;
             if (running && !session.Active) StopVoice();
         }
         public void StopVoice()
         {
-            running = false;
+            running = false; turnOpen=false;
             if (microphone) { Microphone.End(microphoneDevice); Destroy(microphone); microphone = null; }
             if (speaker) speaker.Stop(); while (audioQueue.Count > 0) Destroy(audioQueue.Dequeue()); cancellation?.Cancel(); socket?.Dispose(); socket = null;
         }
