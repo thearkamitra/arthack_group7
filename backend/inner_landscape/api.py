@@ -6,6 +6,7 @@ import json
 import secrets
 import time
 import uuid
+from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -15,6 +16,8 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from .garmin import HeartRateMonitor
+from .garmin_ble import GarminBLE
 from .config import Settings
 from .domain import command, event, participant_view
 from .providers import Media, ProviderUnavailable, Voice, decode_image
@@ -30,6 +33,11 @@ class CommandBody(BaseModel):
     command_id: str = Field(min_length=8, max_length=100)
     command: str
     payload: dict = Field(default_factory=dict)
+
+
+class HeartRateBody(BaseModel):
+    device_id: str = Field(min_length=1, max_length=100)
+    consent: bool = False
 
 
 class PairBody(BaseModel):
@@ -53,12 +61,36 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     media = Media(cfg, store)
     voice = Voice(cfg)
     admin_token = secrets.token_urlsafe(40)
+    heart_rate = HeartRateMonitor()
+    garmin = GarminBLE(heart_rate)
+
+    def reconcile_heart_rate():
+        heart_rate.reconcile({s["id"] for s in store.read()["workspace"]["sessions"] if s["status"] == "active"})
+
+    @asynccontextmanager
+    async def lifespan(app):
+        async def cleanup():
+            while True:
+                reconcile_heart_rate()
+                garmin.devices = {key: value for key, value in garmin.devices.items() if time.monotonic() - value[1] <= 60}
+                await asyncio.sleep(1)
+        task = asyncio.create_task(cleanup())
+        try:
+            yield
+        finally:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+            await garmin.stop()
+
     app = FastAPI(
+        lifespan=lifespan,
         title="Inner Landscape coordinator",
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
     )
+    app.state.garmin = garmin
+    app.state.heart_rate = heart_rate
     app.state.store = store
     app.state.settings = cfg
     app.state.media = media
@@ -153,7 +185,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "connected": False,
             },
             "media": {"configured": bool(cfg.fal_key), "connected": False},
-            "garmin": {"status": "deferred", "connected": False},
+            "garmin": {"status": "mac_ble", "connected": garmin.state == "connected", "ephemeral": True},
             "hardware_verified": False,
         }
 
@@ -163,9 +195,43 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return store.read()
 
     @app.put("/api/workspace")
-    def write_workspace(body: WorkspaceBody, request: Request):
+    async def write_workspace(body: WorkspaceBody, request: Request):
         therapist(request)
-        return store.replace(body.workspace, body.revision)
+        result = store.replace(body.workspace, body.revision)
+        reconcile_heart_rate()
+        if heart_rate.sid is None and garmin.task and not garmin.task.done():
+            await garmin.stop()
+        return result
+
+    @app.post("/api/garmin/scan")
+    async def scan_garmin(request: Request):
+        therapist(request)
+        return await garmin.scan()
+
+    @app.post("/api/sessions/{sid}/heart-rate/start")
+    async def start_heart_rate(sid: str, body: HeartRateBody, request: Request):
+        therapist(request)
+        if session(sid)["status"] != "active":
+            raise HTTPException(409, "Resume before connecting heart rate")
+        reconcile_heart_rate()
+        if not body.consent:
+            raise ValueError("Confirm local heart-rate monitoring before connecting")
+        return await garmin.start(sid, body.device_id)
+
+    @app.get("/api/sessions/{sid}/heart-rate")
+    def read_heart_rate(sid: str, request: Request):
+        therapist(request)
+        session(sid)
+        reconcile_heart_rate()
+        return garmin.view(sid, request.headers.get("x-garmin-token", ""))
+
+    @app.post("/api/sessions/{sid}/heart-rate/stop")
+    async def stop_heart_rate(sid: str, request: Request):
+        therapist(request)
+        if heart_rate.sid is not None:
+            heart_rate.authorize(sid, request.headers.get("x-garmin-token", ""))
+        await garmin.stop()
+        return garmin.view(sid)
 
     @app.post("/api/sessions/{sid}/pair")
     def make_pair(sid: str, request: Request):
@@ -199,7 +265,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return value if access == "therapist" else participant_view(value)
 
     @app.post("/api/sessions/{sid}/commands")
-    def send_command(sid: str, body: CommandBody, request: Request):
+    async def send_command(sid: str, body: CommandBody, request: Request):
         access = role(request, sid)
         if access == "participant" and body.command == "resume":
             # A therapist must explicitly resume after pause/tracking loss.
@@ -211,6 +277,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             lambda s: command(s, body.command, body.payload, access),
             body.command_id,
         )
+        reconcile_heart_rate()
+        if heart_rate.sid is None and garmin.task and not garmin.task.done():
+            await garmin.stop()
         return {
             "revision": result["revision"],
             "session": result["session"]

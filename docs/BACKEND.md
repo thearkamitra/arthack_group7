@@ -110,7 +110,9 @@ microphone calls remain untested live. See `UNITY_HANDOFF.md` for hardware check
 
 ## Garmin
 
-**Deferred and separate.** No BLE SDK, watch scanning, permissions, fake BPM or
-Garmin Connect calls are included. A future independent adapter may submit sensor
-observations once that milestone is explicitly resumed. Nothing in the current
-session service requires the watch.
+**Optional local BLE integration.** The Mac coordinator scans and connects using
+Bleak, with explicit frontend consent, baseline and sustained-rise pacing cues,
+and automatic disconnect/data clearing. See [GARMIN.md](GARMIN.md) for steps,
+thresholds, lifecycle and verification limits. The shared parser is also used by
+the working research CLI. Garmin Connect/cloud APIs are not used. Sessions still
+work without a watch.

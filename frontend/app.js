@@ -134,7 +134,7 @@
     ["settings", "settings", "Settings"],
   ];
   function layout(content, section) {
-    return `<div class="shell"><aside class="sidebar">${brand()}<div class="workspace-label">YOUR WORKSPACE</div><nav class="nav" aria-label="Workspace">${navItems.map(([id, img, title]) => `<a href="#${id}" class="${section === id ? "active" : ""}" ${section === id ? 'aria-current="page"' : ""}>${icon(img)}<span class="nav-label">${title}</span>${id === "clients" ? '<span class="count">3</span>' : ""}</a>`).join("")}</nav><div class="sidebar-bottom"><div class="quiet-card">${icon("leaf")}<p>A little space.<br>A different perspective.</p></div><div class="profile"><span class="avatar">DR</span><div>Demo practitioner<small>Therapist workspace</small></div></div></div></aside><div class="workspace"><header class="topbar"><div class="crumb">Workspace ${icon("chevron")} ${esc(section[0].toUpperCase() + section.slice(1))}</div><div class="top-actions"><span class="subtext date">${date(new Date(), { weekday: "short", year: "numeric" })}</span><span class="pill amber"><span class="dot"></span>${window.LandscapeBackend?.connected ? "Shared Mac demo" : "Local demo"}</span><a href="#client/demo-jamie" class="text-link">Client view ${icon("arrow")}</a></div></header><main id="main" tabindex="-1">${!storageAvailable ? '<div class="storage-alert" role="alert">Local storage is unavailable. Changes will not survive closing this page.</div>' : ""}${content}<div class="footer-note">${icon("shield")} ${window.LandscapeBackend?.connected ? "Fictional clients · Shared on this Mac · Garmin deferred" : "Fictional clients · Browser-local demo · Devices and AI are not connected"}</div></main></div></div>`;
+    return `<div class="shell"><aside class="sidebar">${brand()}<div class="workspace-label">YOUR WORKSPACE</div><nav class="nav" aria-label="Workspace">${navItems.map(([id, img, title]) => `<a href="#${id}" class="${section === id ? "active" : ""}" ${section === id ? 'aria-current="page"' : ""}>${icon(img)}<span class="nav-label">${title}</span>${id === "clients" ? '<span class="count">3</span>' : ""}</a>`).join("")}</nav><div class="sidebar-bottom"><div class="quiet-card">${icon("leaf")}<p>A little space.<br>A different perspective.</p></div><div class="profile"><span class="avatar">DR</span><div>Demo practitioner<small>Therapist workspace</small></div></div></div></aside><div class="workspace"><header class="topbar"><div class="crumb">Workspace ${icon("chevron")} ${esc(section[0].toUpperCase() + section.slice(1))}</div><div class="top-actions"><span class="subtext date">${date(new Date(), { weekday: "short", year: "numeric" })}</span><span class="pill amber"><span class="dot"></span>${window.LandscapeBackend?.connected ? "Shared Mac demo" : "Local demo"}</span><a href="#client/demo-jamie" class="text-link">Client view ${icon("arrow")}</a></div></header><main id="main" tabindex="-1">${!storageAvailable ? '<div class="storage-alert" role="alert">Local storage is unavailable. Changes will not survive closing this page.</div>' : ""}${content}<div class="footer-note">${icon("shield")} ${window.LandscapeBackend?.connected ? "Fictional clients · Shared on this Mac · Garmin optional · session-only" : "Fictional clients · Browser-local demo · Devices and AI are not connected"}</div></main></div></div>`;
   }
   let artworkId = 0;
   function artwork(depth = {}, hero = false) {
@@ -223,7 +223,7 @@
     const c = client(id),
       active = current();
     return layout(
-      `<a href="#profile/${c.id}" class="back">${icon("back")} ${c.name}</a>${head("BEFORE YOU BEGIN", "Set the scene.", "A few intentions, a little context, and space for the unexpected.")}<div class="split-details"><form id="prepare-form" class="panel panel-pad"><div class="section-head"><h2>Session preparation</h2><span class="pill sage">${c.name}</span></div><input type="hidden" name="clientId" value="${c.id}"><div class="field"><label for="goal">What would you like to make room for?</label><input id="goal" name="goal" placeholder="e.g. Exploring change with curiosity" required maxlength="150" value="${esc(c.focus)}"></div><div class="field"><label for="preNotes">Before-session notes</label><textarea id="preNotes" name="preNotes" placeholder="Context, intentions, or things to return to…" maxlength="10000"></textarea><small class="hint">Practitioner notes are separate from the scripted conversation.</small></div><div class="field"><label for="exclusions">Topics or imagery to avoid</label><input id="exclusions" name="exclusions" maxlength="500" placeholder="Optional boundaries for a future AI guide"><small class="hint">Recorded for review. This simulator uses fixed questions and cannot enforce topic rules against an AI.</small></div>${comfort("before")}<div class="callout">${icon("book")} <strong>Questionnaires come later.</strong> Standardized assessments will be chosen with a practitioner. Nothing is scored or recommended automatically here.</div><label class="check-row"><input name="consent" type="checkbox" required><span>I understand this is a desktop simulation with fictional content. Notes and reflections are ${window.LandscapeBackend?.connected ? "saved on this Mac" : "saved in this browser"}. No microphone, headset or watch data is collected.</span></label>${active ? `<div class="callout mb">There is already an unfinished session. <a href="#session/${active.id}" class="text-link">Return to it ${icon("arrow")}</a> before starting another.</div>` : ""}<div class="form-actions">${link("Back", "profile/" + c.id, true)}<button class="button" ${active ? "disabled" : ""}>${icon("play")} Begin demo session</button></div></form><aside><div class="panel panel-pad"><h2>A gentle starting point</h2><p class="subtext">A large landscape. Three regions. A scripted guide to help you find a place to begin.</p>${scene(null, "small")}<div class="divider"></div><h3>Connection check</h3>${devices()}</div></aside></div>`,
+      `<a href="#profile/${c.id}" class="back">${icon("back")} ${c.name}</a>${head("BEFORE YOU BEGIN", "Set the scene.", "A few intentions, a little context, and space for the unexpected.")}<div class="split-details"><form id="prepare-form" class="panel panel-pad"><div class="section-head"><h2>Session preparation</h2><span class="pill sage">${c.name}</span></div><input type="hidden" name="clientId" value="${c.id}"><div class="field"><label for="goal">What would you like to make room for?</label><input id="goal" name="goal" placeholder="e.g. Exploring change with curiosity" required maxlength="150" value="${esc(c.focus)}"></div><div class="field"><label for="preNotes">Before-session notes</label><textarea id="preNotes" name="preNotes" placeholder="Context, intentions, or things to return to…" maxlength="10000"></textarea><small class="hint">Practitioner notes are separate from the scripted conversation.</small></div><div class="field"><label for="exclusions">Topics or imagery to avoid</label><input id="exclusions" name="exclusions" maxlength="500" placeholder="Optional boundaries for a future AI guide"><small class="hint">Recorded for review. This simulator uses fixed questions and cannot enforce topic rules against an AI.</small></div>${comfort("before")}<div class="callout">${icon("book")} <strong>Questionnaires come later.</strong> Standardized assessments will be chosen with a practitioner. Nothing is scored or recommended automatically here.</div><label class="check-row"><input name="consent" type="checkbox" required><span>I understand this is a desktop simulation with fictional content. Notes and reflections are ${window.LandscapeBackend?.connected ? "saved on this Mac" : "saved in this browser"}. Optional voice, headset and live watch connections require separate explicit actions during the session.</span></label>${active ? `<div class="callout mb">There is already an unfinished session. <a href="#session/${active.id}" class="text-link">Return to it ${icon("arrow")}</a> before starting another.</div>` : ""}<div class="form-actions">${link("Back", "profile/" + c.id, true)}<button class="button" ${active ? "disabled" : ""}>${icon("play")} Begin demo session</button></div></form><aside><div class="panel panel-pad"><h2>A gentle starting point</h2><p class="subtext">A large landscape. Three regions. A scripted guide to help you find a place to begin.</p>${scene(null, "small")}<div class="divider"></div><h3>Connection check</h3>${devices()}</div></aside></div>`,
       "sessions",
     );
   }
@@ -259,15 +259,47 @@
       return "";
     }
     return layout(
-      `<div class="page-head"><div><span class="eyebrow">SESSION IN PROGRESS · ${esc(client(s.clientId).name)}</span><h1>${esc(s.goal)}</h1><p>A conversation, a landscape, and time to notice.</p></div><a class="button secondary" href="#client-session/${s.id}">Client view ${icon("arrow")}</a></div><div class="session-grid">${stage(s)}${guide(s)}</div>${connectionControls(s)}<div class="device-summary">${[s.driver === "unity" ? "Unity · paired" : "Quest 2 · not connected", "Garmin · deferred", "ElevenLabs · not connected", "fal.ai · not connected"].map((t) => `<div class="device-mini">${t.split(" · ")[0]}<strong style="margin:6px 0 0">${t.split(" · ")[1]}</strong></div>`).join("")}</div><div class="grid-two mt"><section class="panel panel-pad"><div class="section-head"><h2>Conversation & interactions</h2><span class="badge">LIVE DEMO TIMELINE</span></div><ol class="timeline" id="timeline">${timeline(s)}</ol></section><section class="panel panel-pad"><h2>In-the-moment notes</h2><p class="subtext">Keep your observations separate from the client's words.</p><form id="session-note" data-id="${s.id}"><label for="moment-note">Practitioner observation</label><textarea id="moment-note" name="note" maxlength="5000" placeholder="What feels useful to remember?" required></textarea><div class="form-actions"><button class="button secondary">Add to timeline</button></div></form><div class="callout mt">Heart rate will help inform pacing once connected. No readings or emotional interpretations are simulated.</div></section></div>`,
+      `<div class="page-head"><div><span class="eyebrow">SESSION IN PROGRESS · ${esc(client(s.clientId).name)}</span><h1>${esc(s.goal)}</h1><p>A conversation, a landscape, and time to notice.</p></div><a class="button secondary" href="#client-session/${s.id}">Client view ${icon("arrow")}</a></div><div class="session-grid">${stage(s)}${guide(s)}</div>${connectionControls(s)}${garminControls(s)}<div class="device-summary">${[s.driver === "unity" ? "Unity · paired" : "Quest 2 · not connected", "Garmin · optional live monitoring", "ElevenLabs · not connected", "fal.ai · not connected"].map((t) => `<div class="device-mini">${t.split(" · ")[0]}<strong style="margin:6px 0 0">${t.split(" · ")[1]}</strong></div>`).join("")}</div><div class="grid-two mt"><section class="panel panel-pad"><div class="section-head"><h2>Conversation & interactions</h2><span class="badge">LIVE DEMO TIMELINE</span></div><ol class="timeline" id="timeline">${timeline(s)}</ol></section><section class="panel panel-pad"><h2>In-the-moment notes</h2><p class="subtext">Keep your observations separate from the client's words.</p><form id="session-note" data-id="${s.id}"><label for="moment-note">Practitioner observation</label><textarea id="moment-note" name="note" maxlength="5000" placeholder="What feels useful to remember?" required></textarea><div class="form-actions"><button class="button secondary">Add to timeline</button></div></form><div class="callout mt">Optional live heart rate can flag a sustained rise for a check-in. Ask the participant what they need; pulse does not identify emotion.</div></section></div>`,
       "sessions",
     );
   }
+  function garminControls(s) {
+    if (!window.LandscapeBackend?.connected) return "";
+    const g = window.LandscapeGarmin.state;
+    return `<section class="panel panel-pad mt" aria-labelledby="garmin-heading"><div class="section-head"><h2 id="garmin-heading">Garmin heart rate</h2><span class="pill" id="garmin-status">Disconnected</span></div><p class="subtext">Wear your watch and start Broadcast Heart Rate. Close the standalone research receiver before connecting here. The Mac receives Bluetooth; your browser only displays local observations.</p><div class="garmin-readings"><strong id="garmin-bpm">— BPM</strong><span id="garmin-baseline">No baseline</span><span id="garmin-age">No readings received</span></div><p id="garmin-cue" role="status"></p><div class="spaced"><button class="button secondary" data-action="garmin-scan" data-id="${esc(s.id)}">Scan for watch</button><label for="garmin-device">Watch</label><select id="garmin-device" ${g.devices.length ? "" : "disabled"}>${g.devices.map(d => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join("")}</select><button class="button" data-action="garmin-connect" data-id="${esc(s.id)}">Connect watch</button><button class="button secondary" data-action="garmin-stop" data-id="${esc(s.id)}">Disconnect & clear</button></div><label class="check-row"><input type="checkbox" id="garmin-consent"><span>I agree to local, session-only heart-rate monitoring. BPM and baseline stay in memory, are not sent to the voice guide, and are cleared on pause, finish, navigation away or disconnection.</span></label><p class="hint">Prototype pacing cue: after at least 30 seconds and 15 samples, a rise of at least 20 BPM or 25% above the baseline (whichever is greater) for 5 seconds prompts a check-in. These are engineering thresholds, not medical limits. No automatic scene change or emotion inference.</p><p id="garmin-message" class="subtext" role="status">${esc(g.message)}</p></section>`;
+  }
+  function updateGarmin() {
+    const g = window.LandscapeGarmin?.state;
+    if (!g || !$("#garmin-status")) return;
+    const o = g.observation;
+    const labels = {disconnected:"Disconnected", baseline:"Collecting baseline", tracking:"Receiving live heart rate", elevated:"Sustained rise", stale:"Signal stale — baseline reset"};
+    $("#garmin-status").textContent = o.transport === "connecting" ? "Connecting…" : labels[o.status] || "Disconnected";
+    $("#garmin-bpm").textContent = o.bpm == null ? "— BPM" : `${o.bpm} BPM`;
+    $("#garmin-baseline").textContent = o.baseline == null ? (g.sid ? `Baseline: ${Math.min(30, Math.floor(o.baseline_seconds || 0))}/30 sec · ${o.baseline_samples || 0} samples` : "No baseline") : `Baseline ${o.baseline} BPM · rise threshold ${Math.ceil(o.threshold_bpm)} BPM`;
+    $("#garmin-age").textContent = o.age_seconds == null ? "No readings received" : `Last reading ${o.age_seconds}s ago`;
+    $("#garmin-cue").textContent = o.cue || (o.status === "stale" ? "No fresh readings. Pacing cues are suspended; reconnect if the signal does not return." : "");
+    $("#garmin-cue").className = o.spike ? "callout garmin-rise" : "subtext";
+    $("#garmin-message").textContent = g.message || o.error || "";
+    const active = current()?.status === "active";
+    for (const action of ["scan", "connect", "stop"]) {
+      const b = document.querySelector(`[data-action="garmin-${action}"]`);
+      if (b) b.disabled = action === "stop" ? !g.sid : g.busy || !!g.sid || !active || (action === "connect" && !g.devices.length);
+    }
+  }
+  window.addEventListener("garminchange", () => {
+    const select = $("#garmin-device"), g = window.LandscapeGarmin.state;
+    if (select && Array.from(select.options).map(o => o.value).join() !== g.devices.map(d => d.id).join()) {
+      select.replaceChildren(...g.devices.map(d => new Option(d.name, d.id)));
+      select.disabled = !g.devices.length;
+    }
+    updateGarmin();
+  });
+
   function connectionControls(s) {
     const backend = window.LandscapeBackend;
     if (!backend?.connected)
-      return '<div class="callout mt">Local-only workspace. Start the coordinator to pair Unity and configure voice/media. Garmin remains deferred.</div>';
-    return `<section class="panel panel-pad mt"><div class="section-head"><h2>Connected session</h2><span class="pill sage">Mac coordinator</span></div><p class="subtext">Pair the Unity client to this session. Voice sends microphone audio to ElevenLabs only after explicit start. Media uses the current scene plus a visual brief; private notes are not sent. Garmin is deferred.</p><div class="spaced">${button("Pair Unity headset", "pair", true, `data-id="${s.id}"`)}${button(window.LandscapeVoice?.active ? "Stop voice" : "Start voice guide", "voice", true, `data-id="${s.id}" ${!backend.status?.paid_enabled || !backend.status?.voice.configured ? "disabled" : ""}`)}${button("Media studio", "media-studio", true, `data-id="${s.id}"`)}<span id="connection-message" class="subtext"></span></div><div id="media-studio"></div></section>`;
+      return '<div class="callout mt">Local-only workspace. Start the coordinator to pair Unity and configure voice/media. Start it to use local Garmin Bluetooth monitoring.</div>';
+    return `<section class="panel panel-pad mt"><div class="section-head"><h2>Connected session</h2><span class="pill sage">Mac coordinator</span></div><p class="subtext">Pair the Unity client to this session. Voice sends microphone audio to ElevenLabs only after explicit start. Media uses the current scene plus a visual brief; private notes are not sent. Garmin monitoring is available below with separate consent.</p><div class="spaced">${button("Pair Unity headset", "pair", true, `data-id="${s.id}"`)}${button(window.LandscapeVoice?.active ? "Stop voice" : "Start voice guide", "voice", true, `data-id="${s.id}" ${!backend.status?.paid_enabled || !backend.status?.voice.configured ? "disabled" : ""}`)}${button("Media studio", "media-studio", true, `data-id="${s.id}"`)}<span id="connection-message" class="subtext"></span></div><div id="media-studio"></div></section>`;
   }
   async function captureScene() {
     const svg = document.querySelector("#scene svg");
@@ -314,7 +346,7 @@
   function draftSummary(s) {
     const reflections = s.events.filter((e) => e.type === "reflection"),
       explored = S.regions.filter((r) => s.depth[r]);
-    return `${client(s.clientId).name} completed a simulated reflection session focused on “${s.goal}”. ${reflections.length} reflection${reflections.length === 1 ? " was" : "s were"} recorded across ${explored.length} landscape region${explored.length === 1 ? "" : "s"}${explored.length ? ": " + explored.join(", ") : ""}. This template summarizes activity only; it does not interpret clinical meaning. Device and AI services were not connected.`;
+    return `${client(s.clientId).name} completed a simulated reflection session focused on “${s.goal}”. ${reflections.length} reflection${reflections.length === 1 ? " was" : "s were"} recorded across ${explored.length} landscape region${explored.length === 1 ? "" : "s"}${explored.length ? ": " + explored.join(", ") : ""}. This template summarizes activity only; it does not interpret clinical meaning. Optional connections may have been used; live heart-rate readings are cleared when monitoring stops and are not part of this review.`;
   }
   function reviewPage(id) {
     const s = byId(id);
@@ -355,7 +387,7 @@
   }
   function settingsPage() {
     return layout(
-      `${head("A LITTLE CLARITY", "Your workspace, explained.", "Connections, local storage, and what this first milestone can do.")}<div class="grid-two"><div class="panel panel-pad"><h2>Connections</h2><p class="subtext">These will be connected in later implementation milestones. There are no secret input fields in the frontend.</p>${devices()}<div class="callout mt">API keys belong in the backend environment. Creating a key does not connect this desktop prototype.</div></div><div class="panel panel-pad"><h2>Demo data & privacy</h2><ul class="privacy-list"><li>All three clients are fictional.</li><li>Notes, check-ins and sessions persist in this browser's local storage.</li><li>No application data is sent to a provider.</li><li>The client preview is a presentation mode, not a separate authorized role.</li><li>Returning to an unfinished session requires explicit resume.</li><li>Clearing browser storage removes saved demo data.</li></ul><div class="divider"></div><p class="subtext">To remove this prototype's saved notes and sessions from this browser, confirm below. Other websites' data is unaffected.</p>${button("Clear saved demo data", "clear", true)}</div></div>`,
+      `${head("A LITTLE CLARITY", "Your workspace, explained.", "Connections, local storage, and what this first milestone can do.")}<div class="grid-two"><div class="panel panel-pad"><h2>Connections</h2><p class="subtext">The Mac coordinator supports optional connections during an active session. Garmin uses Bluetooth on the Mac; live readings stay in memory. There are no secret input fields in the frontend.</p>${devices()}<div class="callout mt">API keys belong in the backend environment. Creating a key does not connect this desktop prototype.</div></div><div class="panel panel-pad"><h2>Demo data & privacy</h2><ul class="privacy-list"><li>All three clients are fictional.</li><li>Notes, check-ins and sessions persist in this browser's local storage.</li><li>Garmin heart rate stays local and is cleared on disconnect. Explicitly started voice/media features send their disclosed inputs to their providers.</li><li>The client preview is a presentation mode, not a separate authorized role.</li><li>Returning to an unfinished session requires explicit resume.</li><li>Clearing browser storage removes saved demo data.</li></ul><div class="divider"></div><p class="subtext">To remove this prototype's saved notes and sessions from this browser, confirm below. Other websites' data is unaffected.</p>${button("Clear saved demo data", "clear", true)}</div></div>`,
       "settings",
     );
   }
@@ -408,6 +440,7 @@
         preserved[field.id] = { value: field.value, checked: field.checked };
       }
     const [page, id] = (location.hash.slice(1) || "overview").split("/");
+    window.LandscapeGarmin?.reconcile(current(), ["session", "client-session"].includes(page) && current()?.id === id && !document.hidden);
     const views = {
       overview,
       clients: clientsPage,
@@ -425,6 +458,7 @@
     if (studio && document.querySelector("#media-studio"))
       document.querySelector("#media-studio").innerHTML = studio;
     renderedPath = location.hash;
+    updateGarmin();
     for (const [id, value] of Object.entries(preserved)) {
       const field = document.getElementById(id);
       if (field) {
@@ -648,6 +682,9 @@
     const s = byId(target.dataset.id);
     if (!s) return;
     try {
+      if (target.dataset.action === "garmin-scan") await window.LandscapeGarmin.scan();
+      if (target.dataset.action === "garmin-connect") await window.LandscapeGarmin.start(s.id, $("#garmin-device").value, $("#garmin-consent").checked);
+      if (target.dataset.action === "garmin-stop") await window.LandscapeGarmin.stop();
       if (target.dataset.action === "pair") {
         await window.LandscapeBackend.scene(s.id, await captureScene());
         const result = await window.LandscapeBackend.pair(s.id);
@@ -746,10 +783,12 @@
           payload = {};
         if (name === "pause") {
           name = s.status === "paused" ? "resume" : "pause";
+          await window.LandscapeGarmin.stop();
           await window.LandscapeVoice.stop();
         }
         if (name === "finish") {
           name = "stop";
+          await window.LandscapeGarmin.stop();
           await window.LandscapeVoice.stop();
         }
         if (name === "select") payload = { region: target.dataset.region };

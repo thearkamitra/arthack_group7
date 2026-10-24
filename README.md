@@ -16,11 +16,12 @@ bash backend/scripts/run.sh
 
 Open http://127.0.0.1:4173. This starts the Mac session coordinator and serves the
 frontend together. Stop any older static server on that port first. Paid provider
-operations are **disabled by default**. Garmin is deferred and has no dependency
-in the core application.
+operations are **disabled by default**. Garmin live heart rate is available through the Mac Bluetooth receiver,
+with session-only baseline/rise cues and automatic disconnect/clear on finish.
 
 - [Backend setup, credentials and verification](docs/BACKEND.md)
 - [Unity teammate handoff](docs/UNITY_HANDOFF.md)
+- [Garmin connection, spike logic and cleanup](docs/GARMIN.md)
 
 The private ElevenLabs reflection agent is created and verified; its ID is in
 ignored `work/elevenlabs-agent.json`. No speech or media-generation smoke test has
@@ -62,7 +63,7 @@ prototype's data through Settings. Storage failure shows a warning.
 
 Use **fictional data only**. This frontend has no authentication or clinical data
 protection. Client mode is a presentation preview, not an access boundary. The static preview has no provider connections. The coordinator adds gated
-voice/media adapters and Unity pairing; Garmin remains deferred. Comfort
+voice/media adapters, Unity pairing and optional local Garmin monitoring. Comfort
 checks are not standardized assessments. Static-mode artwork is local SVG. The coordinator can preview and apply provider
 media after the paid gate and explicit generation/continuity approval.
 
@@ -114,7 +115,7 @@ provider-specific precedence. Do not run a paid speech test without approval.
 
 ## Layout
 
-- `frontend/`: therapist/client UI and optional coordinator/voice connection.
+- `frontend/`: therapist/client UI and optional coordinator/voice/Garmin connection.
 - `backend/`: Python service, pinned dependencies, tests and setup scripts.
 - `unity/`: source integration kit for the Unity teammate; hardware validation pending.
 - `docs/`: API setup, backend instructions and Unity handoff.

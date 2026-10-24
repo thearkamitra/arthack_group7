@@ -2,19 +2,30 @@
 
 Researched: 24 October 2026. Assumption: your watch is the **Garmin Venu 4**, as named in the project plan. If it is another model, check its manual before following the broadcast instructions.
 
+## Integrated frontend now available
+
+The working receiver has been incorporated into the Mac coordinator. See
+[Garmin session setup](../docs/GARMIN.md) for Scan → Select watch → Connect,
+prototype spike cues, and automatic disconnect/data clearing. Close this
+standalone receiver before connecting from the frontend. Both use a shared
+payload parser; original CLI recordings remain available and are preserved.
+The live integrated mode deliberately keeps readings in memory rather than
+writing the CLI's run files. The implementation details below describe the
+original research workflow; the integrated setup supersedes the pending A3 work.
+
 ## Choose the route
 
 **For heart rate during the art session, wear the watch and use Bluetooth heart-rate broadcast to the Mac.** USB is useful afterward for syncing saved recordings. You are right that taking the watch off to plug it in prevents useful wrist measurements during the session. Garmin documents USB as a sync/file-transfer route, not a live heart-rate feed.
 
 | What you want | Route | What you need to do |
 | --- | --- | --- |
-| Live BPM during a session | Watch → Bluetooth LE → Mac receiver/logger | Follow A; receiver software still needs implementation/verification |
+| Live BPM during a session | Watch → Bluetooth LE → Mac receiver/logger | Follow A; integrated receiver available; actual-watch frontend test remains |
 | A saved session with heart-rate samples | Record activity → Garmin Connect → original FIT export | Follow B; available without building an integration |
 | Previous days of wellness data | Garmin Connect wellness/account export | Follow C |
 | Sync saved activities without the phone | USB → Garmin Express → Garmin Connect | Follow D |
 | Automated richer data later | Garmin Health API or mobile SDK | Follow E; approval and device-specific checks required |
 
-A broadcast connection alone does not save a file. Garmin Connect phone pairing alone also does not deliver a live stream into this project. This document is a collection plan; no watch connection or recording has been tested here.
+A broadcast connection alone does not save a file. Garmin Connect phone pairing alone also does not deliver a live stream into this project. This document is a collection plan; the standalone receiver works according to the user; integrated hardware verification remains pending.
 
 ## A. Live heart rate while wearing the watch
 
@@ -37,7 +48,7 @@ Garmin lists Venu 4 as supporting Bluetooth heart-rate broadcast; Bluetooth-capa
 
 ### 3. Connect a receiver — research script available
 
-A standalone receiver script is available at [garmin_ble_receiver.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/research/garmin_ble_receiver.py). It connects to a Garmin watch broadcasting BLE Heart Rate, parses GATT characteristic `0x2A37`, displays live readings, and records session runs into ignored `runs/garmin/<run_id>/`.
+A standalone receiver script is available at [garmin_ble_receiver.py](garmin_ble_receiver.py). It connects to a Garmin watch broadcasting BLE Heart Rate, parses GATT characteristic `0x2A37`, displays live readings, and records session runs into ignored `runs/garmin/<run_id>/`.
 
 **Run commands:**
 ```bash
@@ -126,6 +137,6 @@ Ordinary HR broadcast does not imply access to raw optical waveforms, ECG, HRV, 
 
 1. Confirm your watch is a Venu 4 and enable heart-rate broadcast while wearing it.
 2. For a file today, record and export a short activity using B.
-3. For live data in Inner Landscape, the next implementation milestone is the minimal Mac BLE receiver/logger in A3, followed by the actual watch test in A4. Artwork integration should follow that verified capture.
+3. For live data in Inner Landscape, follow [the integrated frontend instructions](../docs/GARMIN.md), then verify real readings and disconnect cleanup with your watch. The A4 test remains useful for hardware verification.
 
 Research checked official Garmin, Chrome and Bluetooth documentation. No hardware pairing, sensor capture, FIT decoding, API approval or SDK evaluation was performed for this guide.

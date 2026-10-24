@@ -2,7 +2,9 @@ aiofiles==25.1.0
 annotated-doc==0.0.5
 annotated-types==0.8.0
 anyio==4.15.1
+async-timeout==5.0.1
 asyncstdlib==3.14.0
+bleak==3.0.2
 certifi==2026.10.23
 charset-normalizer==3.5.2
 click==8.5.0
@@ -20,6 +22,10 @@ opentelemetry-api==1.45.1
 pillow==12.0.0
 pydantic==2.14.1
 pydantic-core==2.50.1
+pyobjc-core==12.2.2
+pyobjc-framework-cocoa==12.2.2
+pyobjc-framework-corebluetooth==12.2.2
+pyobjc-framework-libdispatch==12.2.2
 python-dotenv==1.2.4
 requests==2.34.2
 starlette==1.7.0
