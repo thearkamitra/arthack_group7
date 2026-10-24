@@ -5,6 +5,18 @@ abstract landscape gradually becomes defined through words and selected regions.
 Active development is on `master`. The first target is a large 2D image on a Mac;
 Meta Quest 2/3 support comes later, using head direction rather than eye tracking.
 
+## Shareable Lovable demo
+
+- Live: https://inner-landscape-dialogue-garden.lovable.app/
+- Editor: https://lovable.dev/projects/bce89f74-a75d-43ba-a68b-519c3b13e00f
+
+This is a frontend-only simulation with scripted guidance and region-specific
+artwork progression. The Lovable source is hosted separately and is not synced
+to this repository. The local sketch below is the earlier prototype.
+
+API setup: [backend/API_SETUP.md](backend/API_SETUP.md). Put local credentials in
+the ignored root `.env`; `.env.example` contains blank placeholders only.
+
 ## Run the interaction sketch
 
 Open `frontend/index.html` in a browser (double-click it in Finder). No server,
