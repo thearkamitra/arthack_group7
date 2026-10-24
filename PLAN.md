@@ -1,6 +1,7 @@
 # Inner Landscape — implementation plan
 
-Status: frontend milestone 1 implemented as a local demo; integrations pending.
+Status: frontend and Mac coordinator implemented; private voice agent verified;
+voice/media live tests and teammate Unity hardware validation pending. Garmin deferred.
 Target: Mac development, Unity application on Meta Quest 2, Garmin Venu 4,
 ElevenLabs conversational guide, fal.ai imagery/video, and a therapist web console.
 Active branch: `master`. `main` remains empty.
@@ -135,9 +136,10 @@ only the response or therapist instruction changes the exploration decision.
 Do not derive anxiety, emotional valence, truthfulness or diagnosis from pulse.
 No universal medical alert thresholds will be invented for the prototype.
 
-## 5. Garmin Venu 4 connection
+## 5. Garmin Venu 4 connection — deferred, separate workstream
 
-Initial route: watch Broadcast Heart Rate → Bluetooth LE → Mac sensor bridge →
+This milestone is explicitly deferred by the user. No BLE dependency or watch
+connection is included in the core application. Planned route: watch Broadcast Heart Rate → Bluetooth LE → Mac sensor bridge →
 session coordinator → therapist console and optional Unity ambient rhythm.
 
 - Test the watch's Bluetooth heart-rate broadcast on the actual Mac first.
@@ -221,8 +223,8 @@ paused session or replaces a newer cycle. Stop works locally even when disconnec
 
 ## 8. ElevenLabs integration
 
-- Existing API key is configuration; no agent exists yet. Create the reflection
-  agent during the voice milestone and record its agent ID separately.
+- Private reflection agent has been created and verified. Its ID is stored in
+  ignored local metadata, separate from the API key. No paid conversation test ran.
 - Resume the official CLI onboarding check before SDK/code setup as instructed.
 - Guide behavior: open the conversation, ask one short question at a time, allow
   silence and interruption, avoid diagnosis and suggestive interpretations.
@@ -341,12 +343,12 @@ therapist-defined review workflow and does not silently trigger deeper content.
 | --- | --- | --- |
 | 0. Contracts and scope | Agreed cycle, region map, events, retention and UI flow | Review this plan; sample events and clear ownership |
 | 1. Desktop vertical slice — implemented | Light therapist/client UI, simulated sessions and procedural local artwork | Browser-verified start/select/respond/pause/finish; saved pre/post notes reload; seven offline rule tests pass; no fake live sensors |
-| 2. Quest foundation | Unity Android app, large still/video surface, region UV tracking | Install on physical Quest 2; head turn selects expected region; stable frame time and stop |
-| 3. Shared session service | Mac coordinator, event store, paired console and headset | Same session state/timeline; authorized controls; reconnect/dedup and stale result rejection |
-| 4. Garmin | Live BLE heart rate and freshness display | Venu 4 data visible on Mac/console; disconnect becomes a gap; no emotion labels |
-| 5. AI guide | Created ElevenLabs agent and streamed conversation | After test approval: AI opens; region context affects follow-up; interruption/pause works |
-| 6. Still generation | fal image editing on confirmed region | Expected artifact decodes; continuity reviewed; original retained; failure keeps prior scene |
-| 7. Video cycle | Async clip generation and Unity playback, each ≤30 seconds | Duration checked; head-directed regions remain valid; no forced waiting or stale playback |
+| 2. Quest foundation — handoff source only, hardware pending | Unity Android app, large still/video surface, region UV tracking | Install on physical Quest 2; head turn selects expected region; stable frame time and stop |
+| 3. Shared session service — implemented, local API tested | Mac coordinator, event store, paired console and headset | Same session state/timeline; authorized controls; reconnect/dedup and stale result rejection |
+| 4. Garmin — deferred by user | Live BLE heart rate and freshness display | Venu 4 data visible on Mac/console; disconnect becomes a gap; no emotion labels |
+| 5. AI guide — private agent verified; paid test pending | Created ElevenLabs agent and streamed conversation | After test approval: AI opens; region context affects follow-up; interruption/pause works |
+| 6. Still generation — adapter implemented; live test pending | fal image editing on confirmed region | Expected artifact decodes; continuity reviewed; original retained; failure keeps prior scene |
+| 7. Video cycle — adapter implemented; live/hardware tests pending | Async clip generation and Unity playback, each ≤30 seconds | Duration checked; head-directed regions remain valid; no forced waiting or stale playback |
 | 8. End-to-end demo | Therapist preparation → repeated cycles → review/notes | One complete synthetic session on real headset; summary and notes reload correctly |
 
 Priority: achieve a complete still-image/voice/headset loop before adding generated
@@ -371,7 +373,7 @@ supported encoding/resolution from a physical playback test, not desktop success
 - Which standardized questionnaire, language and permitted reuse are appropriate.
 - Whether this version remains LAN-only or needs authenticated remote access.
 - Final media endpoint selection, per-session spend cap and acceptable wait time.
-- Which env file is authoritative for each provider; agent creation is still pending.
+- Which env file is authoritative for each provider; agent creation is complete; paid validation remains pending.
 
 These choices do not block the first local UI prototype with synthetic records,
 but hardware, paid calls and clinical assessment work wait for their relevant gates.

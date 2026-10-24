@@ -35,17 +35,23 @@ Garmin lists Venu 4 as supporting Bluetooth heart-rate broadcast; Bluetooth-capa
 
 **Ready when:** the watch indicates broadcasting has started. This is separate from receiving data on the Mac.
 
-### 3. Connect a receiver — development step, then you
+### 3. Connect a receiver — research script available
 
-The existing plan (PLAN.md, section 5) proposes a small Mac BLE bridge. Before wiring heart rate into the artwork, implement and test only scan/connect, live BPM, connection state and local export. No Garmin cloud API key or paid Health API is needed for this direct broadcast route.
+A standalone receiver script is available at [garmin_ble_receiver.py](file:///Users/arkamitra/Documents/ChatGPT/arthack/research/garmin_ble_receiver.py). It connects to a Garmin watch broadcasting BLE Heart Rate, parses GATT characteristic `0x2A37`, displays live readings, and records session runs into ignored `runs/garmin/<run_id>/`.
 
-**Your action once the receiver exists:** open it, click Connect/Scan, select your watch, and allow macOS Bluetooth access for the receiving app if prompted. Connect from the receiver rather than expecting ordinary macOS Bluetooth settings to display BPM.
+**Run commands:**
+```bash
+# 1. Listen and connect to an actively broadcasting Garmin watch:
+uv run --with bleak python research/garmin_ble_receiver.py
 
-For a browser-based diagnostic alternative, Chrome on macOS supports Web Bluetooth. Such a page needs a secure context and an explicit user click to open the device chooser. This would be a separate diagnostic implementation, not a feature already present in this project. [Chrome documentation](https://developer.chrome.com/docs/capabilities/bluetooth).
+# 2. Or scan nearby BLE devices without connecting:
+uv run --with bleak python research/garmin_ble_receiver.py --scan-only
 
-**Developer requirements:** subscribe to Heart Rate service `0x180D`, measurement characteristic `0x2A37`; parse flags and 8/16-bit BPM correctly; timestamp receipt; retain disconnect events; export data. Confirm the actual device exposes the expected service before claiming compatibility. [Bluetooth assigned numbers](https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Assigned_Numbers/out/en/index-en.html).
+# 3. Live terminal display only without writing to runs/:
+uv run --with bleak python research/garmin_ble_receiver.py --no-save
+```
 
-**Ready when:** the Mac receives multiple timestamped BPM measurements, broadly consistent with the watch display. Seeing a device name or “connected” is insufficient.
+**Developer requirements satisfied:** subscribes to Heart Rate service `0x180D`, measurement characteristic `0x2A37`; parses flags (8/16-bit BPM, contact flags, Energy Expended offset, R-R intervals); timestamps reception; handles disconnects; and outputs `heart-rate.csv`, `events.csv`, and `manifest.json`.
 
 ### 4. Run a short capture — you
 

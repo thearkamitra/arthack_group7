@@ -68,7 +68,19 @@
   const byId = (id) => data.sessions.find((s) => s.id === id);
   function save() {
     try {
+      for (const session of data.sessions)
+        for (const item of session.events) {
+          if (!item.event_id) item.event_id = crypto.randomUUID();
+          item.session_id = session.id;
+          item.schema_version = 1;
+          item.source = item.source || "desktop";
+          if (!item.cycle_id) item.cycle_id = session.cycle;
+        }
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      if (window.LandscapeBackend?.connected)
+        window.LandscapeBackend.save(data).catch((error) =>
+          toast(error.message),
+        );
       storageAvailable = true;
     } catch {
       storageAvailable = false;
@@ -122,7 +134,7 @@
     ["settings", "settings", "Settings"],
   ];
   function layout(content, section) {
-    return `<div class="shell"><aside class="sidebar">${brand()}<div class="workspace-label">YOUR WORKSPACE</div><nav class="nav" aria-label="Workspace">${navItems.map(([id, img, title]) => `<a href="#${id}" class="${section === id ? "active" : ""}" ${section === id ? 'aria-current="page"' : ""}>${icon(img)}<span class="nav-label">${title}</span>${id === "clients" ? '<span class="count">3</span>' : ""}</a>`).join("")}</nav><div class="sidebar-bottom"><div class="quiet-card">${icon("leaf")}<p>A little space.<br>A different perspective.</p></div><div class="profile"><span class="avatar">DR</span><div>Demo practitioner<small>Therapist workspace</small></div></div></div></aside><div class="workspace"><header class="topbar"><div class="crumb">Workspace ${icon("chevron")} ${esc(section[0].toUpperCase() + section.slice(1))}</div><div class="top-actions"><span class="subtext date">${date(new Date(), { weekday: "short", year: "numeric" })}</span><span class="pill amber"><span class="dot"></span>Local demo</span><a href="#client/demo-jamie" class="text-link">Client view ${icon("arrow")}</a></div></header><main id="main" tabindex="-1">${!storageAvailable ? '<div class="storage-alert" role="alert">Local storage is unavailable. Changes will not survive closing this page.</div>' : ""}${content}<div class="footer-note">${icon("shield")} Fictional clients · Browser-local demo · Devices and AI are not connected</div></main></div></div>`;
+    return `<div class="shell"><aside class="sidebar">${brand()}<div class="workspace-label">YOUR WORKSPACE</div><nav class="nav" aria-label="Workspace">${navItems.map(([id, img, title]) => `<a href="#${id}" class="${section === id ? "active" : ""}" ${section === id ? 'aria-current="page"' : ""}>${icon(img)}<span class="nav-label">${title}</span>${id === "clients" ? '<span class="count">3</span>' : ""}</a>`).join("")}</nav><div class="sidebar-bottom"><div class="quiet-card">${icon("leaf")}<p>A little space.<br>A different perspective.</p></div><div class="profile"><span class="avatar">DR</span><div>Demo practitioner<small>Therapist workspace</small></div></div></div></aside><div class="workspace"><header class="topbar"><div class="crumb">Workspace ${icon("chevron")} ${esc(section[0].toUpperCase() + section.slice(1))}</div><div class="top-actions"><span class="subtext date">${date(new Date(), { weekday: "short", year: "numeric" })}</span><span class="pill amber"><span class="dot"></span>${window.LandscapeBackend?.connected ? "Shared Mac demo" : "Local demo"}</span><a href="#client/demo-jamie" class="text-link">Client view ${icon("arrow")}</a></div></header><main id="main" tabindex="-1">${!storageAvailable ? '<div class="storage-alert" role="alert">Local storage is unavailable. Changes will not survive closing this page.</div>' : ""}${content}<div class="footer-note">${icon("shield")} ${window.LandscapeBackend?.connected ? "Fictional clients · Shared on this Mac · Garmin deferred" : "Fictional clients · Browser-local demo · Devices and AI are not connected"}</div></main></div></div>`;
   }
   let artworkId = 0;
   function artwork(depth = {}, hero = false) {
@@ -131,7 +143,7 @@
   }
   function scene(session, cls = "", disabled = false) {
     const depth = session?.depth || {};
-    return `<div class="scene ${cls}" id="scene">${artwork(depth)}<span class="scene-label">${session ? "DESKTOP EXPLORATION · SIMULATED" : "A LITTLE ROOM TO EXPLORE"}</span>${session ? `<div class="scene-regions" aria-label="Choose a landscape region">${S.regions.map((r, i) => `<button class="region-button" data-action="select" data-region="${r}" aria-label="Explore ${r}" aria-pressed="${session.region === r}" ${disabled ? "disabled" : ""}><span>${["The sky", "The ridges", "The water"][i]} · ${(depth[r] || 0) + 1}/4</span></button>`).join("")}</div>` : ""}</div>`;
+    return `<div class="scene ${cls}" id="scene">${artwork(depth)}${session?.media && session.media.source !== "desktop_snapshot" ? `<${session.media.kind === "video" ? "video" : "img"} class="applied-media" src="${esc(session.media.url)}" ${session.media.kind === "video" ? (session.status === "active" ? 'autoplay muted playsinline preload="metadata"' : 'muted playsinline preload="metadata"') : 'alt="Approved session landscape"'}></${session.media.kind === "video" ? "video" : "img"}>` : ""}<span class="scene-label">${session ? "DESKTOP EXPLORATION · SIMULATED" : "A LITTLE ROOM TO EXPLORE"}</span>${session ? `<div class="scene-regions" aria-label="Choose a landscape region">${S.regions.map((r, i) => `<button class="region-button" data-action="select" data-region="${r}" aria-label="Explore ${r}" aria-pressed="${session.region === r}" ${disabled ? "disabled" : ""}><span>${["The sky", "The ridges", "The water"][i]} · ${(depth[r] || 0) + 1}/4</span></button>`).join("")}</div>` : ""}</div>`;
   }
   function clientRows() {
     return S.clients
@@ -146,7 +158,7 @@
     const completed = sessions().filter((s) => s.status === "completed");
     const activeLink = active ? `session/${active.id}` : "prepare/demo-jamie";
     return layout(
-      `${head("A SPACE FOR MEANINGFUL MOMENTS", "Make room for reflection.", "A quiet overview of your clients, conversations, and what comes next.", link(icon(active ? "play" : "plus") + (active ? "Return to session" : "Begin a session"), activeLink))}<section class="hero"><div class="hero-copy"><span class="eyebrow">A DIFFERENT WAY TO EXPLORE</span><h2>Let the conversation<br>shape the landscape.</h2><p>A gentle space where attention becomes a starting point, and each reflection opens something new.</p><a class="text-link" href="#${activeLink}">${active ? "Continue exploring" : "Prepare your first session"} ${icon("arrow")}</a></div><div class="hero-art">${artwork({}, true)}</div></section><div class="stats"><div class="stat"><span class="stat-icon">${icon("people")}</span><div><div class="stat-label">Clients in your workspace</div><strong>3</strong><small>fictional demo profiles</small></div></div><div class="stat"><span class="stat-icon">${icon("calendar")}</span><div><div class="stat-label">Completed sessions</div><strong>${completed.length}</strong><small>${completed.length ? "moments to look back on" : "a fresh beginning"}</small></div></div><div class="stat"><span class="stat-icon">${icon("notes")}</span><div><div class="stat-label">Session reflections</div><strong>${data.sessions.reduce((n, s) => n + s.events.filter((e) => e.type === "reflection").length, 0)}</strong><small>saved in this browser</small></div></div></div><div class="grid-two"><section><div class="section-head"><div><h2>Your clients</h2><p>Every journey starts with a conversation.</p></div><a href="#clients" class="text-link">View all ${icon("arrow")}</a></div><div class="panel">${clientRows()}</div></section><section><div class="section-head"><h2>A moment for you</h2></div><div class="panel journal">${icon("leaf", "leaf")}<span class="eyebrow">THE PRACTITIONER'S PAUSE</span><h3>Arrive before you begin.</h3><p>Take a breath. Notice what you bring into the room. There is no need to have every answer.</p><a href="#notes" class="text-link">Open your notes ${icon("arrow")}</a></div><div class="callout mt"><strong>Start with curiosity.</strong><br>This prototype uses a scripted guide. Your judgement and the client's choices lead the experience.</div></section></div>`,
+      `${head("A SPACE FOR MEANINGFUL MOMENTS", "Make room for reflection.", "A quiet overview of your clients, conversations, and what comes next.", link(icon(active ? "play" : "plus") + (active ? "Return to session" : "Begin a session"), activeLink))}<section class="hero"><div class="hero-copy"><span class="eyebrow">A DIFFERENT WAY TO EXPLORE</span><h2>Let the conversation<br>shape the landscape.</h2><p>A gentle space where attention becomes a starting point, and each reflection opens something new.</p><a class="text-link" href="#${activeLink}">${active ? "Continue exploring" : "Prepare your first session"} ${icon("arrow")}</a></div><div class="hero-art">${artwork({}, true)}</div></section><div class="stats"><div class="stat"><span class="stat-icon">${icon("people")}</span><div><div class="stat-label">Clients in your workspace</div><strong>3</strong><small>fictional demo profiles</small></div></div><div class="stat"><span class="stat-icon">${icon("calendar")}</span><div><div class="stat-label">Completed sessions</div><strong>${completed.length}</strong><small>${completed.length ? "moments to look back on" : "a fresh beginning"}</small></div></div><div class="stat"><span class="stat-icon">${icon("notes")}</span><div><div class="stat-label">Session reflections</div><strong>${data.sessions.reduce((n, s) => n + s.events.filter((e) => e.type === "reflection").length, 0)}</strong><small>${window.LandscapeBackend?.connected ? "saved on this Mac" : "saved in this browser"}</small></div></div></div><div class="grid-two"><section><div class="section-head"><div><h2>Your clients</h2><p>Every journey starts with a conversation.</p></div><a href="#clients" class="text-link">View all ${icon("arrow")}</a></div><div class="panel">${clientRows()}</div></section><section><div class="section-head"><h2>A moment for you</h2></div><div class="panel journal">${icon("leaf", "leaf")}<span class="eyebrow">THE PRACTITIONER'S PAUSE</span><h3>Arrive before you begin.</h3><p>Take a breath. Notice what you bring into the room. There is no need to have every answer.</p><a href="#notes" class="text-link">Open your notes ${icon("arrow")}</a></div><div class="callout mt"><strong>Start with curiosity.</strong><br>This prototype uses a scripted guide. Your judgement and the client's choices lead the experience.</div></section></div>`,
       "overview",
     );
   }
@@ -164,7 +176,7 @@
       ? matches
           .map(
             (c) =>
-              `<article class="panel client-card">${avatar(c, true)}<div><h2>${c.name}</h2><div class="client-id">FICTIONAL CLIENT · ${c.initials}-00${S.clients.indexOf(c) + 1}</div></div><p>${c.description}</p><div class="card-meta"><span>${sessions(c.id).length} sessions</span><span>Local demo</span></div>${link("View client " + icon("arrow"), "profile/" + c.id, true)}</article>`,
+              `<article class="panel client-card">${avatar(c, true)}<div><h2>${c.name}</h2><div class="client-id">FICTIONAL CLIENT · ${c.initials}-00${S.clients.indexOf(c) + 1}</div></div><p>${c.description}</p><div class="card-meta"><span>${sessions(c.id).length} sessions</span><span>${window.LandscapeBackend?.connected ? "Shared Mac demo" : "Local demo"}</span></div>${link("View client " + icon("arrow"), "profile/" + c.id, true)}</article>`,
           )
           .join("")
       : '<div class="panel empty empty-search">No clients match this search.</div>';
@@ -183,7 +195,7 @@
     const c = client(id),
       list = sessions(c.id);
     return layout(
-      `<a href="#clients" class="back">${icon("back")} All clients</a><div class="page-head"><div class="spaced">${avatar(c, true)}<div><h1 style="margin-bottom:4px">${c.name}</h1><p>${c.focus} <span class="badge">DEMO CLIENT</span></p></div></div>${link(icon("plus") + "Prepare session", "prepare/" + c.id)}</div><div class="tabs"><span class="active" style="padding:13px 0;font-size:12px;border-bottom:2px solid var(--sage)">Overview</span><a href="#client/${c.id}">Client experience ${icon("arrow")}</a></div><div class="split-details"><section><div class="section-head"><h2>Session history</h2><span class="subtext">${list.length} sessions</span></div><div class="panel">${history(list)}</div><div class="panel panel-pad mt"><div class="section-head"><h2>Practitioner notes</h2><span class="save-indicator" id="save-state">Browser-local</span></div><p class="subtext">Private in a future connected system. This demo has no authentication—use fictional content only.</p><label for="profile-note">Ongoing context</label><textarea id="profile-note" data-profile="${c.id}" placeholder="What would you like to remember for next time?" maxlength="10000">${esc(data.notes[c.id] || "")}</textarea><div class="form-actions">${button("Save note", "save-profile", false, `data-client="${c.id}"`)}</div></div></section><aside><div class="panel panel-pad"><span class="eyebrow">EXPLORATION FOCUS</span><h2 class="mt">${c.focus}</h2><p class="subtext">${c.description}</p><div class="divider"></div><span class="eyebrow">ASSESSMENTS</span><p class="subtext mt">No standardized questionnaire selected. A practitioner will select an appropriate instrument before it is added.</p><span class="pill">Not configured</span></div><div class="callout mt">Client check-ins are simple comfort ratings, not standardized tests or clinical scores.</div></aside></div>`,
+      `<a href="#clients" class="back">${icon("back")} All clients</a><div class="page-head"><div class="spaced">${avatar(c, true)}<div><h1 style="margin-bottom:4px">${c.name}</h1><p>${c.focus} <span class="badge">DEMO CLIENT</span></p></div></div>${link(icon("plus") + "Prepare session", "prepare/" + c.id)}</div><div class="tabs"><span class="active" style="padding:13px 0;font-size:12px;border-bottom:2px solid var(--sage)">Overview</span><a href="#client/${c.id}">Client experience ${icon("arrow")}</a></div><div class="split-details"><section><div class="section-head"><h2>Session history</h2><span class="subtext">${list.length} sessions</span></div><div class="panel">${history(list)}</div><div class="panel panel-pad mt"><div class="section-head"><h2>Practitioner notes</h2><span class="save-indicator" id="save-state">${window.LandscapeBackend?.connected ? "Saved on Mac" : "Browser-local"}</span></div><p class="subtext">Private in a future connected system. This demo has no authentication—use fictional content only.</p><label for="profile-note">Ongoing context</label><textarea id="profile-note" data-profile="${c.id}" placeholder="What would you like to remember for next time?" maxlength="10000">${esc(data.notes[c.id] || "")}</textarea><div class="form-actions">${button("Save note", "save-profile", false, `data-client="${c.id}"`)}</div></div></section><aside><div class="panel panel-pad"><span class="eyebrow">EXPLORATION FOCUS</span><h2 class="mt">${c.focus}</h2><p class="subtext">${c.description}</p><div class="divider"></div><span class="eyebrow">ASSESSMENTS</span><p class="subtext mt">No standardized questionnaire selected. A practitioner will select an appropriate instrument before it is added.</p><span class="pill">Not configured</span></div><div class="callout mt">Client check-ins are simple comfort ratings, not standardized tests or clinical scores.</div></aside></div>`,
       "clients",
     );
   }
@@ -211,7 +223,7 @@
     const c = client(id),
       active = current();
     return layout(
-      `<a href="#profile/${c.id}" class="back">${icon("back")} ${c.name}</a>${head("BEFORE YOU BEGIN", "Set the scene.", "A few intentions, a little context, and space for the unexpected.")}<div class="split-details"><form id="prepare-form" class="panel panel-pad"><div class="section-head"><h2>Session preparation</h2><span class="pill sage">${c.name}</span></div><input type="hidden" name="clientId" value="${c.id}"><div class="field"><label for="goal">What would you like to make room for?</label><input id="goal" name="goal" placeholder="e.g. Exploring change with curiosity" required maxlength="150" value="${esc(c.focus)}"></div><div class="field"><label for="preNotes">Before-session notes</label><textarea id="preNotes" name="preNotes" placeholder="Context, intentions, or things to return to…" maxlength="10000"></textarea><small class="hint">Practitioner notes are separate from the scripted conversation.</small></div><div class="field"><label for="exclusions">Topics or imagery to avoid</label><input id="exclusions" name="exclusions" maxlength="500" placeholder="Optional boundaries for a future AI guide"><small class="hint">Recorded for review. This simulator uses fixed questions and cannot enforce topic rules against an AI.</small></div>${comfort("before")}<div class="callout">${icon("book")} <strong>Questionnaires come later.</strong> Standardized assessments will be chosen with a practitioner. Nothing is scored or recommended automatically here.</div><label class="check-row"><input name="consent" type="checkbox" required><span>I understand this is a desktop simulation with fictional content. Notes and reflections are saved in this browser. No microphone, headset or watch data is collected.</span></label>${active ? `<div class="callout mb">There is already an unfinished session. <a href="#session/${active.id}" class="text-link">Return to it ${icon("arrow")}</a> before starting another.</div>` : ""}<div class="form-actions">${link("Back", "profile/" + c.id, true)}<button class="button" ${active ? "disabled" : ""}>${icon("play")} Begin demo session</button></div></form><aside><div class="panel panel-pad"><h2>A gentle starting point</h2><p class="subtext">A large landscape. Three regions. A scripted guide to help you find a place to begin.</p>${scene(null, "small")}<div class="divider"></div><h3>Connection check</h3>${devices()}</div></aside></div>`,
+      `<a href="#profile/${c.id}" class="back">${icon("back")} ${c.name}</a>${head("BEFORE YOU BEGIN", "Set the scene.", "A few intentions, a little context, and space for the unexpected.")}<div class="split-details"><form id="prepare-form" class="panel panel-pad"><div class="section-head"><h2>Session preparation</h2><span class="pill sage">${c.name}</span></div><input type="hidden" name="clientId" value="${c.id}"><div class="field"><label for="goal">What would you like to make room for?</label><input id="goal" name="goal" placeholder="e.g. Exploring change with curiosity" required maxlength="150" value="${esc(c.focus)}"></div><div class="field"><label for="preNotes">Before-session notes</label><textarea id="preNotes" name="preNotes" placeholder="Context, intentions, or things to return to…" maxlength="10000"></textarea><small class="hint">Practitioner notes are separate from the scripted conversation.</small></div><div class="field"><label for="exclusions">Topics or imagery to avoid</label><input id="exclusions" name="exclusions" maxlength="500" placeholder="Optional boundaries for a future AI guide"><small class="hint">Recorded for review. This simulator uses fixed questions and cannot enforce topic rules against an AI.</small></div>${comfort("before")}<div class="callout">${icon("book")} <strong>Questionnaires come later.</strong> Standardized assessments will be chosen with a practitioner. Nothing is scored or recommended automatically here.</div><label class="check-row"><input name="consent" type="checkbox" required><span>I understand this is a desktop simulation with fictional content. Notes and reflections are ${window.LandscapeBackend?.connected ? "saved on this Mac" : "saved in this browser"}. No microphone, headset or watch data is collected.</span></label>${active ? `<div class="callout mb">There is already an unfinished session. <a href="#session/${active.id}" class="text-link">Return to it ${icon("arrow")}</a> before starting another.</div>` : ""}<div class="form-actions">${link("Back", "profile/" + c.id, true)}<button class="button" ${active ? "disabled" : ""}>${icon("play")} Begin demo session</button></div></form><aside><div class="panel panel-pad"><h2>A gentle starting point</h2><p class="subtext">A large landscape. Three regions. A scripted guide to help you find a place to begin.</p>${scene(null, "small")}<div class="divider"></div><h3>Connection check</h3>${devices()}</div></aside></div>`,
       "sessions",
     );
   }
@@ -233,11 +245,11 @@
   }
   function stage(s, clientMode = false) {
     const disabled = s.status !== "active" || s.pendingCycle;
-    return `<section><div id="scene-slot">${scene(s, clientMode ? "client-scene" : "", disabled)}</div><div id="scene-legend">${sessionLegend(s)}</div><div class="progress" aria-hidden="true"><span id="cycle-progress" style="width:${((30 - s.remaining) / 30) * 100}%"></span></div><div class="stage-footer"><div class="timer"><strong id="remaining">${String(s.remaining).padStart(2, "0")}</strong> / 30 sec <span class="countdown-caption">· Cycle ${s.cycle} · simulated window</span></div><div class="controls">${button(icon(s.status === "paused" ? "play" : "pause") + (s.status === "paused" ? "Resume" : "Pause"), "pause", true, `data-id="${s.id}"`)}${button("Finish session", "finish", true, `data-id="${s.id}"`)}</div></div>${s.pendingCycle ? `<div class="callout"><strong>A moment to reflect.</strong><br>This 30-second window is complete. Stay here as long as you need. ${button("Begin next cycle " + icon("arrow"), "next", false, `data-id="${s.id}" ${s.status !== "active" ? "disabled" : ""}`)}</div>` : ""}${s.status === "paused" ? '<div class="callout">Session paused. The clock and exploration are held until you resume.</div>' : ""}<p class="demo-notice">Region choice uses clicks or keyboard, not head tracking. Artwork is procedural; no generated video is playing.</p></section>`;
+    return `<section><div id="scene-slot">${scene(s, clientMode ? "client-scene" : "", disabled)}</div><div id="scene-legend">${sessionLegend(s)}</div>${s.proposal ? `<div class="callout mb"><strong>Suggested next region: ${esc(s.proposal.region || "ask the practitioner")}</strong><br>${esc(s.proposal.reason)} ${s.proposal.region ? button("Confirm region", "select", true, `data-id="${s.id}" data-region="${s.proposal.region}" ${s.status !== "active" ? "disabled" : ""}`) : ""}</div>` : ""}<div class="progress" aria-hidden="true"><span id="cycle-progress" style="width:${((30 - s.remaining) / 30) * 100}%"></span></div><div class="stage-footer"><div class="timer"><strong id="remaining">${String(s.remaining).padStart(2, "0")}</strong> / 30 sec <span class="countdown-caption">· Cycle ${s.cycle} · simulated window</span></div><div class="controls">${button(icon(s.status === "paused" ? "play" : "pause") + (s.status === "paused" ? "Resume" : "Pause"), "pause", true, `data-id="${s.id}"`)}${button("Finish session", "finish", true, `data-id="${s.id}"`)}</div></div>${s.pendingCycle ? `<div class="callout"><strong>A moment to reflect.</strong><br>This 30-second window is complete. Stay here as long as you need. ${button("Begin next cycle " + icon("arrow"), "next", false, `data-id="${s.id}" ${s.status !== "active" ? "disabled" : ""}`)}</div>` : ""}${s.status === "paused" ? '<div class="callout">Session paused. The clock and exploration are held until you resume.</div>' : ""}<p class="demo-notice">${s.driver === "unity" ? "Unity participant paired; head-directed reports are used when received." : "Desktop selection uses clicks or keyboard."} ${s.media?.job_id ? "Approved provider media is shown." : "Artwork is procedural; no generated video is playing."}</p></section>`;
   }
   function guide(s) {
     const disabled = s.status !== "active" || s.pendingCycle;
-    return `<section class="panel guide-panel"><div class="guide-heading"><span class="guide-orb"></span><div><strong>Your reflection guide</strong><small>Scripted preview · no AI connected</small></div></div><p class="guide-text" id="guide-text">${s.pendingCycle ? "Take your time with this moment. Begin the next cycle when you feel ready to explore further." : esc(latestGuide(s))}</p><form id="reflection-form" data-id="${s.id}"><label for="reflection">A few words about the ${s.region === "ridge" ? "ridges" : s.region}</label><textarea id="reflection" name="reflection" placeholder="There is no right answer…" required maxlength="2000" ${disabled ? "disabled" : ""}></textarea><small class="hint subtext">This is a simulation. Your words are recorded, but their meaning does not drive the artwork.</small><button class="button wide mt" ${disabled ? "disabled" : ""}>Reflect & reveal ${icon("arrow")}</button></form></section>`;
+    return `<section class="panel guide-panel"><div class="guide-heading"><span class="guide-orb"></span><div><strong>Your reflection guide</strong><small>${window.LandscapeVoice?.active ? "ElevenLabs live voice · microphone active" : "Scripted preview · no AI connected"}</small></div></div><p class="guide-text" id="guide-text">${s.pendingCycle ? "Take your time with this moment. Begin the next cycle when you feel ready to explore further." : esc(latestGuide(s))}</p><form id="reflection-form" data-id="${s.id}"><label for="reflection">A few words about the ${s.region === "ridge" ? "ridges" : s.region}</label><textarea id="reflection" name="reflection" placeholder="There is no right answer…" required maxlength="2000" ${disabled ? "disabled" : ""}></textarea><small class="hint subtext">This is a simulation. Your words are recorded, but their meaning does not drive the artwork.</small><button class="button wide mt" ${disabled ? "disabled" : ""}>Reflect & reveal ${icon("arrow")}</button></form></section>`;
   }
   function sessionPage(id) {
     const s = byId(id);
@@ -247,9 +259,51 @@
       return "";
     }
     return layout(
-      `<div class="page-head"><div><span class="eyebrow">SESSION IN PROGRESS · ${esc(client(s.clientId).name)}</span><h1>${esc(s.goal)}</h1><p>A conversation, a landscape, and time to notice.</p></div><a class="button secondary" href="#client-session/${s.id}">Client view ${icon("arrow")}</a></div><div class="session-grid">${stage(s)}${guide(s)}</div><div class="device-summary">${["Quest 2 · not connected", "Garmin · no readings", "ElevenLabs · not connected", "fal.ai · not connected"].map((t) => `<div class="device-mini">${t.split(" · ")[0]}<strong style="margin:6px 0 0">${t.split(" · ")[1]}</strong></div>`).join("")}</div><div class="grid-two mt"><section class="panel panel-pad"><div class="section-head"><h2>Conversation & interactions</h2><span class="badge">LIVE DEMO TIMELINE</span></div><ol class="timeline" id="timeline">${timeline(s)}</ol></section><section class="panel panel-pad"><h2>In-the-moment notes</h2><p class="subtext">Keep your observations separate from the client's words.</p><form id="session-note" data-id="${s.id}"><label for="moment-note">Practitioner observation</label><textarea id="moment-note" name="note" maxlength="5000" placeholder="What feels useful to remember?" required></textarea><div class="form-actions"><button class="button secondary">Add to timeline</button></div></form><div class="callout mt">Heart rate will help inform pacing once connected. No readings or emotional interpretations are simulated.</div></section></div>`,
+      `<div class="page-head"><div><span class="eyebrow">SESSION IN PROGRESS · ${esc(client(s.clientId).name)}</span><h1>${esc(s.goal)}</h1><p>A conversation, a landscape, and time to notice.</p></div><a class="button secondary" href="#client-session/${s.id}">Client view ${icon("arrow")}</a></div><div class="session-grid">${stage(s)}${guide(s)}</div>${connectionControls(s)}<div class="device-summary">${[s.driver === "unity" ? "Unity · paired" : "Quest 2 · not connected", "Garmin · deferred", "ElevenLabs · not connected", "fal.ai · not connected"].map((t) => `<div class="device-mini">${t.split(" · ")[0]}<strong style="margin:6px 0 0">${t.split(" · ")[1]}</strong></div>`).join("")}</div><div class="grid-two mt"><section class="panel panel-pad"><div class="section-head"><h2>Conversation & interactions</h2><span class="badge">LIVE DEMO TIMELINE</span></div><ol class="timeline" id="timeline">${timeline(s)}</ol></section><section class="panel panel-pad"><h2>In-the-moment notes</h2><p class="subtext">Keep your observations separate from the client's words.</p><form id="session-note" data-id="${s.id}"><label for="moment-note">Practitioner observation</label><textarea id="moment-note" name="note" maxlength="5000" placeholder="What feels useful to remember?" required></textarea><div class="form-actions"><button class="button secondary">Add to timeline</button></div></form><div class="callout mt">Heart rate will help inform pacing once connected. No readings or emotional interpretations are simulated.</div></section></div>`,
       "sessions",
     );
+  }
+  function connectionControls(s) {
+    const backend = window.LandscapeBackend;
+    if (!backend?.connected)
+      return '<div class="callout mt">Local-only workspace. Start the coordinator to pair Unity and configure voice/media. Garmin remains deferred.</div>';
+    return `<section class="panel panel-pad mt"><div class="section-head"><h2>Connected session</h2><span class="pill sage">Mac coordinator</span></div><p class="subtext">Pair the Unity client to this session. Voice sends microphone audio to ElevenLabs only after explicit start. Media uses the current scene plus a visual brief; private notes are not sent. Garmin is deferred.</p><div class="spaced">${button("Pair Unity headset", "pair", true, `data-id="${s.id}"`)}${button(window.LandscapeVoice?.active ? "Stop voice" : "Start voice guide", "voice", true, `data-id="${s.id}" ${!backend.status?.paid_enabled || !backend.status?.voice.configured ? "disabled" : ""}`)}${button("Media studio", "media-studio", true, `data-id="${s.id}"`)}<span id="connection-message" class="subtext"></span></div><div id="media-studio"></div></section>`;
+  }
+  async function captureScene() {
+    const svg = document.querySelector("#scene svg");
+    if (!svg) throw new Error("Open a live scene first.");
+    const copy = svg.cloneNode(true);
+    copy.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    copy
+      .querySelectorAll(".region-detail")
+      .forEach((el) =>
+        el.setAttribute(
+          "opacity",
+          el.classList.contains("visible") ? "1" : "0",
+        ),
+      );
+    const blob = new Blob([new XMLSerializer().serializeToString(copy)], {
+        type: "image/svg+xml",
+      }),
+      url = URL.createObjectURL(blob);
+    try {
+      const image = new Image();
+      image.src = url;
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = 900;
+      canvas.height = 560;
+      canvas.getContext("2d").drawImage(image, 0, 0, 900, 560);
+      return canvas.toDataURL("image/png");
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+  async function openMedia(s) {
+    const jobs = await window.LandscapeBackend.jobs(s.id),
+      enabled = window.LandscapeBackend.status?.paid_enabled;
+    document.querySelector("#media-studio").innerHTML =
+      `<div class="divider"></div><p class="subtext">${enabled ? "Generation may incur provider charges. One job at a time; four jobs maximum per session. Video output is currently 5 seconds, within the 30-second limit." : "Paid generation is disabled. Restart the coordinator with --enable-paid only after agreeing a test budget."}</p><form id="media-form" data-id="${s.id}"><label for="visual-brief">Visual brief (no names, notes or identifying details)</label><input id="visual-brief" name="brief" required maxlength="1000" placeholder="Soft mist lifting over the selected region"><div class="spaced mt"><select name="kind" aria-label="Media type" style="width:auto"><option value="image">Refine selected image region</option><option value="video">Animate current scene · 5 seconds</option></select><button class="button" ${!enabled ? "disabled" : ""}>Generate preview</button>${button("Refresh jobs", "media-studio", true, `data-id="${s.id}"`)}</div></form><div class="mt">${jobs.map((j) => `<article class="callout mb"><strong>${esc(j.kind)} · ${esc(j.status)}</strong><p class="subtext">${esc(j.error || j.model)}</p>${j.status === "ready" ? `${j.kind === "image" ? `<img src="/api/sessions/${s.id}/media/${j.id}/artifact" alt="Generated preview" style="max-width:100%;border-radius:8px">` : `<video controls preload="metadata" src="/api/sessions/${s.id}/media/${j.id}/artifact" style="width:100%"></video>`}<p class="subtext">Check continuity and region placement before applying. A generated video can move landmarks.</p>${button("Confirm continuity & use", "apply-media", true, `data-id="${s.id}" data-job="${j.id}"`)}` : ""}</article>`).join("") || '<p class="subtext">No generation jobs yet.</p>'}</div>`;
   }
   function sessionsPage() {
     return layout(
@@ -312,7 +366,7 @@
     const c = client(id),
       active = current();
     return clientLayout(
-      `<div class="client-intro"><span class="eyebrow">WELCOME, ${c.name.split(" ")[0].toUpperCase()}</span><h1>A little space.<br>A new perspective.</h1><p>There is nothing to get right. Take your time, follow your curiosity, and see where the landscape takes you.</p></div><div class="client-card-wrap">${scene(null, "small")}<form id="client-start" class="panel panel-pad client-welcome-form"><input type="hidden" name="clientId" value="${c.id}"><h2>Before we begin</h2><p class="subtext">This is a scripted desktop preview. You can pause or stop whenever you want. No microphone, headset or watch is being used.</p>${comfort("before")}<label class="check-row"><input name="consent" type="checkbox" required><span>I understand this is a demo and anything I type is saved in this browser. I will use fictional content.</span></label>${active ? `<div class="callout mb">An unfinished session is already open. ${link("Return to session", "client-session/" + active.id, true)}</div>` : ""}<button class="button wide" ${active ? "disabled" : ""}>Begin reflection ${icon("arrow")}</button></form></div>`,
+      `<div class="client-intro"><span class="eyebrow">WELCOME, ${c.name.split(" ")[0].toUpperCase()}</span><h1>A little space.<br>A new perspective.</h1><p>There is nothing to get right. Take your time, follow your curiosity, and see where the landscape takes you.</p></div><div class="client-card-wrap">${scene(null, "small")}<form id="client-start" class="panel panel-pad client-welcome-form"><input type="hidden" name="clientId" value="${c.id}"><h2>Before we begin</h2><p class="subtext">This is a scripted desktop preview. You can pause or stop whenever you want. No microphone, headset or watch is being used.</p>${comfort("before")}<label class="check-row"><input name="consent" type="checkbox" required><span>I understand this is a demo and anything I type is ${window.LandscapeBackend?.connected ? "saved on this Mac" : "saved in this browser"}. I will use fictional content.</span></label>${active ? `<div class="callout mb">An unfinished session is already open. ${link("Return to session", "client-session/" + active.id, true)}</div>` : ""}<button class="button wide" ${active ? "disabled" : ""}>Begin reflection ${icon("arrow")}</button></form></div>`,
       c,
     );
   }
@@ -341,10 +395,17 @@
   let renderedPath = "";
   function render() {
     const preserved = {};
+    const focusId = document.activeElement?.id;
+    const selection = document.activeElement?.selectionStart;
+    const studio =
+      renderedPath === location.hash
+        ? document.querySelector("#media-studio")?.innerHTML
+        : null;
     if (renderedPath === location.hash)
-      for (const id of ["reflection", "moment-note"]) {
-        const field = document.getElementById(id);
-        if (field) preserved[id] = field.value;
+      for (const field of document.querySelectorAll(
+        "textarea[id],input[id],select[id]",
+      )) {
+        preserved[field.id] = { value: field.value, checked: field.checked };
       }
     const [page, id] = (location.hash.slice(1) || "overview").split("/");
     const views = {
@@ -361,10 +422,24 @@
       "client-session": () => clientSession(id),
     };
     $("#app").innerHTML = (views[page] || notFound)();
+    if (studio && document.querySelector("#media-studio"))
+      document.querySelector("#media-studio").innerHTML = studio;
     renderedPath = location.hash;
     for (const [id, value] of Object.entries(preserved)) {
       const field = document.getElementById(id);
-      if (field) field.value = value;
+      if (field) {
+        field.value = typeof value === "object" ? value.value : value;
+        if (typeof value === "object" && field.type === "checkbox")
+          field.checked = value.checked;
+      }
+    }
+    if (focusId && document.getElementById(focusId)) {
+      const focused = document.getElementById(focusId);
+      focused.focus({ preventScroll: true });
+      if (typeof selection === "number" && focused.setSelectionRange)
+        try {
+          focused.setSelectionRange(selection, selection);
+        } catch {}
     }
     document.title =
       "Inner Landscape · " +
@@ -424,7 +499,7 @@
       save();
       toast(
         storageAvailable
-          ? "Demo note saved in this browser."
+          ? "Demo note saved locally."
           : "Note is kept in memory only.",
       );
     }
@@ -531,6 +606,7 @@
       document.hidden
     )
       return;
+    if (s.driver === "unity") return;
     if (S.tick(s)) {
       save();
       if ($("#remaining"))
@@ -565,4 +641,129 @@
     if (s && S.pause(s)) save();
   });
   render();
+
+  document.addEventListener("click", async (e) => {
+    const target = e.target.closest("[data-action]");
+    if (!target || target.disabled) return;
+    const s = byId(target.dataset.id);
+    if (!s) return;
+    try {
+      if (target.dataset.action === "pair") {
+        await window.LandscapeBackend.scene(s.id, await captureScene());
+        const result = await window.LandscapeBackend.pair(s.id);
+        toast("Unity pairing code: " + result.code + " (valid 2 minutes)");
+        const msg = document.querySelector("#connection-message");
+        if (msg)
+          msg.textContent =
+            "Pairing code: " + result.code + " · expires in 2 minutes";
+      }
+      if (target.dataset.action === "voice") {
+        if (window.LandscapeVoice.active) await window.LandscapeVoice.stop();
+        else {
+          if (
+            !confirm(
+              "Start the paid voice guide? Microphone audio and conversation will be processed by ElevenLabs. Use fictional demo content only.",
+            )
+          )
+            return;
+          await window.LandscapeBackend.flush();
+          await window.LandscapeVoice.start(s.id, toast);
+        }
+        render();
+      }
+      if (target.dataset.action === "media-studio") await openMedia(s);
+      if (target.dataset.action === "apply-media")
+        await window.LandscapeBackend.apply(s.id, target.dataset.job);
+      if (["pause", "finish"].includes(target.dataset.action))
+        await window.LandscapeVoice.stop();
+      if (target.dataset.action === "select") window.LandscapeVoice.update();
+    } catch (error) {
+      toast(error.message);
+    }
+  });
+  document.addEventListener("submit", async (e) => {
+    if (e.target.id !== "media-form") return;
+    e.preventDefault();
+    const form = e.target,
+      values = Object.fromEntries(new FormData(form)),
+      s = byId(form.dataset.id);
+    const submit = form.querySelector(
+      'button[type="submit"],button:not([type])',
+    );
+    if (submit) submit.disabled = true;
+    try {
+      const image = await captureScene();
+      await window.LandscapeBackend.generate(s.id, {
+        image,
+        brief: values.brief,
+        kind: values.kind,
+      });
+      toast("Generation queued. The existing scene stays in place.");
+      await openMedia(s);
+    } catch (error) {
+      toast(error.message);
+      if (submit) submit.disabled = false;
+    }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) window.LandscapeVoice?.stop();
+  });
+  window.LandscapeBackend?.start(
+    data,
+    (workspace) => {
+      data = workspace;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch {}
+      const active = current();
+      if (!active || active.status !== "active") window.LandscapeVoice?.stop();
+      render();
+    },
+    (message) => {
+      toast(message);
+      render();
+    },
+  );
+
+  document.addEventListener(
+    "click",
+    async (e) => {
+      const target = e.target.closest("[data-action]"),
+        backend = window.LandscapeBackend;
+      if (
+        !target ||
+        target.disabled ||
+        !backend?.connected ||
+        !["pause", "finish", "select", "next"].includes(target.dataset.action)
+      )
+        return;
+      const s = byId(target.dataset.id) || current();
+      if (!s) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      try {
+        let name = target.dataset.action,
+          payload = {};
+        if (name === "pause") {
+          name = s.status === "paused" ? "resume" : "pause";
+          await window.LandscapeVoice.stop();
+        }
+        if (name === "finish") {
+          name = "stop";
+          await window.LandscapeVoice.stop();
+        }
+        if (name === "select") payload = { region: target.dataset.region };
+        await backend.command(s.id, name, payload);
+        if (name === "stop")
+          location.hash =
+            (location.hash.startsWith("#client-session/")
+              ? "client-session/"
+              : "review/") + s.id;
+        window.LandscapeVoice.update();
+      } catch (error) {
+        toast(error.message);
+      }
+    },
+    true,
+  );
 })();

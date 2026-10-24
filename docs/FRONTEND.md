@@ -1,5 +1,9 @@
 # Frontend milestone 1
 
+The coordinator connection, gated voice/media controls and Unity pairing were
+added subsequently. See `BACKEND.md` and `UNITY_HANDOFF.md` for their current
+setup and limits. The milestone-1 description below covers the static fallback.
+
 The local source of truth is `frontend/`. No npm packages or external visual assets
 are required. Open `frontend/index.html` or use the loopback-only preview command
 in the README. The implementation makes no paid API calls.

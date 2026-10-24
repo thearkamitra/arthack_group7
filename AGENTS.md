@@ -6,9 +6,10 @@
   Meta Quest 2/3. Do not assume clinical efficacy or infer emotions from pulse.
 - Work on `master`; `main` is intentionally empty. Push authorized completed work.
 - Keep frontend code under `frontend/` and documentation under `docs/`.
-- No backend or Python environment is currently needed. Introduce Python code,
-  dependencies, setup and meaningful tests under `backend/` only when required
-  by the agreed implementation plan. Pin direct dependencies.
+- The shared Python coordinator, dependencies, setup and tests live under
+  `backend/`; use its minimal hidden `.venv` with Python 3.10. Pin direct
+  dependencies and retain the installed environment snapshot. Unity teammate
+  source stays under `unity/`. Garmin is deferred as an independent workstream.
 - The former Auto-MIA pipeline and its environment are retired. Do not restore
   the submodule, mesh dependencies or historical training artifacts by default.
 

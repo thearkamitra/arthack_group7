@@ -1,8 +1,8 @@
 # API setup
 
-The local frontend and Lovable demo currently use no external APIs. Creating keys
-alone does not connect them. Integration work will read the following variables
-on the backend; never embed them in browser code or prefix secrets with VITE_.
+The static frontend and previous Lovable demo make no external API calls. The
+Mac coordinator now implements paid-gated voice/media adapters. See BACKEND.md.
+Creating keys alone does not enable calls. Never put keys in browser code or VITE_ variables.
 
 ## Local Mac
 
@@ -15,7 +15,8 @@ ELEVENLABS_API_KEY=your_elevenlabs_key
 ELEVENLABS_AGENT_ID=your_agent_id
 ```
 
-The future backend must explicitly load this file; the HTML sketch cannot read it.
+The coordinator loads `.env` for fal and prefers `.env.local` for the ElevenLabs
+key. Process environment takes precedence. The static frontend cannot read either file.
 No SDKs or environment replacements are required just to store the keys.
 
 ## fal.ai
@@ -33,7 +34,7 @@ No SDKs or environment replacements are required just to store the keys.
 3. Enable permissions needed for Agents/conversations. Enable text-to-speech
    separately only if using that endpoint; set a credit limit where available.
 4. Put the key in local `.env` as ELEVENLABS_API_KEY.
-5. Agent creation is pending. During implementation, create the reflection guide
+5. The private reflection guide has been created and verified. To create it on a new checkout, create the reflection guide
    in Agents, configure its voice, opening question and instructions, and copy
    its ID into ELEVENLABS_AGENT_ID. This ID is not another API key. Leave it
    unset until the agent exists.
