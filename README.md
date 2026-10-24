@@ -9,15 +9,56 @@ cycles, Unity/Quest 2, Garmin and the therapist/client platform.
 
 ## Current frontend
 
-Open `frontend/index.html` in a browser. No installation or server is required.
-Choose a local image, select a region, and write a reflection. Three scripted
-turns sharpen the whole image. This local sketch does not generate imagery,
-interpret text, measure gaze, or connect to voice or heart-rate services.
+The first local frontend milestone is implemented with plain HTML, CSS and
+JavaScript. It requires no dependency installation or build step.
 
-The separate Lovable demo is at:
-https://inner-landscape-dialogue-garden.lovable.app/
-Its source is not synced to this repository. Local frontend development continues
-here. Meta Quest 2/3 and Garmin Venu 4 integration will be planned later.
+Open `frontend/index.html` in a browser, or serve **only** the frontend directory:
+
+```sh
+python3 -m http.server 4173 --bind 127.0.0.1 --directory frontend
+```
+
+Open http://127.0.0.1:4173. Do not serve the repository root: it contains local
+credential files. Python's standard-library server is only for local preview.
+
+### Available flows
+
+- Overview and three fictional client profiles, searchable by name or focus.
+- Session preparation: aim, pre-notes, boundaries and optional comfort check.
+- Live desktop simulation: select sky/ridges/water, write reflections and reveal
+  procedural details only in that region. Each exploration window lasts up to
+  30 seconds; starting the next cycle requires a deliberate action.
+- Pause/resume, finish, interaction history and practitioner observations.
+- Session review, post-notes, comfort check and reviewed status.
+- Client presentation mode with welcome, reflection and completion/check-in views.
+- Client context notes, session history, notes index and connection status page.
+
+Notes and sessions are saved in browser-local storage. The UI explains this before
+starting. File and HTTP origins may have separate storage. Hidden tabs pause active
+sessions; reloading an unfinished session restores it paused. Clear only this
+prototype's data through Settings. Storage failure shows a warning.
+
+Use **fictional data only**. This frontend has no authentication or clinical data
+protection. Client mode is a presentation preview, not an access boundary. There
+are no real microphone, AI, generation, headset or heart-rate connections. Comfort
+checks are not standardized assessments. All generated-looking artwork is local
+SVG; the 30-second window does not play a generated video.
+
+The earlier, separate Lovable demo is still available at
+https://inner-landscape-dialogue-garden.lovable.app/ . It has not been updated by
+this implementation and its source is not synced to this repository.
+
+### Verification
+
+```sh
+node --test frontend/tests/state.test.cjs
+node --check frontend/state.js
+node --check frontend/app.js
+```
+
+Tests cover setup rejection, region isolation/refinement limits, pause, the
+30-second boundary, explicit cycle restart, completed-session rules, persistence
+and malformed storage recovery. Normal tests need no network or provider keys.
 
 ## API setup
 

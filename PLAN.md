@@ -1,6 +1,6 @@
 # Inner Landscape — implementation plan
 
-Status: proposed; implementation has not started.
+Status: frontend milestone 1 implemented as a local demo; integrations pending.
 Target: Mac development, Unity application on Meta Quest 2, Garmin Venu 4,
 ElevenLabs conversational guide, fal.ai imagery/video, and a therapist web console.
 Active branch: `master`. `main` remains empty.
@@ -267,9 +267,9 @@ validated clip of at most 30 seconds → Unity playback → stable continuation 
 ## 10. Therapist and client frontend
 
 Build locally under `frontend/`; Lovable is optional and its existing demo is
-reference material, not the source of truth. Start with plain TypeScript/Vite
-for structured UI and API integration; add a UI framework only if the component
-complexity warrants it. Pin package versions during implementation.
+reference material, not the source of truth. The first milestone uses buildless HTML/CSS/JavaScript with separate session rules
+and offline Node tests, retaining direct local-file use. Introduce TypeScript/Vite
+when API/component complexity warrants a build step. Pin package versions then.
 
 Visual language: warm off-white background, soft sage/sky accents, charcoal text,
 generous spacing, fine borders, restrained shadows and a clear type hierarchy.
@@ -340,7 +340,7 @@ therapist-defined review workflow and does not silently trigger deeper content.
 | Stage | Deliverable | Completion evidence |
 | --- | --- | --- |
 | 0. Contracts and scope | Agreed cycle, region map, events, retention and UI flow | Review this plan; sample events and clear ownership |
-| 1. Desktop vertical slice | Light therapist/client UI, simulated sessions and local media | Start/select/respond/pause/finish; notes persist/reload; no fake live sensors |
+| 1. Desktop vertical slice — implemented | Light therapist/client UI, simulated sessions and procedural local artwork | Browser-verified start/select/respond/pause/finish; saved pre/post notes reload; seven offline rule tests pass; no fake live sensors |
 | 2. Quest foundation | Unity Android app, large still/video surface, region UV tracking | Install on physical Quest 2; head turn selects expected region; stable frame time and stop |
 | 3. Shared session service | Mac coordinator, event store, paired console and headset | Same session state/timeline; authorized controls; reconnect/dedup and stale result rejection |
 | 4. Garmin | Live BLE heart rate and freshness display | Venu 4 data visible on Mac/console; disconnect becomes a gap; no emotion labels |
