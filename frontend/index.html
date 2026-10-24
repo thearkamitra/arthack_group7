@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Inner Landscape — interaction sketch</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#10151c;color:#ede9df;font:17px system-ui}main{max-width:1500px;margin:auto;padding:28px}header{display:flex;justify-content:space-between;align-items:center}h1{font:normal 30px Georgia}small{color:#b4bac4}.layout{display:grid;grid-template-columns:3fr 1fr;gap:24px}#scene{position:relative;min-height:65vh;overflow:hidden;border-radius:20px;background:radial-gradient(ellipse at 20% 70%,#557b84,transparent 55%),radial-gradient(ellipse at 75% 30%,#aa8b9e,transparent 50%),#25334b}#scene img{width:100%;height:100%;position:absolute;object-fit:cover;filter:blur(var(--blur,24px));transition:filter 2s}#regions{position:absolute;inset:0;display:flex}#regions button{width:33.333%;border:1px solid transparent;background:transparent;color:#fff;cursor:pointer;display:flex;align-items:end;justify-content:center;padding-bottom:24px;text-shadow:0 1px 4px #000}#regions button[aria-pressed=true]{border:2px solid #e2dac1;background:#ffffff0c}aside{padding:12px}button,input,textarea{font:inherit}textarea{width:100%;min-height:100px;background:#202936;color:#fff;border:1px solid #637083;border-radius:8px;padding:12px}aside button,.upload{display:block;margin:14px 0;padding:10px 16px;border:1px solid #71818b;border-radius:8px;background:#334753;color:white;cursor:pointer}#history{max-height:28vh;overflow:auto}#history p{font-size:14px;color:#c3cbd4}.upload input{display:block;max-width:100%;margin-top:8px}button:focus-visible{outline:3px solid #edc888}footer{margin-top:20px;color:#b4bac4;font-size:14px}@media(max-width:800px){.layout{grid-template-columns:1fr}#scene{min-height:50vh}}
+</style>
+<main>
+<header><h1>Inner Landscape</h1><small>Local interaction sketch · no AI connected</small></header>
+<div class="layout">
+<section id="scene" aria-label="Landscape with three selectable regions">
+<img id="image" alt="Your chosen landscape" hidden>
+<div id="regions"><button aria-pressed="false">Left</button><button aria-pressed="true">Centre</button><button aria-pressed="false">Right</button></div>
+</section>
+<aside><small>GUIDE · SCRIPTED PREVIEW</small><p id="guide" aria-live="polite">Take a moment to look around. Which region draws you in, and what does it bring to mind?</p>
+<form id="conversation"><label for="answer">Your reflection</label><textarea id="answer" required maxlength="2000" placeholder="Write a few words…"></textarea><button>Explore this region</button></form>
+<div id="history" aria-live="polite"></div>
+<label class="upload">Choose a landscape image<input id="upload" type="file" accept="image/png,image/jpeg,image/webp"></label>
+<button id="reset" type="button">Start again</button><p id="status" role="status">Choose an image to preview gradual sharpening.</p>
+</aside></div>
+<footer>Click a region to select it. This sketch sharpens the whole image over three turns; it does not generate content or measure gaze. Images and reflections stay in this browser tab. Garmin, voice and VR are not connected.</footer>
+</main>
+<script>
+let turn=0,region='Centre',imageUrl;
+const image=document.querySelector('#image'),status=document.querySelector('#status'),guide=document.querySelector('#guide'),history=document.querySelector('#history');
+const prompts=['What stands out there? Would you like to give it a shape or a texture?','What would you like to keep, soften, or change in this space?','Take a moment with this landscape. What would you like to carry away?'];
+for(const button of document.querySelectorAll('#regions button'))button.onclick=()=>{region=button.textContent;for(const item of document.querySelectorAll('#regions button'))item.setAttribute('aria-pressed',String(item===button));};
+function reset(){turn=0;image.style.setProperty('--blur','24px');history.replaceChildren();document.querySelector('#answer').value='';guide.textContent='Take a moment to look around. Which region draws you in, and what does it bring to mind?';status.textContent=image.hidden?'Choose an image to preview gradual sharpening.':'Ready. Your original file is unchanged.';}
+document.querySelector('#upload').onchange=async event=>{const file=event.target.files[0];if(!file)return;if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>20*1024*1024){status.textContent='Choose a PNG, JPEG or WebP image under 20 MB.';return;}const next=URL.createObjectURL(file);try{const probe=new Image();probe.src=next;await probe.decode();if(imageUrl)URL.revokeObjectURL(imageUrl);imageUrl=next;image.src=next;image.hidden=false;reset();}catch{URL.revokeObjectURL(next);status.textContent='This file could not be decoded as an image.';}};
+document.querySelector('#conversation').onsubmit=event=>{event.preventDefault();const answer=document.querySelector('#answer');if(!answer.value.trim())return;if(image.hidden){status.textContent='Choose an image first.';return;}if(turn>=3){status.textContent='Preview complete. Start again to explore another path.';return;}const entry=document.createElement('p');entry.textContent=region+' · '+answer.value.trim();history.append(entry);guide.textContent=prompts[turn];turn++;image.style.setProperty('--blur',Math.max(0,24-turn*8)+'px');answer.value='';status.textContent='Preview turn '+turn+' of 3 · selected region: '+region;};
+document.querySelector('#reset').onclick=reset;
+</script>
+</html>
