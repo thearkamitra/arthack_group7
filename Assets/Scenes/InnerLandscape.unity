@@ -37,8 +37,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a281e641bd474891861d7340d9836763, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   landscapeMaterial: {fileID: 2100000, guid: 9f7f52197dfd43b7ab16bfeb6b9e8440, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
