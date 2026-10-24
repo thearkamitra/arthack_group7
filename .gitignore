@@ -42,3 +42,6 @@ Thumbs.db
 *.csproj
 *.sln
 *.slnx
+
+# Unity CLI installation scratch cache
+/.utmp/

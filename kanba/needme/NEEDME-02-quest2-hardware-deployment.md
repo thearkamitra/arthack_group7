@@ -33,3 +33,11 @@ Local build prerequisite: Unity license initialization timed out and Android Bui
 Sync retest: Android Build Support is now installed. Licensing initialization remains blocked; batch compilation did not run. The new Android profile has Development Build enabled for the LAN demo.
 
 Latest recovery: licensing is fixed; Unity C# compilation and the scene/OpenXR setup method pass. Hub still reports modules installing (6/12), so folder presence did not prove installation complete. Wait for completion before APK build. Physical Quest acceptance remains pending.
+
+## APK ready; physical connection required
+
+Android tooling is repaired. A signed development APK now exists at
+`outputs/InnerLandscape.apk` and package/ABI/VR/permissions/integrity checks pass.
+No Quest is detected over USB. Connect a data-capable cable, enable Developer Mode
+and approve USB debugging inside the headset. Then the agent can install and launch
+without further routine approval. Rendering/audio/interaction tests stay pending.

@@ -133,7 +133,8 @@ this workspace. No dependencies are currently required by the local HTML sketch.
 Unity runtime code is now inside the root project and the InnerLandscape scene is
 selected for builds. See [Unity handoff](docs/UNITY_HANDOFF.md). Unity licensing
 is fixed and C# compilation plus editor scene/OpenXR configuration pass. Android
-module installation is still underway; APK and physical Quest checks remain.
+tooling is repaired and a signed development APK is verified at
+`outputs/InnerLandscape.apk`. USB deployment and physical Quest checks remain.
 
 Garmin is integrated in the therapist panel and Python coordinator. Run the small
 [Garmin broadcast check](docs/GARMIN.md) after enabling broadcast on the watch.

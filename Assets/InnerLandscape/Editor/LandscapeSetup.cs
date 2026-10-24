@@ -23,6 +23,8 @@ namespace InnerLandscape.Editor
             app.landscapeMaterial=material;
             EditorSceneManager.SaveScene(scene,"Assets/Scenes/InnerLandscape.unity");
             EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/Scenes/InnerLandscape.unity",true)};
+            PlayerSettings.productName="Inner Landscape";
+            PlayerSettings.companyName="Inner Landscape";
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android,"com.innerlandscape.demo");
             PlayerSettings.Android.targetArchitectures=AndroidArchitecture.ARM64;
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android,ScriptingImplementation.IL2CPP);

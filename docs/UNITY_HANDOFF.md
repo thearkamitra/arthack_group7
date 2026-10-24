@@ -13,10 +13,20 @@ Touch input. The referenced double-sided unlit shader includes stereo instancing
 Source compilation and the editor configuration entry point now pass in Unity
 6000.6.7f1. The scene and XR settings have been saved by Unity itself.
 
-The licensing lock was cleared by stopping an orphaned editor licensing helper;
-Hub's existing Personal license refreshed successfully. Android module installation
-is still underway in Hub (6 of 12 components at last inspection), even though an
-AndroidPlayer directory already exists. No APK or physical headset pass is claimed.
+The licensing lock is resolved and the full Android toolchain has been repaired.
+The parent Android repair did not install its NDK/CMake child modules; installing
+`android-ndk-r27c` and `cmake-3.22.1` explicitly resolved this. Verified Java
+17.0.18, NDK r27c (27.2.12479018), and CMake 3.22.1 by running their binaries.
+
+A development APK was built and validated at `outputs/InnerLandscape.apk`
+(54,682,134 bytes at this build). Verified: package `com.innerlandscape.demo`, app
+label Inner Landscape, ARM64 IL2CPP library, VR launch category, Internet/microphone/
+OpenXR permissions, development cleartext LAN permission, APK signature and ZIP
+integrity. Local evidence: `work/quest-build/final-manifest.json` and
+`work/quest-build/build-network.log`. These generated artifacts remain ignored.
+
+No Quest was listed by `adb devices`, so installation, launch, pairing and physical
+rendering/audio/comfort checks remain pending. No hardware pass is claimed.
 
 ## Build
 
@@ -86,3 +96,19 @@ cleanup remains manual between demo runs.
 - Voice WebSocket `/api/sessions/{id}/voice` starts with
   `{ "token":"...", "consent":true }`.
 - Never put tokens in URLs, logs or screenshots; never package provider keys.
+
+## Prepared local build and coordinator
+
+The Mac coordinator was restarted with `--host 0.0.0.0 --demo-lan --enable-paid`.
+Its local status check confirms voice and media credentials configured with paid
+features enabled. No voice/media request is sent merely by enabling the server.
+
+To deploy the existing APK after USB debugging approval:
+
+```sh
+"/Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb" devices
+"/Applications/Unity/Hub/Editor/6000.6.7f1/PlaybackEngines/AndroidPlayer/SDK/platform-tools/adb" install -r outputs/InnerLandscape.apk
+```
+
+`AndroidDemoNetwork.cs` sets `usesCleartextTraffic` only for Development Build;
+release builds explicitly disable it. The local HTTP/WS demo is synthetic only.

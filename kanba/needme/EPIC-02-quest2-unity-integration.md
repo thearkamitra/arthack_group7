@@ -37,7 +37,7 @@ What remains is compiling in Unity, deploying to a physical Quest 2, and verifyi
 
 ## 3. Tasks & Stories
 
-- [ ] **Task 2.1 — Unity Project Configuration**:
+- [x] **Task 2.1 — Unity Project Configuration**:
   - Open the root Unity 6000.6.7f1 project with Android Build Support and run the configuration menu.
   - Set Android manifest permissions: `android.permission.INTERNET` and `android.permission.RECORD_AUDIO`.
   - Configure Android Network Security config for trusted cleartext LAN IP development (HTTP/WS for demo only).
@@ -118,3 +118,24 @@ to .gitignore. The project is registered in Hub and its editor was launched.
 Remaining gate: Hub still shows module installation underway (6/12), despite the
 AndroidPlayer folder existing. Wait for all SDK/NDK/module installation to finish,
 then build the APK and perform the physical acceptance tests. No APK is claimed.
+
+Current pickup: Codex — complete exact NDK/CMake child modules, build and validate the Android APK, deploy if a Quest is connected.
+
+## Verified Android APK build
+
+Installed exact missing child modules `android-ndk-r27c` and `cmake-3.22.1` using
+Unity's official CLI, with the user's explicit EULA approval. Ran Java, NDK clang
+and CMake version checks successfully. Built a development ARM64 IL2CPP APK with
+Unity 6000.6.7f1. Corrected the app label and added an editor build hook that sets
+Android cleartext permission only in development APKs for the approved LAN demo.
+
+Validated `outputs/InnerLandscape.apk` (54,682,134 bytes): signature, ZIP integrity,
+package, app label, ARM64 IL2CPP payload, VR category, Internet/microphone/OpenXR
+permissions and cleartext/development flags. The first build artifacts and all
+attempt logs were preserved locally. Final manifest/log are under `work/quest-build/`.
+Acceptance criterion 1 (APK builds) now passes. Criteria 2–6 remain hardware checks.
+The coordinator is listening on LAN port 4173 with approved providers enabled.
+
+Blocker: repeated `adb devices` checks listed no Quest. Required action: connect a
+data-capable USB cable, enable headset Developer Mode, approve USB debugging in
+the headset. Then install, launch, pair and run physical acceptance checks.
