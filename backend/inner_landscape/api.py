@@ -272,6 +272,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         value = session(sid)
         result = value if access == "therapist" else participant_view(value)
         result["demo"] = demo.snapshot(sid)
+        from .region_zoom import billable_units
+        result["demo"]["fal_calls_remaining"]=max(0,cfg.max_jobs-billable_units(store.jobs(sid)))
         return result
 
     @app.post("/api/sessions/{sid}/demo/start")
@@ -310,6 +312,88 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if session(sid)["status"] != "active" or session(sid).get("pendingCycle"):
             raise ValueError("Resume or begin the next cycle before camera control")
         return demo.input(sid, body.get("action"))
+
+    @app.post("/api/sessions/{sid}/demo/generate")
+    async def demo_generate(sid: str, body: dict, request: Request):
+        therapist(request)
+        from .demo_generation import generate_view
+        value=session(sid); state=demo.state(sid); live=demo.snapshot(sid)
+        if body.get('autoplay') is not True or not value.get('clientId','').startswith('demo-'):
+            raise ValueError('Automatic generation is restricted to explicitly confirmed fictional demos')
+        if value['status']!='active' or value.get('pendingCycle') or not live['connected'] or live['headset'] or live['busy'] or not live['frame_ready']:
+            raise ValueError('Resume a connected browser demo before confirming the view')
+        active=value.get('media',{})
+        if active.get('entry') and value.get('source_hash')!=active.get('final_hash'):
+            raise ValueError('Wait for the current transition to finish')
+        width,height=body.get('width'),body.get('height')
+        if type(width) is not int or type(height) is not int or not (160<=width<=1280 and 90<=height<=720):
+            raise ValueError('Invalid browser viewport dimensions')
+        def stage(message):
+            state['simulation']=dict(mode='fal',stage=message,width=width,height=height)
+        state['simulating']=True
+        try:
+            video=await generate_view(cfg,media,store,value,state['frame'],width,height,stage)
+            apply_media(sid,ApplyBody(job_id=video['id'],continuity_confirmed=True),request)
+            store.mutate(sid,lambda current:event(current,'media','Confirmed fictional demo view: real fal discovery and inward journey','fal'))
+            state['simulation']=dict(mode='fal',stage='Playing fal.ai journey',width=width,height=height,job_id=video['id'])
+            return dict(simulated=False,job_id=video['id'],dimensions=video.get('final_resolution'),duration=5)
+        except (ValueError,ProviderUnavailable) as exc:
+            state['simulation']=dict(mode='fal',stage=str(exc),width=width,height=height,error=True)
+            raise
+        except Exception:
+            state['simulation']=dict(mode='fal',stage='Generation stopped; previous artwork retained. Inspect Media studio before retrying.',error=True)
+            raise
+        finally:
+            state['simulating']=False
+
+    @app.post("/api/sessions/{sid}/demo/simulate")
+    async def demo_simulate(sid: str, body: dict, request: Request):
+        therapist(request)
+        from .demo_media import make_demo_bundle
+        from .region_zoom import manual_decision
+        value = session(sid)
+        state = demo.state(sid)
+        live = demo.snapshot(sid)
+        if value["status"] != "active" or value.get("pendingCycle") or not live["connected"] or live["headset"] or live["busy"] or not live["frame_ready"]:
+            raise ValueError("Resume a connected browser demo before confirming the view")
+        active_media=value.get('media',{})
+        if active_media.get('entry') and value.get('source_hash') != active_media.get('final_hash'):
+            raise ValueError('Wait for the current transition to finish')
+        width, height = body.get("width"), body.get("height")
+        if type(width) is not int or type(height) is not int or not (160 <= width <= 1280 and 90 <= height <= 720):
+            raise ValueError("Invalid browser viewport dimensions")
+        # The click confirms the currently visible camera view; no gaze is invented.
+        selected = manual_decision(dict(cycle=value['cycle'],source_hash=value.get('source_hash',''),x=.5,y=.5,input_mode='scripted'),value['cycle'],value.get('source_hash',''))
+        job = dict(id=uuid.uuid4().hex,session_id=sid,cycle=value['cycle'],kind='video',
+                   status='preparing',model='LOCAL SIMULATION · no fal request',source='simulation',
+                   simulated=True,billable_units=0,entry=selected,brief='Slow inward approach from the confirmed browser view',created_at=time.time())
+        state.update(simulating=True,simulation=dict(stage='Preparing simulated fal clip',width=width,height=height))
+        media.persist(job)
+        try:
+            result = await asyncio.to_thread(make_demo_bundle, state['frame'], cfg.work/'media'/job['id']/'bundle', width, height)
+            # Bundle artifacts retain normal authenticated media/frame routes.
+            directory=cfg.work/'media'/job['id']
+            for name in ('output.mp4','first.png','final.png'):
+                (directory/name).write_bytes((directory/'bundle'/name).read_bytes())
+            job.update(result,status='ready')
+            media.persist(job)
+            def freeze(current):
+                if current['status']!='active' or current['cycle']!=value['cycle'] or current.get('source_hash')!=value.get('source_hash'):
+                    raise ValueError('Session changed; simulated clip retained without applying')
+                current['spatialDecision']=selected
+                event(current,'media','Simulated fal clip from confirmed browser view; no provider call','simulation')
+            store.mutate(sid,freeze)
+            apply_media(sid,ApplyBody(job_id=job['id'],continuity_confirmed=True),request)
+            state['simulation']=dict(stage='Playing simulated fal clip',width=result['final_resolution'][0],height=result['final_resolution'][1],job_id=job['id'])
+            return dict(simulated=True,job_id=job['id'],dimensions=result['final_resolution'],duration=5)
+        except Exception:
+            if job['status']!='ready':
+                job.update(status='failed',error='Local simulation failed; previous artwork retained')
+                media.persist(job)
+            state['simulation']=dict(stage='Simulation stopped; previous artwork retained')
+            raise
+        finally:
+            state['simulating']=False
 
     @app.post("/api/sessions/{sid}/demo/speech")
     def demo_speech(sid: str, body: dict, request: Request):
@@ -578,6 +662,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 return
             s["media"] = {
                 "entry": bool(job.get("entry")),
+                "simulated": bool(job.get("simulated")),
                 "first_url": f"/api/sessions/{sid}/media/{job['id']}/frame/first" if job.get("entry") else "",
                 "final_url": f"/api/sessions/{sid}/media/{job['id']}/frame/final" if job.get("entry") else "",
                 "final_resolution": job.get("final_resolution"),

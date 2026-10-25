@@ -74,6 +74,14 @@ application asset. This revision does not generate or bill a new video. Picture 
 must be attached/selected in the generation workflow before claiming an exact
 last-frame constraint. Preserve source files and record run manifests.
 
+## Current Confirm view shortcut
+
+Confirm view now runs the real fal still/video/enhanced-final pipeline automatically
+for the fictional browser demo. It uses three paid calls within the four-call
+session limit, keeps the current image visible while preparing, and then plays
+Unity's transition. It requires no prompt form. Use Media studio below when
+manual visual review before applying is preferred. The sample pulse is demo data.
+
 ## Presenter sequence and remaining acceptance
 
 1. Start the Mac coordinator: `bash backend/scripts/run.sh --enable-paid`.

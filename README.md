@@ -7,6 +7,64 @@ Development takes place on `master`; `main` is intentionally empty.
 Implementation plan: [PLAN.md](PLAN.md). It specifies up-to-30-second media
 cycles, Unity/Quest 2, Garmin and the therapist/client platform.
 
+## Run the demo
+
+From the repository root, on this Mac:
+
+```sh
+# First run, or after backend dependencies change:
+bash backend/scripts/setup.sh
+
+# Start the coordinator with live voice/provider access enabled:
+bash backend/scripts/run.sh --enable-paid
+```
+
+Open **http://127.0.0.1:4173/** in your browser. Keep the terminal running;
+press **Ctrl+C** there to stop the coordinator. Use this same browser origin
+throughout the session. Credentials belong only in ignored `.env` / `.env.local`;
+see [API setup](docs/API_SETUP.md). Without `--enable-paid`, start with
+`bash backend/scripts/run.sh`; live voice and paid media generation are disabled.
+Do not run the static frontend server on the same port as the coordinator.
+
+1. Open this repository in **Unity 6000.6.7f1**. Save any unsaved scene changes.
+   The runtime scene is `Assets/Scenes/InnerLandscape.unity`.
+2. Open or create a fictional session in the frontend. Click **Resume** if paused,
+   then **Use browser + Unity demo**. The launcher enters Play Mode and pairs the
+   Editor. Wait for **LIVE UNITY DEMO** and an actual artwork preview.
+3. Use the arrows to choose a view containing visible artwork; **Center** resets
+   the camera. Click **Confirm view** to run real fal discovery: a generated still,
+   a five-second inward clip revealing new companion objects, and an enhanced
+   final frame. The displayed view is the image reference; prompts are automatic.
+   The current image holds while fal prepares the result, then Unity plays the
+   transition and uses its final frame for the next cycle. This fictional demo
+   click opts into automatic playback; the separate Media studio keeps its review
+   gate. Each full journey uses **three paid provider calls** within the four-call
+   session budget; start a new demo session when that budget is exhausted. Failed
+   or ambiguous jobs are not automatically resubmitted. Nearly blank views are
+   rejected before billing. The pulse is still sample data, not a Garmin reading.
+4. For a live conversation, click **Start voice guide** and allow microphone
+   access for this local site. Audio and conversation go to ElevenLabs;
+   use fictional demo content. Wait for **ElevenLabs voice connected**.
+   **Stop voice** releases the microphone. Browser microphone permission may
+   still require its normal first-use approval.
+5. **Pause / Resume** holds the session; **Finish session** ends it. Hiding the
+   browser pauses the session and stops voice, so resume after returning.
+   Unity stays running in the background to receive controls.
+
+**Media studio** is the separate real-provider path: review the visual brief,
+preview generated results and approve continuity before applying. Paid jobs use
+server-side credentials and the existing four-call session budget. The separate local simulation endpoint does not consume provider budget;
+**Confirm view uses real fal generation**. Actual Garmin monitoring is optional
+and has separate consent/connect controls; it is independent of the sample pulse.
+
+If the preview reports no live heartbeat, check Play Mode and press
+**Use browser + Unity demo** again from an active session. After editing scripts,
+let Unity recompile. If the server was restarted, reload the frontend and resume;
+do not clear browser data. More detail: [browser/Unity guide](docs/BROWSER_UNITY_DEMO.md).
+
+For the free scripted presentation, use **Guided demo → Presentation view**;
+it needs no Unity, microphone or provider calls.
+
 ## Connected backend and Unity handoff
 
 ```sh

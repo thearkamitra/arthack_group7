@@ -209,3 +209,53 @@ This closes the heartbeat subtask only. Runtime still reports a saved-media
 download failure while retaining the existing artwork texture; connection success
 does not verify generation-source readiness or a live voice/media cycle.
 EPIC-08 remains In Progress for the remaining end-to-end/hardware checks.
+
+### Active seamless-demo follow-up (2026-10-25)
+
+Owner: Codex. User authorizes prompt-free confirmation simulation, labelled
+synthetic heart rate and voice diagnosis/repair. Plan: generate a deterministic
+five-second local entry bundle from the authenticated current Unity preview at
+the browser viewport dimensions, retain source/command/output manifests, apply
+through the normal interruptible transition, and keep paid generation separate.
+Show synthetic BPM only as simulation. Remove redundant voice modal, retain the
+inline microphone disclosure, handle provider audio metadata and startup errors,
+and verify live provider startup with a bounded test.
+
+### Active real-fal view discovery (2026-10-25)
+
+Owner: Codex. User requests actual new objects during inward motion. Replace
+Confirm view's local simulation with the existing real fal image/video/enhancement
+pipeline for fictional demo profiles. The click authorizes that bounded automatic
+demo sequence; normal Media studio review remains unchanged. Preserve the
+current-view snapshot, inherited forms/palette, four-call budget, one in-flight
+job, no billable retries, pause/stale-source checks and per-job manifests.
+
+Seamless-demo follow-up evidence: automatic local five-second bundles, sample
+pulse, explicit demo presentation, voice startup without the redundant modal,
+provider-reported PCM output rate and microphone resampling implemented. The
+browser connected to ElevenLabs and recorded guide/participant event types; raw
+audio was not exported. The local test promoted its final image and repaired
+the previously unavailable saved scene. This path remains available internally,
+but Confirm view has now been switched to actual fal as requested below.
+
+Real-fal discovery evidence: new automatic demo pipeline uses the full confirmed
+viewport once, inherited-form prompts, three sequential billable units, explicit
+fictional-profile autoplay opt-in, source/cycle/pause guards and existing
+manifest/transition routes. A real still, video and enhancement succeeded:
+image request `01a1727b-9bc3-7570-bc09-6a0df4e8a29c`, video request
+`01a1727b-b438-7813-ab14-df94b6893de8`, enhancement request
+`01a1727c-d27c-7730-8fef-0de2211ea6e8`. Video is 5.041667 seconds at
+1280×716; enhanced final image is 2560×1432. Visual review confirms new layered
+forms, floating spheres and facets during the clip. Unity completed and promoted
+it to cycle 4. The initial source was 97% flat background, so a tested preflight
+now rejects almost-empty views before billing. Provider styling introduced a
+symbol-like center; generative adherence remains approximate, and manual Media
+studio remains the review-before-playback option.
+
+Verification: full suites passed 58 backend and 28 frontend tests; final targeted
+checks passed 16 demo backend tests and four Unity-controller frontend tests.
+The UI reports the remaining provider budget and disables another full journey
+when fewer than three calls remain. No automatic billable retry or fake fallback.
+README startup/use instructions updated. Live screenshots and provider artifacts
+remain ignored under `work/final_demo/` and `work/coordinator/media/`.
+EPIC-08 remains In Progress for broader and physical-headset acceptance.

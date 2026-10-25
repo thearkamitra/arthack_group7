@@ -1812,3 +1812,8 @@ input[type="checkbox"] {
 .unity-arrows div {display:flex;gap:12px}
 .unity-arrows button {min-width:60px;min-height:42px;border-radius:8px;border:1px solid #9eafa6;background:#e5eee8;color:#1b382b;cursor:pointer}
 .unity-arrows button:disabled {opacity:.45;cursor:default}
+
+.demo-heartbeat { padding:12px 16px; border-radius:12px; background:#edf1e8; color:#526a54; animation:demo-pulse var(--beat-duration, .83s) ease-in-out infinite; font-size:.85rem; }
+.demo-heartbeat.is-paused { animation-play-state:paused; }
+@keyframes demo-pulse { 0%,100% { opacity:1; } 30% { opacity:.55; } }
+@media (prefers-reduced-motion: reduce) { .demo-heartbeat { animation:none; } }

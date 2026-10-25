@@ -1,6 +1,7 @@
 /* Live Unity preview and mock head direction. Provider credentials stay on Mac. */
 (function () {
   let sid=null, state=null, busy=false, previewAt=0;
+  let confirming=false, heartbeatStart=Date.now();
   let speechSequence=Date.now()*1000;
   async function request(id,path,body) {
     const response=await fetch(`/api/sessions/${id}/demo/${path}`,{credentials:'same-origin',method:body?'POST':'GET',headers:{'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
@@ -10,7 +11,19 @@
   const api={
     get state(){return state;},
     async start(id){await window.LandscapeBackend.flush();const response=await fetch(`/api/sessions/${id}`,{credentials:'same-origin'});if(!response.ok)throw new Error('Session unavailable');const session=await response.json();if(!session.media?.url)await window.LandscapeBackend.canonical(id);sid=id;state=await request(id,'start',{});await poll();},
-    async move(action){if(!sid||!state?.connected||state.headset||state.busy)return;state=await request(sid,'input',{action});},
+    async move(action){
+      if(!sid||!state?.connected||state.headset||state.busy||confirming)return;
+      if(action==='freeze'){
+        const image=document.querySelector('#unity-demo-frame'),rect=image.getBoundingClientRect();
+        const scale=Math.min(1,1280/rect.width,720/rect.height);
+        const width=Math.max(160,Math.round(rect.width*scale)),height=Math.max(90,Math.round(rect.height*scale));
+        confirming=true;
+        document.querySelector('#unity-demo-status').textContent='View confirmed · fal.ai is creating new related objects…';
+        try{await request(sid,'generate',{width,height,autoplay:true});}finally{confirming=false;}
+        await poll();return;
+      }
+      state=await request(sid,'input',{action});
+    },
     async speech(id,speaking,window_id){return request(id,'speech',{speaking,window_id,sequence:++speechSequence});},
   };
   async function poll(){
@@ -28,8 +41,10 @@
       if(!state?.enabled){view?.remove();const old=slot.querySelector('#scene');if(old)old.hidden=false;return;}
       if(!view){
         view=document.createElement('div');view.id='unity-demo-panel';
-        view.innerHTML='<div class="unity-live"><img id="unity-demo-frame" alt="Live Unity camera preview"><span class="unity-reticle" aria-hidden="true">+</span></div><p id="unity-demo-status" role="status"></p><div class="unity-arrows" aria-label="Mock head direction"><button type="button" data-camera="up" aria-label="Look up">↑</button><div><button type="button" data-camera="left" aria-label="Look left">←</button><button type="button" data-camera="center">Center</button><button type="button" data-camera="right" aria-label="Look right">→</button></div><button type="button" data-camera="down" aria-label="Look down">↓</button><button type="button" data-camera="freeze">Confirm most-looked region</button></div>';
+        view.innerHTML='<div class="unity-live"><img id="unity-demo-frame" alt="Live Unity camera preview"><span class="unity-reticle" aria-hidden="true">+</span></div><p id="unity-demo-status" role="status"></p><div class="unity-arrows" aria-label="Mock head direction"><button type="button" data-camera="up" aria-label="Look up">↑</button><div><button type="button" data-camera="left" aria-label="Look left">←</button><button type="button" data-camera="center">Center</button><button type="button" data-camera="right" aria-label="Look right">→</button></div><button type="button" data-camera="down" aria-label="Look down">↓</button><button type="button" data-camera="freeze">Confirm view</button></div>';
         slot.prepend(view);
+        const note=document.createElement('p');note.id='demo-simulation-note';note.setAttribute('role','status');view.append(note);
+        const pulse=document.createElement('p');pulse.id='demo-heartbeat';pulse.className='demo-heartbeat';view.append(pulse);
       }
       const headset=state.headset;const old=slot.querySelector('#scene');if(old)old.hidden=!headset;
       view.querySelector('.unity-live').hidden=headset;
@@ -37,7 +52,18 @@
       image.hidden=!state.frame_ready;
       if(state.frame_ready&&Date.now()-previewAt>350){previewAt=Date.now();image.src=`/api/sessions/${sid}/demo/frame?t=${previewAt}`;}
       document.querySelector('#unity-demo-status').textContent=headset?'Headset connected · browser arrows disabled':!state.connected?'No live Unity heartbeat. Pairing alone does not confirm a live connection. Keep the InnerLandscape scene in Play Mode; reconnect with Use browser + Unity demo.':'LIVE UNITY DEMO · arrows simulate head direction · '+(state.busy?'transition in progress':`${state.yaw}° horizontal / ${-state.pitch}° vertical${session.spatialDecision ? " · Region confirmed: cell " + (session.spatialDecision.cell + 1) : ""}`);
-      view.querySelectorAll('[data-camera]').forEach(b=>b.disabled=!state.connected||headset||state.busy||session.status!=='active'||session.pendingCycle);
+      const simulation=state.simulation;
+      document.querySelector('#demo-simulation-note').textContent='Sample pulse is demo data. '+(simulation?.mode==='fal' ? ((simulation.job_id&&session.media?.job_id===simulation.job_id&&session.source_hash===session.media?.final_hash&&!simulation.error?'fal.ai view ready · choose another view':simulation.stage)+(simulation.width?' · view '+simulation.width+' × '+simulation.height+' px':'')) : confirming?'fal.ai is creating your next view…':'Confirm view creates new related objects with fal.ai. Uses up to three paid calls; your current image stays visible while preparing.');
+      const noBudget=Number.isFinite(state.fal_calls_remaining)&&state.fal_calls_remaining<3;
+      if(noBudget)document.querySelector('#demo-simulation-note').textContent+=' · '+state.fal_calls_remaining+' provider call remaining; start a new demo session for another full journey.';
+      const pulse=document.querySelector('#demo-heartbeat');
+      const liveWatch=window.LandscapeGarmin?.state?.sid;
+      pulse.hidden=!!liveWatch;
+      const bpm=Math.round(72+3*Math.sin((Date.now()-heartbeatStart)/6000));
+      pulse.textContent=session.status==='active'?'♥ '+bpm+' BPM · sample pulse':'Sample pulse paused';
+      pulse.style.setProperty('--beat-duration',(60/bpm)+'s');
+      pulse.classList.toggle('is-paused',session.status!=='active');
+      view.querySelectorAll('[data-camera]').forEach(b=>b.disabled=(b.dataset.camera==='freeze'&&noBudget)||confirming||!state.connected||headset||state.busy||session.status!=='active'||session.pendingCycle);
     }catch(error){const label=document.querySelector('#unity-demo-status');if(label)label.textContent=error.message;state=null;document.querySelectorAll('[data-camera]').forEach(b=>b.disabled=true);}
     finally{busy=false;}
   }

@@ -123,3 +123,34 @@ Local Editor diagnostics are written to ignored
 `work/browser_demo/editor-status.json`: scene, Play Mode/pause/compilation flags,
 background execution, runtime component presence, session status and bridge
 freshness. It contains no participant token, conversation or preview data.
+
+## Automatic real fal discovery (2026-10-25)
+
+**Confirm view** now sends the authenticated current Unity preview to the real
+fal pipeline for fictional demo profiles, with an explicit autoplay flag. It fits
+the snapshot to the displayed viewport once and uses that entire view as the
+reference, without applying a second center crop. A short automatic brief asks
+for new companion shapes, ribbons, facets and layered forms inheriting the
+current form and palette; the video asks them to emerge during forward motion.
+No practitioner notes, identifiers or transcript are included.
+
+The existing adapters generate a Flux Kontext still, a five-second Kling 2.5
+Turbo video, and a Clarity-enhanced exact ending. These are three provider calls,
+within the existing four-call session cap. The previous stable surface remains
+visible during preparation. Once ready, the existing Unity transition plays and
+promotes the final image. Pause or a stale source/cycle prevents the next stage
+or application; paid submissions are never automatically retried. Normal Media
+studio previews and continuity confirmation remain unchanged.
+
+The endpoint rejects near-empty background views before billing. Provider output
+can drift in style or introduce unwanted symbolic forms: inspect the result,
+pause if unsuitable, and use the manual Media studio workflow when review before
+playback is required. Automatic playback is restricted to the fictional demo path.
+The sample pulse remains explicitly distinguished from real Garmin data.
+
+Verified live run: jobs `bd90e003-110d-4773-be8f-508bab49ba5a` (still) and
+`7282cd57-c20c-4a91-853f-4c61703a745f` (video plus enhancement). The source was
+mostly background; this prompted the new blank-view preflight. Visual review
+confirmed new layered fan forms, spheres and facets in the video. The clip probes
+as 5.041667 seconds at 1280×716; Unity completed and promoted it to cycle 4.
+Artifacts/manifests are ignored under `work/coordinator/media/<job-id>/`.
