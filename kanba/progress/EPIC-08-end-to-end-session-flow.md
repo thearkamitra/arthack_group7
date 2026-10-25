@@ -160,3 +160,25 @@ no automatic POST/PUT retry. The pasted user credential is not used or recorded
 in code, tests or logs. No backend restart is needed to serve this frontend fix.
 
 Final authentication regression run: **48 backend tests and 27 frontend tests passed**. Evidence logs: `work/browser_demo/auth-backend-tests.log` and `work/browser_demo/auth-frontend-tests.log` (ignored).
+
+### Active final-demo preparation (2026-10-25)
+
+Owner: Codex. Scope: align a reusable video prompt with the current artwork and
+approved inward/related-form transition; inspect the interactive browser demo;
+repair the observed scripted-demo/Unity-controller global-name collision; record
+a concrete final-demo checklist. Broader epic and hardware acceptance stay open.
+
+Final-demo preparation evidence: corrected the `LandscapeDemo` global collision
+by giving the live Unity controller its own `LandscapeUnityDemo` namespace,
+including voice speech-gate calls. Scripted and live scripts are now loaded
+together in the controller regression tests; all 27 frontend tests passed.
+Versioned changed frontend script URLs to refresh cached browser assets.
+Interactive browser check now reaches the Unity waiting state instead of
+`start is not a function`; Media studio opens and the revised visual brief is
+prepared. Screenshot: ignored `work/final_demo/browser-media-studio.png`.
+The coordinator was started with the approved paid gate, but no provider job or
+microphone capture was started. Unity startup was attempted; app observation
+times out and no live preview was verified. This is now a Unity connection
+blocker, not the earlier browser-origin denial: browser inspection succeeded.
+See [revised prompts and final demo sequence](../../docs/FINAL_DEMO.md).
+EPIC-08 stays In Progress: live voice, transition and physical acceptance remain.

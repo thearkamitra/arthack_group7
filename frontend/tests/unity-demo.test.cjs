@@ -5,7 +5,9 @@ function setup(){
   const document={hidden:false,querySelector:selector=>selector==='[data-demo-session]'?{dataset:{demoSession:'s'}}:null,querySelectorAll:()=>[],addEventListener:(name,fn)=>handlers[name]=fn};
   const context={window,document,Date,setInterval(){},async fetch(url,options){calls.push({url,options});return {ok:true,json:async()=>url.endsWith('/start')||url.endsWith('/input')?state:{status:'active',media:{url:'/existing.png'},demo:state}};}};
   vm.runInNewContext(fs.readFileSync('frontend/unity-demo.js','utf8'),context);
-  return {api:window.LandscapeDemo,calls,handlers,set:(change)=>Object.assign(state,change)};
+  vm.runInNewContext(fs.readFileSync('frontend/demo-script.js','utf8'),context);
+  assert.equal(typeof window.LandscapeDemo.steps, 'object');
+  return {api:window.LandscapeUnityDemo,calls,handlers,set:(change)=>Object.assign(state,change)};
 }
 test('arrow commands preserve the existing source image and send real demo controls',async()=>{
   const {api,calls}=setup();await api.start('s');await api.move('left');

@@ -48,5 +48,5 @@
     if(action){event.preventDefault();api.move(action).catch(()=>{});}
   });
   setInterval(poll,250);
-  window.LandscapeDemo=api;
+  window.LandscapeUnityDemo=api;
 })();

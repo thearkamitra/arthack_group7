@@ -920,7 +920,7 @@
       if (target.dataset.action === "garmin-scan") await window.LandscapeGarmin.scan();
       if (target.dataset.action === "garmin-connect") await window.LandscapeGarmin.start(s.id, $("#garmin-device").value, $("#garmin-consent").checked);
       if (target.dataset.action === "garmin-stop") await window.LandscapeGarmin.stop();
-      if (target.dataset.action === "browser-demo") await window.LandscapeDemo.start(s.id);
+      if (target.dataset.action === "browser-demo") await window.LandscapeUnityDemo.start(s.id);
       if (target.dataset.action === "pair") {
         await window.LandscapeBackend.canonical(s.id);
         const result = await window.LandscapeBackend.pair(s.id);

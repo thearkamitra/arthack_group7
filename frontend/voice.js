@@ -14,7 +14,7 @@
     if(!voiceSid)return;
     const time=context?.currentTime || 0;
     const speaking=!ended && context?.state==='running' && playing.some(n=>n.playbackStart<=time&&n.playbackEnd>time);
-    window.LandscapeDemo?.speech(voiceSid,speaking,windowId).catch(()=>{});
+    window.LandscapeUnityDemo?.speech(voiceSid,speaking,windowId).catch(()=>{});
   }
   const api = {
     get active() {
