@@ -26,6 +26,12 @@ namespace InnerLandscape
         bool pressed;
         readonly List<XRInputSubsystem> trackingSystems = new List<XRInputSubsystem>();
         readonly List<RaycastResult> hits = new List<RaycastResult>();
+        void Awake()
+        {
+            // The browser is the control surface; Unity must keep its heartbeat,
+            // preview and remote pause polling alive when the Editor loses focus.
+            Application.runInBackground = true;
+        }
         void Start()
         {
             var cameraObject = new GameObject("Tracked head", typeof(Camera), typeof(AudioListener));

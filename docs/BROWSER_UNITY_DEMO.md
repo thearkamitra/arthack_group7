@@ -105,3 +105,21 @@ page once to load the updated JavaScript and renew its cookie. Do not clear loca
 storage or session data. An unfinished session may require an explicit Resume
 after a coordinator restart. Browser-tool origin permission remains a separate
 issue; this fix does not grant the agent browser access.
+
+## Paired but no live heartbeat
+
+Pairing records and browser-demo presence are separate. The browser accepts
+Unity as live only while its authenticated presence is newer than three seconds;
+a retained paired label alone does not establish a running connection.
+
+The demo enables background execution in both Player Settings and the runtime
+bootstrap so switching to the browser does not suspend Unity's presence, preview
+or remote pause polling. The bridge starts through OnEnable after a one-frame
+dependency wait, so a script reload restarts its coroutine after OnDisable stopped
+it. A new browser-approved offer is still required when reload loses the runtime
+participant token; authorization is not bypassed.
+
+Local Editor diagnostics are written to ignored
+`work/browser_demo/editor-status.json`: scene, Play Mode/pause/compilation flags,
+background execution, runtime component presence, session status and bridge
+freshness. It contains no participant token, conversation or preview data.

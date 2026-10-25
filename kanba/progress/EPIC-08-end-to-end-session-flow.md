@@ -182,3 +182,30 @@ times out and no live preview was verified. This is now a Unity connection
 blocker, not the earlier browser-origin denial: browser inspection succeeded.
 See [revised prompts and final demo sequence](../../docs/FINAL_DEMO.md).
 EPIC-08 stays In Progress: live voice, transition and physical acceptance remain.
+
+### Active heartbeat repair (2026-10-25)
+
+Owner: Codex. Investigate the user-reported paired-but-waiting Unity state;
+verify background runtime, pairing and browser preview, preserving session data
+and unsaved scenes. Current project disables runInBackground while the browser
+requires presence newer than three seconds.
+
+Heartbeat repair verified: Unity had background execution disabled, and its
+bridge coroutine used Start even though OnDisable stops it on script reload.
+Enabled background execution in bootstrap/Player Settings, restarted the bridge
+from OnEnable after a one-frame dependency wait, and replaced the misleading
+waiting message with the actual heartbeat condition. Local sanitized Editor
+status now distinguishes Play Mode, pause, runtime bridge and freshness.
+
+After user-assisted window focus (native Unity inspection still times out),
+Unity recompiled the changes without C# errors. Browser-driven reconnection
+succeeded: actual artwork preview, LIVE UNITY DEMO, left turn at -5 degrees,
+center control, and fresh presence/frame availability across a five-second
+background check. All 27 frontend tests passed. Evidence is ignored under
+`work/final_demo/`: `unity-live-left.png`, `unity-live-connected.png`, and
+`heartbeat-verification.json`. No provider calls or microphone capture.
+
+This closes the heartbeat subtask only. Runtime still reports a saved-media
+download failure while retaining the existing artwork texture; connection success
+does not verify generation-source readiness or a live voice/media cycle.
+EPIC-08 remains In Progress for the remaining end-to-end/hardware checks.

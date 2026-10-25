@@ -36,7 +36,7 @@
       const image=view.querySelector('img');
       image.hidden=!state.frame_ready;
       if(state.frame_ready&&Date.now()-previewAt>350){previewAt=Date.now();image.src=`/api/sessions/${sid}/demo/frame?t=${previewAt}`;}
-      document.querySelector('#unity-demo-status').textContent=headset?'Headset connected · browser arrows disabled':!state.connected?'Waiting for Unity Editor. Open this project; save any unsaved scene changes.':'LIVE UNITY DEMO · arrows simulate head direction · '+(state.busy?'transition in progress':`${state.yaw}° horizontal / ${-state.pitch}° vertical${session.spatialDecision ? " · Region confirmed: cell " + (session.spatialDecision.cell + 1) : ""}`);
+      document.querySelector('#unity-demo-status').textContent=headset?'Headset connected · browser arrows disabled':!state.connected?'No live Unity heartbeat. Pairing alone does not confirm a live connection. Keep the InnerLandscape scene in Play Mode; reconnect with Use browser + Unity demo.':'LIVE UNITY DEMO · arrows simulate head direction · '+(state.busy?'transition in progress':`${state.yaw}° horizontal / ${-state.pitch}° vertical${session.spatialDecision ? " · Region confirmed: cell " + (session.spatialDecision.cell + 1) : ""}`);
       view.querySelectorAll('[data-camera]').forEach(b=>b.disabled=!state.connected||headset||state.busy||session.status!=='active'||session.pendingCycle);
     }catch(error){const label=document.querySelector('#unity-demo-status');if(label)label.textContent=error.message;state=null;document.querySelectorAll('[data-camera]').forEach(b=>b.disabled=true);}
     finally{busy=false;}

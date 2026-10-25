@@ -18,7 +18,16 @@ namespace InnerLandscape
         int frozen; float received;
         public bool Fresh => Time.realtimeSinceStartup-received<1;
         RenderTexture target;Texture2D capture;
-        void Start(){StartCoroutine(Loop());}
+        void OnEnable(){StartCoroutine(ConnectWhenReady());}
+        IEnumerator ConnectWhenReady()
+        {
+            // AddComponent enables us before LandscapeApp assigns session. OnEnable
+            // also runs after script reload, where Start does not run again.
+            yield return null;
+            while(!session)yield return null;
+            Application.runInBackground=true;
+            yield return Loop();
+        }
         UnityWebRequest Post(string path,string json,bool auth=true)
         {
             var r=new UnityWebRequest(session.serverUrl.TrimEnd('/')+path,"POST");
